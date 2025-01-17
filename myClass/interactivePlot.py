@@ -34,7 +34,7 @@ class interactivePlot:
         self.bottom_margin = 50
 
         # flat axes
-        self.axs = np.ravel(self.axs)
+        self.axs = list(np.ravel(self.axs))
 
         # Set pickradius for XAxis and YAxis for easier selection
         for ax in self.axs:
@@ -94,7 +94,7 @@ class interactivePlot:
             scale_factor = 1.1  # Zoom out
 
         artist = self.detect_artist(event)  # Detect the Artist element under the mouse
-        #print(artist)
+        #print('scroll', artist)
 
         if artist is None:
             #print("No artist detected under the scroll event.")
@@ -260,7 +260,5 @@ if __name__ == "__main__":
     interactive_plot.plot(0, x2, y2, label='cos')
 
     interactive_plot.plot(1, x2, y2, label='cos')
-
-    #interactive_plot.axs[1].sharex(interactive_plot.axs[0])
 
     plt.show()

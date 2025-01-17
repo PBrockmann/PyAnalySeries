@@ -49,7 +49,6 @@ class displaySingleSerieWindow(QWidget):
         data_table.setRowCount(len(serie))
         data_table.setColumnCount(2)
         data_table.setHorizontalHeaderLabels([self.xName, self.yName])
-        data_table.resizeColumnsToContents()
         duplicates = serie.index.duplicated()
         for i in range(len(serie)):
             data_table.setItem(i, 0, QTableWidgetItem(str(f'{serie.index[i]:.6f}')))
@@ -235,6 +234,7 @@ class displaySingleSerieWindow(QWidget):
 
     #---------------------------------------------------------------------------------------------
     def closeEvent(self, event):
+        plt.close()
         self.serieDict['Comment'] = self.textComment.toPlainText()
         self.item.setData(0, Qt.UserRole, self.serieDict)
         self.open_displayWindows.pop(self.Id, None)

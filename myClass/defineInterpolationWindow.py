@@ -225,17 +225,17 @@ class defineInterpolationWindow(QWidget):
         self.pointersPlot_ax.set_xlabel(self.X2Name)
         self.pointersPlot_ax.set_ylabel(self.X1Name)
 
-        self.pointersPlot_axGradient.set_ylabel('Gradients', color='darkorange')
+        self.pointersPlot_axGradient.set_ylabel('Gradients (dx/dy)', color='darkorange')
         self.pointersPlot_axGradient.yaxis.set_label_position('right') 
 
         X2CoordsValues = np.linspace(self.X2Coords[0], self.X2Coords[-1], 100)
 
         f_1to2, f_2to1 = self.defineInterpolationFunctions(self.X1Coords, self.X2Coords, interpolationMode='Linear')
-        gradientLinear = np.gradient(f_2to1(X2CoordsValues), X2CoordsValues).astype(np.float32)      # to avoid unnecessary precision
+        gradientLinear = np.gradient(X2CoordsValues, f_2to1(X2CoordsValues)).astype(np.float32)      # to avoid unnecessary precision
         line1, = self.pointersPlot_axGradient.plot(X2CoordsValues, gradientLinear, color='darkorange', lw=1, label='Linear')
 
         f_1to2, f_2to1 = self.defineInterpolationFunctions(self.X1Coords, self.X2Coords, interpolationMode='PCHIP')
-        gradientPCHIP = np.gradient(f_2to1(X2CoordsValues), X2CoordsValues).astype(np.float32)       # to avoid unnecessary precision
+        gradientPCHIP = np.gradient(X2CoordsValues, f_2to1(X2CoordsValues)).astype(np.float32)       # to avoid unnecessary precision
         line2, = self.pointersPlot_axGradient.plot(X2CoordsValues, gradientPCHIP, color='darkorange', linestyle='dashed', lw=1, label='PCHIP')
 
         lines = [line1, line2]
@@ -260,7 +260,6 @@ class defineInterpolationWindow(QWidget):
         self.pointers_table.setRowCount(len(self.X1Coords))
         self.pointers_table.setColumnCount(2)
         self.pointers_table.setHorizontalHeaderLabels([self.X1Name, self.X2Name])
-        self.pointers_table.resizeColumnsToContents()
         for i in range(len(self.X1Coords)):
             self.pointers_table.setItem(i, 0, QTableWidgetItem(str(f'{self.X1Coords[i]:.6f}')))
             self.pointers_table.setItem(i, 1, QTableWidgetItem(str(f'{self.X2Coords[i]:.6f}')))
@@ -686,6 +685,7 @@ class defineInterpolationWindow(QWidget):
 
     #---------------------------------------------------------------------------------------------
     def closeEvent(self, event):
+        plt.close()
         self.open_interpolationWindows.pop(self.Id, None)
         event.accept()
 

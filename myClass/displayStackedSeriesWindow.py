@@ -129,6 +129,7 @@ class displayStackedSeriesWindow(QWidget):
 
     #---------------------------------------------------------------------------------------------
     def closeEvent(self, event):
+        plt.close()
         self.open_displayWindows.pop(self.Ids, None)
         event.accept()
 

@@ -41,7 +41,6 @@ class displayInterpolationWindow(QWidget):
         pointers_table.setRowCount(len(self.X1Coords))
         pointers_table.setColumnCount(2)
         pointers_table.setHorizontalHeaderLabels([self.X1Name, 'X'])
-        pointers_table.resizeColumnsToContents()
         for i in range(len(self.X1Coords)):
             pointers_table.setItem(i, 0, QTableWidgetItem(str(f'{self.X1Coords[i]:.6f}')))
             pointers_table.setItem(i, 1, QTableWidgetItem(str(f'{self.X2Coords[i]:.6f}')))
@@ -70,16 +69,16 @@ class displayInterpolationWindow(QWidget):
         pointersPlot_ax.set_ylabel('X')
 
         pointersPlot_axGradient = pointersPlot_ax.twinx()
-        pointersPlot_axGradient.set_ylabel('Gradients', color='darkorange')
+        pointersPlot_axGradient.set_ylabel('Gradients (dx/dy)', color='darkorange')
 
         X2CoordsValues = np.linspace(self.X2Coords[0], self.X2Coords[-1], 100)
 
         (f_1to2, f_2to1) = defineInterpolationWindow.defineInterpolationFunctions(self.X1Coords, self.X2Coords, interpolationMode='Linear')
-        gradientLinear = np.gradient(f_2to1(X2CoordsValues), X2CoordsValues).astype(np.float32)      # to avoid unnecessary precision
+        gradientLinear = np.gradient(X2CoordsValues, f_2to1(X2CoordsValues)).astype(np.float32)      # to avoid unnecessary precision
         line1, = pointersPlot_axGradient.plot(X2CoordsValues, gradientLinear, color='darkorange', lw=1, label='Linear')
 
         (f_1to2, f_2to1) = defineInterpolationWindow.defineInterpolationFunctions(self.X1Coords, self.X2Coords, interpolationMode='PCHIP')
-        gradientPCHIP = np.gradient(f_2to1(X2CoordsValues), X2CoordsValues).astype(np.float32)       # to avoid unnecessary precision
+        gradientPCHIP = np.gradient(X2CoordsValues, f_2to1(X2CoordsValues)).astype(np.float32)       # to avoid unnecessary precision
         line2, = pointersPlot_axGradient.plot(X2CoordsValues, gradientPCHIP, color='darkorange', linestyle='dashed', lw=1, label='PCHIP')
 
         lines = [line1, line2]
@@ -174,6 +173,7 @@ class displayInterpolationWindow(QWidget):
 
     #---------------------------------------------------------------------------------------------
     def closeEvent(self, event):
+        plt.close()
         self.interpolationDict['Comment'] = self.textComment.toPlainText()
         self.item.setData(0, Qt.UserRole, self.interpolationDict)
         self.open_displayWindows.pop(self.Id, None)

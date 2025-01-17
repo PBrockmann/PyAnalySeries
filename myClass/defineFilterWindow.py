@@ -186,6 +186,7 @@ class defineFilterWindow(QWidget):
 
     #---------------------------------------------------------------------------------------------
     def closeEvent(self, event):
+        plt.close()
         self.open_filterWindows.pop(self.Id, None)
         event.accept()
 

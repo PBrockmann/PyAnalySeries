@@ -27,6 +27,8 @@ from myClass.displayFilterWindow import displayFilterWindow
 from myClass.defineInterpolationWindow import defineInterpolationWindow
 from myClass.displayInterpolationWindow import displayInterpolationWindow
 
+from myClass.importSeriesWindow import importSeriesWindow
+
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 
@@ -37,23 +39,27 @@ else:
     fileWS = None
 
 #========================================================================================
-version = 'v4.7'
+version = 'v4.8'
 
+open_ws = {}
 open_displayWindows = {} 
 open_filterWindows = {} 
 open_interpolationWindows = {} 
+open_importWindow = {}
 
 #========================================================================================
 def colorize_item(item, color_name):
-    tree_widget.itemChanged.disconnect()
     color = QColor(color_name)
     brush = QBrush(color)
     for col in range(tree_widget.columnCount()):
         item.setBackground(col, brush)
-    tree_widget.itemChanged.connect(item_changed)
 
 #========================================================================================
 def populate_tree_widget(fileName, itemDict_list):
+    global open_ws
+
+    tree_widget.blockSignals(True)
+
     ws_icon = QIcon("icon_folder.png")
 
     ws_item = QTreeWidgetItem(tree_widget)
@@ -61,15 +67,21 @@ def populate_tree_widget(fileName, itemDict_list):
     ws_item.setText(0, fileName)
     ws_item.setToolTip(0, fileName)
     ws_item.setExpanded(True)
-    ws_item.setFlags(ws_item.flags() & ~Qt.ItemIsSelectable)
+    #ws_item.setFlags(ws_item.flags() & ~Qt.ItemIsSelectable)
+    open_ws[id(ws_item)] = ws_item.text(0)
 
     for itemDict in itemDict_list:
         add_item_tree_widget(ws_item, itemDict)
 
     unmark_ws(ws_item)
 
+    tree_widget.blockSignals(False)
+
+    return ws_item
+
 #========================================================================================
 def add_item_tree_widget(ws_item, itemDict, position=None):
+
     icon_serie = QIcon("icon_document.png")
     icon_serieDuplicated = QIcon("icon_copy.png")
     icon_filter = QIcon("icon_filter.png")
@@ -91,6 +103,14 @@ def add_item_tree_widget(ws_item, itemDict, position=None):
     else:
         #print("Error: Type unknown")
         return
+
+    # add item at current_index
+    if not ws_item:
+        current_index = tree_widget.currentItem()
+        if not current_index.parent():
+            ws_item = current_index
+        else:
+            ws_item = current_index.parent()
 
     if position != None:
         ws_item.insertChild(position, item)
@@ -132,14 +152,28 @@ def add_item_tree_widget(ws_item, itemDict, position=None):
     tree_widget.setItemWidget(item, 6, checkboxInverted)
 
 #========================================================================================
-def item_changed(item):
-    try:
+def on_item_changed(item, column):
+    global open_ws
+
+    if column !=0: return
+
+    if not item.parent():
+        new_wsName = item.text(0).replace(' *', '')
+        old_wsName = open_ws[id(item)]
+        if new_wsName == old_wsName: 
+            remark_ws(item)
+            return
+        if new_wsName in open_ws.values():
+            QMessageBox.warning(main_window, "Duplicate WS name", f"The ws '{new_wsName}' is already in use. Please choose a unique name.")
+            item.setText(0, old_wsName)
+        else:
+            open_ws[id(item)] = new_wsName
+            mark_ws(item)
+    else: 
         itemDict = item.data(0, Qt.UserRole)
         itemDict['Name'] = item.text(0)
         item.setData(0, Qt.UserRole, itemDict)
         update_items_from_data(item)
-    except:
-        return
 
 #========================================================================================
 def selectColor(buttonColor, serie_item):
@@ -167,14 +201,15 @@ def update_items_from_data(ref_item):
     for item in allItems:
         itemDict = item.data(0, Qt.UserRole)
         if itemDict['Id'] == ref_itemDict['Id']:
-            if  itemDict['Type'].startswith('Serie'): 
+            if  itemDict['Type'].startswith('Serie'):
                 buttonColor = tree_widget.itemWidget(item, 5)
-                buttonColor.setStyleSheet(f"background-color: {ref_itemDict['Color']}")
+                if buttonColor: buttonColor.setStyleSheet(f"background-color: {ref_itemDict['Color']}")
                 checkboxInverted = tree_widget.itemWidget(item, 6)
-                checkboxInverted.setChecked(ref_itemDict["Y axis inverted"])
+                if checkboxInverted: checkboxInverted.setChecked(ref_itemDict["Y axis inverted"])
+                sync_window_with_item(item)
             item.setText(0, ref_itemDict['Name'])
             item.setData(0, Qt.UserRole, ref_itemDict)
-            sync_window_with_item(item)
+            mark_ws(item.parent())
 
 #========================================================================================
 def sync_window_with_item(item):
@@ -193,8 +228,7 @@ def sync_window_with_item(item):
 #========================================================================================
 def load_WorkSheet(fileName):
 
-    parents = tree_widget.get_parents()
-    if fileName in parents:
+    if fileName in open_ws.values():
         msg = f'{fileName} already loaded'
         main_window.statusBar().showMessage(msg, 5000)
         return 
@@ -290,9 +324,7 @@ def load_WorkSheet(fileName):
             itemDict_list.append(interpolationDict)
 
     #--------------------------------------------------------------------
-    tree_widget.itemChanged.disconnect()
     populate_tree_widget(fileName, itemDict_list)
-    tree_widget.itemChanged.connect(item_changed)
 
     #--------------------------------------------------------------------
     main_window.statusBar().showMessage(fileName + ' loaded', 5000)
@@ -300,16 +332,20 @@ def load_WorkSheet(fileName):
 #========================================================================================
 def new_WorkSheet():
 
-    parents = tree_widget.get_parents()
     fileNameTemplate = 'new_{}.xlsx'
     counterFilename = 1
-    while fileNameTemplate.format("%02d" %counterFilename) in parents:
+    while fileNameTemplate.format("%02d" %counterFilename) in open_ws.values():
         counterFilename += 1
     fileName = fileNameTemplate.format("%02d" %counterFilename)
-    populate_tree_widget(fileName, [])
+    
+    ws_item = populate_tree_widget(fileName, [])
+    mark_ws(ws_item)
+    tree_widget.setCurrentItem(ws_item)
+    tree_widget.clearSelection()
 
 #========================================================================================
 def open_WorkSheet():
+
     fileName, _ = QFileDialog.getOpenFileName(main_window, "Open Excel File", "", "Excel Files (*.xlsx)")
     if fileName:
         base_dir = os.getcwd()
@@ -435,9 +471,9 @@ def save_WorkSheet(ws_item):
 
 #========================================================================================
 def save_WorkSheets():
+
     display_error = False
-    for i in range(tree_widget.topLevelItemCount()):
-        ws_item = tree_widget.topLevelItem(i)
+    for ws_item in tree_widget.get_parents():
         if ws_item.data(0, Qt.UserRole): 
             outFile = ws_item.text(0).replace(" *", "")
             if save_WorkSheet(ws_item):
@@ -451,10 +487,26 @@ def save_WorkSheets():
 
 #========================================================================================
 def import_Data():
-    return
+    global open_importWindow
+
+    current_index = tree_widget.currentItem()
+    if not current_index:
+        new_WorkSheet()
+    
+    Id_importWindow = '123456'
+
+    if open_importWindow:
+        importWindow = open_importWindow[Id_importWindow]
+        importWindow.raise_()
+        importWindow.activateWindow()
+    else:
+        importWindow = importSeriesWindow(open_importWindow, add_item_tree_widget)
+        open_importWindow[Id_importWindow] = importWindow
+        importWindow.show()
 
 #========================================================================================
 def create_tree_widget():
+
     tree_widget = CustomTreeWidget()
     tree_widget.setColumnCount(7)
     tree_widget.setHeaderLabels(["Name", "Id", "Type", "X", "Y", "Color", "Y axis inverted"])
@@ -487,6 +539,7 @@ def create_tree_widget():
 
 #========================================================================================
 class CustomTreeWidget(QTreeWidget):
+
     def __init__(self):
         super().__init__()
         self.clipboard_items = []
@@ -513,7 +566,7 @@ class CustomTreeWidget(QTreeWidget):
     def get_parents(self):
         parents = []
         for i in range(self.topLevelItemCount()):
-            parents.append(self.topLevelItem(i).text(0))
+            parents.append(self.topLevelItem(i))
         return parents
 
     def get_children(self):
@@ -544,6 +597,9 @@ def displaySingleSerie_selected_series():
     global open_displayWindows
 
     items = get_unique_selected_items(tree_widget)
+    if len(items) == 0:
+        main_window.statusBar().showMessage('Please select at least 1 serie', 5000)
+        return
 
     for item in items:
         itemDict = item.data(0, Qt.UserRole)
@@ -576,7 +632,10 @@ def displayMultipleSeries_selected_series(overlaid=True):
     global open_displayWindows
 
     items = get_unique_selected_items(tree_widget)
-    if len(items) == 1:                             # If only 1 item selected
+    if len(items) == 0:
+        main_window.statusBar().showMessage('Please select at least 1 serie', 5000)
+        return
+    elif len(items) == 1:                             # If only 1 item selected
         displaySingleSerie_selected_series()
         return
 
@@ -649,7 +708,7 @@ def apply_filter():
     items = get_unique_selected_items(tree_widget)
     itemSeries_selected = []
     itemFilters_selected = []
-    for item in itemsinterpolation:
+    for item in items:
         itemDict = item.data(0, Qt.UserRole)
         if  itemDict['Type'].startswith('Serie'): 
             itemSeries_selected.append(item)
@@ -838,17 +897,16 @@ def close_all_windows():
 
 #========================================================================================
 def delete_parent_node(item):
-    parent = item.parent()
-    if parent:
-        parent.removeChild(item)
-    else:
-        index = tree_widget.indexOfTopLevelItem(item)
-        tree_widget.takeTopLevelItem(index)
+    global open_ws
+
+    index = tree_widget.indexOfTopLevelItem(item)
+    tree_widget.takeTopLevelItem(index)
+    del open_ws[id(item)]
 
 #========================================================================================
 def show_context_menu(point):
     item = tree_widget.itemAt(point)
-    if item and not item.parent():  # Only allow delete on root items (files)
+    if item and not item.parent():  # Only allow delete on parents (ws)
         context_menu = QMenu(tree_widget)
         delete_action = context_menu.addAction("Remove")
         action = context_menu.exec_(tree_widget.mapToGlobal(point))
@@ -867,15 +925,26 @@ def is_item_in_ws(ws_item, child_item):
 
 #========================================================================================
 def mark_ws(ws_item):
-    if not ws_item.data(0, Qt.UserRole): 
-        ws_item.setData(0, Qt.UserRole, True)  # Mark parent as modified
+    tree_widget.blockSignals(True)
+    ws_item.setData(0, Qt.UserRole, True)  # Mark ws_item as modified
+    if not ws_item.text(0).endswith(' *'):
         ws_item.setText(0, f"{ws_item.text(0)} *") 
+    tree_widget.blockSignals(False)
 
 #========================================================================================
 def unmark_ws(ws_item):
+    tree_widget.blockSignals(True)
     ws_item.setData(0, Qt.UserRole, False)  # Reset modification state
     ws_item.setText(0, ws_item.text(0).replace(" *", ""))  # Remove visual cue
+    tree_widget.blockSignals(False)
     
+#========================================================================================
+def remark_ws(ws_item):
+    tree_widget.blockSignals(True)
+    if ws_item.data(0, Qt.UserRole) and not ws_item.text(0).endswith(' *'):
+        ws_item.setText(0, f"{ws_item.text(0)} *") 
+    tree_widget.blockSignals(False)
+
 #========================================================================================
 def copy_items():
     selected_items = tree_widget.selectedItems()
@@ -905,16 +974,14 @@ def paste_items():
 
 #========================================================================================
 def on_item_double_clicked(item, column):
-    if not item.parent():                       # parent
-        if column in [0]:                       # editable for specific columns
-            item.setFlags(item.flags() | Qt.ItemIsEditable)
-        else:
-            item.setFlags(item.flags() & ~Qt.ItemIsEditable)
-    else:                                       # child
-        if column in [0,5,6]:                   # editable for specific columns
-            item.setFlags(item.flags() | Qt.ItemIsEditable)
-        else:
-            item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+    if column in [0]:                       # editable for specific columns
+        item.setFlags(item.flags() | Qt.ItemIsEditable)
+        if not item.parent():
+            tree_widget.blockSignals(True)
+            item.setText(0, item.text(0).replace(" *", ""))  # Remove visual cue
+            tree_widget.blockSignals(False)
+    else:
+        item.setFlags(item.flags() & ~Qt.ItemIsEditable)
 
 #========================================================================================
 def show_dialog(title, fileHTML, width, height):
@@ -974,7 +1041,7 @@ layout = QVBoxLayout()
 tree_widget = create_tree_widget()
 tree_widget.setContextMenuPolicy(Qt.CustomContextMenu)
 tree_widget.customContextMenuRequested.connect(show_context_menu)
-tree_widget.itemChanged.connect(item_changed)
+tree_widget.itemChanged.connect(on_item_changed)
 tree_widget.itemDoubleClicked.connect(on_item_double_clicked)
 
 layout.addWidget(tree_widget)
@@ -997,6 +1064,7 @@ saveWSs_action = QAction("Save worksheets", main_window)
 saveWSs_action.setShortcut('Ctrl+S')
 saveWSs_action.triggered.connect(save_WorkSheets)
 import_action = QAction("Import data", main_window)
+import_action.setShortcut('Ctrl+M')
 import_action.triggered.connect(import_Data)
 exit_action = QAction('Exit', main_window)
 exit_action.setShortcut('Q')
@@ -1052,16 +1120,10 @@ edit_menu.addAction(close_all_action)
 #----------------------------------------------
 math_menu = menu_bar.addMenu("Processing")
 
-#defineOperation_action = QAction("Define operation", main_window)
-#defineOperation_action.setShortcut('Ctrl+F')
-#defineOperation_action.triggered.connect(define_operation)
-#applyOperation_action = QAction("Apply operation", main_window)
-#applyOperation_action.triggered.connect(apply_operation)
-
-defineFilter_action = QAction("Define Filter", main_window)
+defineFilter_action = QAction("Define Filter smoothing average", main_window)
 defineFilter_action.setShortcut('Ctrl+F')
 defineFilter_action.triggered.connect(define_filter)
-applyFilter_action = QAction("Apply Filter", main_window)
+applyFilter_action = QAction("Apply Filter smoothing average", main_window)
 applyFilter_action.triggered.connect(apply_filter)
 
 defineInterpolation_action = QAction("Define Interpolation", main_window)
@@ -1102,5 +1164,6 @@ if fileWS:
 main_window.setStatusBar(QStatusBar())
 main_window.statusBar().showMessage('Application ready', 5000)
 main_window.show()
+
 sys.exit(app.exec_())
 
