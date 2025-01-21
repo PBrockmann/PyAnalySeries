@@ -1193,5 +1193,8 @@ main_window.setStatusBar(QStatusBar())
 main_window.statusBar().showMessage('Application ready', 5000)
 main_window.show()
 
+current_directory = os.getcwd()
+print(current_directory)
+
 sys.exit(app.exec_())
 
