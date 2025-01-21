@@ -404,8 +404,8 @@ class defineInterpolationWindow(QWidget):
     #---------------------------------------------------------------------------------------------
     def updateConnections(self):
 
-        ylim0 = axs[0].get_ylim()
-        ylim1 = axs[1].get_ylim()
+        ylim0 = self.axs[0].get_ylim()
+        ylim1 = self.axs[1].get_ylim()
 
         for artistsList in self.artistsList_Dict.values():
             if isinstance(artistsList[0], ConnectionPatch):
@@ -422,8 +422,8 @@ class defineInterpolationWindow(QWidget):
 
         self.interactive_plot.fig.canvas.draw()
 
-        axs[0].set_ylim(ylim0)
-        axs[1].set_ylim(ylim1)
+        self.axs[0].set_ylim(ylim0)
+        self.axs[1].set_ylim(ylim1)
 
     #---------------------------------------------------------------------------------------------
     def deleteConnections(self):

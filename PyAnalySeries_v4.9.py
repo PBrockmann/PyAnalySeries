@@ -1051,7 +1051,7 @@ def exit_confirm():
 #========================================================================================
 app = QApplication(sys.argv)
 
-font = QFont('Arial', 11)
+font = QFont('Arial', 12)
 app.setFont(font)
 
 icon = QIcon('PyAnalySeries_icon.png')

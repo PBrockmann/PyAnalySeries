@@ -74,6 +74,7 @@ class importSeriesWindow(QWidget):
             QMessageBox.warning(self, "No Data", "The clipboard is empty.")
             return
 
+        print(text)
         rows = text.split("\n")
         clean_rows = [row.strip() for row in rows if row.strip()]
 
@@ -84,6 +85,7 @@ class importSeriesWindow(QWidget):
         data = []
 
         for row in clean_rows:
+            print(row)
             columns = row.split("\t")
             non_empty_columns = [col for col in columns if col.strip()]
 
