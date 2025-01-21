@@ -80,6 +80,10 @@ class defineFilterWindow(QWidget):
         self.save_button.clicked.connect(self.save_serie)
         self.close_button.clicked.connect(self.close)
 
+        self.status_bar = QStatusBar()
+        self.status_bar.setFixedHeight(20)
+        main_layout.addWidget(self.status_bar)
+
         #----------------------------------------------
         self.setLayout(main_layout)
 
@@ -87,6 +91,8 @@ class defineFilterWindow(QWidget):
         exit_shortcut.activated.connect(self.close)
 
         self.interactive_plot.fig.canvas.setFocus()
+
+        #self.status_bar.showMessage('Ready', 5000)
 
     #---------------------------------------------------------------------------------------------
     def update_value(self):

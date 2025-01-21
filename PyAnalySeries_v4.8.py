@@ -29,6 +29,8 @@ from myClass.displayInterpolationWindow import displayInterpolationWindow
 
 from myClass.importSeriesWindow import importSeriesWindow
 
+from myClass.defineInsolationWindow import defineInsolationWindow
+
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 
@@ -46,6 +48,7 @@ open_displayWindows = {}
 open_filterWindows = {} 
 open_interpolationWindows = {} 
 open_importWindow = {}
+open_insolationWindow= {}
 
 #========================================================================================
 def colorize_item(item, color_name):
@@ -486,7 +489,7 @@ def save_WorkSheets():
         main_window.statusBar().showMessage('Worksheets saved', 5000)
 
 #========================================================================================
-def import_Data():
+def import_Series():
     global open_importWindow
 
     current_index = tree_widget.currentItem()
@@ -503,6 +506,25 @@ def import_Data():
         importWindow = importSeriesWindow(open_importWindow, add_item_tree_widget)
         open_importWindow[Id_importWindow] = importWindow
         importWindow.show()
+
+#========================================================================================
+def define_insolationSerie():
+    global open_insolationWindow
+
+    current_index = tree_widget.currentItem()
+    if not current_index:
+        new_WorkSheet()
+    
+    Id_insolationWindow = '123456'
+
+    if open_insolationWindow:
+        insolationWindow = open_insolationWindow[Id_insolationWindow]
+        insolationWindow.raise_()
+        insolationWindow.activateWindow()
+    else:
+        insolationWindow = defineInsolationWindow(open_insolationWindow, add_item_tree_widget)
+        open_insolationWindow[Id_insolationWindow] = insolationWindow
+        insolationWindow.show()
 
 #========================================================================================
 def create_tree_widget():
@@ -1065,7 +1087,7 @@ saveWSs_action.setShortcut('Ctrl+S')
 saveWSs_action.triggered.connect(save_WorkSheets)
 import_action = QAction("Import data", main_window)
 import_action.setShortcut('Ctrl+M')
-import_action.triggered.connect(import_Data)
+import_action.triggered.connect(import_Series)
 exit_action = QAction('Exit', main_window)
 exit_action.setShortcut('Q')
 exit_action.triggered.connect(exit_confirm)
@@ -1146,6 +1168,8 @@ math_menu.addAction(applyInterpolationPCHIP_action)
 basicSeries_menu = menu_bar.addMenu("Basic series")
 
 insolation_action = QAction("Insolation", main_window)
+insolation_action.triggered.connect(define_insolationSerie)
+
 basicSeries_menu.addAction(insolation_action)
 
 #----------------------------------------------
