@@ -1054,7 +1054,7 @@ app = QApplication(sys.argv)
 font = QFont('Arial', 12)
 app.setFont(font)
 
-icon = QIcon('PyAnalySeries_icon.png')
+icon = QIcon('PyAnalySeries_icon.ico')
 app.setWindowIcon(icon)
 
 main_window = QMainWindow()
