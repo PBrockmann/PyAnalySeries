@@ -70,7 +70,7 @@ def populate_tree_widget(fileName, itemDict_list):
     ws_item.setText(0, fileName)
     ws_item.setToolTip(0, fileName)
     ws_item.setExpanded(True)
-    #ws_item.setFlags(ws_item.flags() & ~Qt.ItemIsSelectable)
+    ws_item.setFlags(ws_item.flags() & ~Qt.ItemIsSelectable)
     open_ws[id(ws_item)] = ws_item.text(0)
 
     for itemDict in itemDict_list:
@@ -128,19 +128,21 @@ def add_item_tree_widget(ws_item, itemDict, position=None):
     item.setText(1, itemDict['Id'])
     item.setText(2, itemDict['Type'])
 
-    font = QFont()
-    font.setFamily("Courier")
-    font.setPointSize(11)
+    font = QFont('Monospace', 12)
+    font.setFamily("Monospace")
     item.setFont(1, font)             # format Id
 
     if itemDict['Type'] == 'INTERPOLATION':
         item.setText(3, itemDict['X1Name'])
+        item.setFont(3, font)
 
     if not itemDict['Type'].startswith('Serie'):
         return
 
     item.setText(3, itemDict['X'])
     item.setText(4, itemDict['Y'])
+    item.setFont(3, font)
+    item.setFont(4, font)
 
     buttonColor = QPushButton()
     buttonColor.setFixedSize(30, 15)
@@ -529,6 +531,8 @@ def define_insolationSerie():
 #========================================================================================
 def create_tree_widget():
 
+    font = QFont('Monospace', 12)
+
     tree_widget = CustomTreeWidget()
     tree_widget.setColumnCount(7)
     tree_widget.setHeaderLabels(["Name", "Id", "Type", "X", "Y", "Color", "Y axis inverted"])
@@ -549,6 +553,9 @@ def create_tree_widget():
         }
     """)
     tree_widget.setFocusPolicy(Qt.ClickFocus)
+    tree_widget.headerItem().setFont(1, font)
+    tree_widget.headerItem().setFont(3, font)
+    tree_widget.headerItem().setFont(4, font)
 
     tree_widget.setDragEnabled(True)
     tree_widget.setAcceptDrops(True)
@@ -1193,8 +1200,8 @@ main_window.setStatusBar(QStatusBar())
 main_window.statusBar().showMessage('Application ready', 5000)
 main_window.show()
 
-current_directory = os.getcwd()
-print(current_directory)
+#current_directory = os.getcwd()
+#print(current_directory)
 
 sys.exit(app.exec_())
 

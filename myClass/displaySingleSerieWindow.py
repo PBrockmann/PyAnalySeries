@@ -113,8 +113,8 @@ class displaySingleSerieWindow(QWidget):
             QTextEdit[readOnly="true"] {
                 background-color: #f8f8f8;
                 border: 1px solid lightgray;
-                font-family: Courier;
-                font-size: 11;
+                font-family: Monospace;
+                font-size: 12;
             }
         """)
 
@@ -191,7 +191,6 @@ class displaySingleSerieWindow(QWidget):
         serie = serie.groupby(serie.index).mean()
         serieColor = serieDict['Color']
         Y_axisInverted = serieDict['Y axis inverted']
-        ax.yaxis.set_inverted(Y_axisInverted)
 
         line, = ax.plot(serie.index, serie.values, color=serieColor, linewidth=self.serieWidth)
         points = ax.scatter(serie.index, serie.values, s=5, marker='o', color=serieColor, visible=False)
@@ -214,7 +213,7 @@ class displaySingleSerieWindow(QWidget):
         if limits:
             ax.set_xlim(limits[0])
             ax.set_ylim(limits[1])
-            ax.yaxis.set_inverted(Y_axisInverted)
+        ax.yaxis.set_inverted(Y_axisInverted)
 
         ax.figure.canvas.draw()
         ax.figure.canvas.setFocus()

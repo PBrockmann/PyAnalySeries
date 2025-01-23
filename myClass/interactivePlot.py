@@ -63,8 +63,8 @@ class interactivePlot:
         points = ax.scatter(x, y, s=5, marker='o', visible=False)
         ax.line_points_pairs.append((line, points))
 
-        legend = ax.legend()
         if label:
+            legend = ax.legend()
             for legend_line, ax_line in zip(legend.get_lines(), ax.get_lines()):
                 legend_line.set_picker(5)
                 ax.map_legend_to_line[legend_line] = ax_line
@@ -197,8 +197,12 @@ class interactivePlot:
                 x_margin = (x_max - x_min) * 0.05
                 y_margin = (y_max - y_min) * 0.05
 
+                is_inverted = event.inaxes.yaxis.get_inverted()             # keep inverted
+
                 event.inaxes.set_xlim(x_min - x_margin, x_max + x_margin)
                 event.inaxes.set_ylim(y_min - y_margin, y_max + y_margin)
+
+                event.inaxes.yaxis.set_inverted(is_inverted)                # set back to state
 
             event.inaxes.figure.canvas.draw()  # Redraw the canvas
 

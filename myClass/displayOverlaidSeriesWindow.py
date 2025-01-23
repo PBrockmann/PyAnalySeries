@@ -105,7 +105,7 @@ class displayOverlaidSeriesWindow(QWidget):
         if limits:
             ax.set_xlim(limits[0])
             ax.set_ylim(limits[1])
-            ax.yaxis.set_inverted(any(Y_axisInverted_list))
+        ax.yaxis.set_inverted(any(Y_axisInverted_list))
 
         ax.figure.canvas.draw()
         ax.figure.canvas.setFocus()

@@ -110,8 +110,8 @@ class displayInterpolationWindow(QWidget):
             QTextEdit[readOnly="true"] {
                 background-color: #f8f8f8;
                 border: 1px solid lightgray;
-                font-family: Courier;
-                font-size: 11;
+                font-family: Monospace;
+                font-size: 12;
             }
         """)
 
