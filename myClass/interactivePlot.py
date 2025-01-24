@@ -99,7 +99,8 @@ class interactivePlot:
         if artist is None:
             #print("No artist detected under the scroll event.")
             return
-
+        
+        #------------------------------
         if isinstance(artist, XAxis):
             ax = artist.axes
             # Zoom on the X axis
@@ -110,6 +111,7 @@ class interactivePlot:
             ax.set_xlim(new_xlim)
             #print("Zooming in on the X axis (ticks or labels)")
 
+        #------------------------------
         elif isinstance(artist, YAxis):
             ax = artist.axes
             # Zoom on the Y axis
@@ -120,6 +122,7 @@ class interactivePlot:
             ax.set_ylim(new_ylim)
             #print("Zooming in on the Y axis (ticks or labels)")
 
+        #------------------------------
         elif isinstance(artist, plt.Axes):
             ax = artist
             # Zoom on both axes
@@ -176,35 +179,60 @@ class interactivePlot:
     #---------------------------------------------------------------------------------------------
     def on_key_press(self, event):
 
-        if not event.inaxes:
-            return
+        artist = self.detect_artist(event)  # Detect the Artist element under the mouse
 
-        if event.key == 'control':
-            for line, points in event.inaxes.line_points_pairs:
-                if line.get_visible():
-                    points.set_visible(True)
-            event.inaxes.figure.canvas.draw()  # Redraw the canvas
+        #------------------------------
+        if isinstance(artist, plt.Axes):
+            ax = artist
 
-        elif event.key == 'a':
-            visible_lines = [line for line in event.inaxes.lines if (line.get_visible() and not is_axvline(line))]
-            if visible_lines:
-                x_min = min(line.get_xdata().min() for line in visible_lines)
-                x_max = max(line.get_xdata().max() for line in visible_lines)
+            if event.key == 'control':
+                for line, points in ax.line_points_pairs:
+                    if line.get_visible():
+                        points.set_visible(True)
+                ax.figure.canvas.draw()  # Redraw the canvas
 
-                y_min = min(line.get_ydata().min() for line in visible_lines)
-                y_max = max(line.get_ydata().max() for line in visible_lines)
+            elif event.key == 'a':
+                visible_lines = [line for line in ax.lines if (line.get_visible() and not is_axvline(line))]
+                if visible_lines:
+                    x_min = min(line.get_xdata().min() for line in visible_lines)
+                    x_max = max(line.get_xdata().max() for line in visible_lines)
+                    y_min = min(line.get_ydata().min() for line in visible_lines)
+                    y_max = max(line.get_ydata().max() for line in visible_lines)
+                    x_margin = (x_max - x_min) * 0.05
+                    y_margin = (y_max - y_min) * 0.05
+                    is_inverted = ax.yaxis.get_inverted()             # keep inverted
+                    ax.set_xlim(x_min - x_margin, x_max + x_margin)
+                    ax.set_ylim(y_min - y_margin, y_max + y_margin)
+                    ax.yaxis.set_inverted(is_inverted)                # set back to state
+                    ax.figure.canvas.draw()  # Redraw the canvas
 
-                x_margin = (x_max - x_min) * 0.05
-                y_margin = (y_max - y_min) * 0.05
-
-                is_inverted = event.inaxes.yaxis.get_inverted()             # keep inverted
-
-                event.inaxes.set_xlim(x_min - x_margin, x_max + x_margin)
-                event.inaxes.set_ylim(y_min - y_margin, y_max + y_margin)
-
-                event.inaxes.yaxis.set_inverted(is_inverted)                # set back to state
-
-            event.inaxes.figure.canvas.draw()  # Redraw the canvas
+        #------------------------------
+        elif isinstance(artist, XAxis):
+            ax = artist.axes
+            if event.key == 'a':
+                #print("key a on xaxis")
+                visible_lines = [line for line in ax.lines if (line.get_visible() and not is_axvline(line))]
+                if visible_lines:
+                    x_min = min(line.get_xdata().min() for line in visible_lines)
+                    x_max = max(line.get_xdata().max() for line in visible_lines)
+                    x_margin = (x_max - x_min) * 0.05
+                    ax.set_xlim(x_min - x_margin, x_max + x_margin)
+                    ax.figure.canvas.draw()  # Redraw the canvas
+            
+        #------------------------------
+        elif isinstance(artist, YAxis):
+            ax = artist.axes
+            if event.key == 'a':
+                #print("key a on yaxis")
+                visible_lines = [line for line in ax.lines if (line.get_visible() and not is_axvline(line))]
+                if visible_lines:
+                    y_min = min(line.get_ydata().min() for line in visible_lines)
+                    y_max = max(line.get_ydata().max() for line in visible_lines)
+                    y_margin = (y_max - y_min) * 0.05
+                    is_inverted = ax.yaxis.get_inverted()             # keep inverted
+                    ax.set_ylim(y_min - y_margin, y_max + y_margin)
+                    ax.yaxis.set_inverted(is_inverted)                # set back to state
+                    ax.figure.canvas.draw()  # Redraw the canvas
 
     #---------------------------------------------------------------------------------------------
     def on_key_release(self, event):

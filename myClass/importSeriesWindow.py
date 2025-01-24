@@ -59,10 +59,10 @@ class importSeriesWindow(QWidget):
         #----------------------------------------------
         self.setLayout(main_layout)
 
-        exit_shortcut = QShortcut(QKeySequence('Q'), self)
+        exit_shortcut = QShortcut('q', self)
         exit_shortcut.activated.connect(self.close)
 
-        paste_shortcut = QShortcut(QKeySequence('Ctrl+V'), self)
+        paste_shortcut = QShortcut('Ctrl+v', self)
         paste_shortcut.activated.connect(self.paste_data)
 
     #---------------------------------------------------------------------------------------------

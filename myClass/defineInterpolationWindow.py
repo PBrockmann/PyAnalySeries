@@ -46,6 +46,8 @@ class defineInterpolationWindow(QWidget):
         self.X1Coords = []
         self.X2Coords = []
         self.artistsList_Dict = {}
+        self.artistsList_LastId = None 
+        self.artistsList_LastValues = []
         self.interpolationMode = 'Linear'
         self.axsInterp = None
         self.second_xaxis = None
@@ -117,11 +119,14 @@ class defineInterpolationWindow(QWidget):
             Id = serieDict['Id']
             self.selectSerie_combo.addItem(f'{n+1} with {Id}: {X1Name} / {Y1Name}')
 
-        self.showInterp = QCheckBox("Show Interpolated Curve")
-        #self.showInterp.setChecked(True)
-        self.showInterp.setChecked(False)
-        self.showInterp.setShortcut("Z")
+        self.showInterp = QCheckBox("Show interpolated curve")
+        self.showInterp.setChecked(True)
+        self.showInterp.setShortcut("z")
         self.showInterp.setToolTip("Type key 'z' as shortcut")
+
+        self.removeAddLastPointer = QCheckBox("Do/Undo last pointer")
+        self.removeAddLastPointer.setChecked(True)
+        self.removeAddLastPointer.setShortcut("u")
 
         self.interp_combo_label = QLabel("Interpolation Method:")
         self.interp_combo_label.setToolTip("Choose between Linear or PCHIP (Piecewise Cubic Hermite Interpolating Polynomial) interpolation")
@@ -134,27 +139,28 @@ class defineInterpolationWindow(QWidget):
 
         control_layout1.addWidget(self.selectSerie_combo_label)
         control_layout1.addWidget(self.selectSerie_combo)
-        control_layout1.addSpacing(50)
-        control_layout1.addWidget(self.showInterp)
-        control_layout1.addWidget(self.interp_combo_label)
-        control_layout1.addWidget(self.interp_combo)
         control_layout1.addStretch()
 
         main_layout.addLayout(control_layout1)
 
         self.selectSerie_combo.currentIndexChanged.connect(self.selectSerie_change)
-        self.showInterp.stateChanged.connect(self.showInterp_change)
         self.interp_combo.currentIndexChanged.connect(self.interpMode_change)
 
         #----------------------------------------------
         control_layout2 = QHBoxLayout()
 
+        control_layout2.addWidget(self.showInterp)
+        control_layout2.addWidget(self.removeAddLastPointer)
+        control_layout2.addWidget(self.interp_combo_label)
+        control_layout2.addWidget(self.interp_combo)
         control_layout2.addStretch()
         control_layout2.addWidget(self.save_button)
         control_layout2.addWidget(self.close_button)
 
         main_layout.addLayout(control_layout2)
 
+        self.showInterp.stateChanged.connect(self.showInterp_change)
+        self.removeAddLastPointer.stateChanged.connect(self.removeAddLastPointer_change)
         self.save_button.clicked.connect(self.save_serie)
         self.close_button.clicked.connect(self.close)
 
@@ -167,13 +173,38 @@ class defineInterpolationWindow(QWidget):
 
         self.myplot()
 
-        exit_shortcut = QShortcut(QKeySequence('Q'), self)
+        exit_shortcut = QShortcut('q', self)
         exit_shortcut.activated.connect(self.close)
 
         self.interactive_plot.fig.canvas.setFocus()
 
     #---------------------------------------------------------------------------------------------
+    def removeAddLastPointer_change(self):
+
+        if not self.artistsList_LastId: return
+
+        connect, vline1, vline2  = self.artistsList_LastValues
+
+        if self.artistsList_LastId in self.artistsList_Dict.keys():
+            for artist in self.artistsList_LastValues:
+                artist.remove()
+            del self.artistsList_Dict[self.artistsList_LastId]
+            self.vline1List.remove(vline1)
+            self.vline2List.remove(vline2)
+        else:
+            self.artistsList_Dict[self.artistsList_LastId] = self.artistsList_LastValues
+            self.interactive_plot.fig.add_artist(connect)
+            self.interactive_plot.axs[0].add_artist(vline1)
+            self.interactive_plot.axs[1].add_artist(vline2)
+            self.vline1List.append(vline1)
+            self.vline2List.append(vline2)
+
+        self.updatePointers()
+        self.updateInterpPlot()
+
+    #---------------------------------------------------------------------------------------------
     def selectSerie_change(self):
+
         #print('change', self.selectSerie_combo.currentIndex())
 
         xlim0 = self.axs[0].get_xlim()      # keep axs[0] range 
@@ -184,6 +215,7 @@ class defineInterpolationWindow(QWidget):
         self.axs[1].clear()
         self.axsInterp.clear()
         self.axsInterp.relim()          # reinit range
+        self.itemINTERPOLATION = None
         self.myplot()
 
         self.axs[0].set_xlim(xlim0)
@@ -193,10 +225,12 @@ class defineInterpolationWindow(QWidget):
 
     #---------------------------------------------------------------------------------------------
     def showInterp_change(self):
+
         self.updateInterpPlot()
 
     #---------------------------------------------------------------------------------------------
     def interpMode_change(self):
+
         self.interpolationMode = self.interp_combo.currentText()
         self.updateInterpPlot()
 
@@ -388,20 +422,40 @@ class defineInterpolationWindow(QWidget):
     #---------------------------------------------------------------------------------------------
     def drawConnections(self):
 
+        redefine_LastId = False
+        if self.artistsList_LastId:
+            connect, vline1_Last, vline2_Last  = self.artistsList_LastValues
+            redefine_LastId = True
+
+        self.artistsList_Dict = {}
+        self.vline1List = []
+        self.vline2List = []
+
+        found_Last_Id = False
         for i in range(len(self.X1Coords)):
             X1Coord = self.X1Coords[i]
             X2Coord = self.X2Coords[i]
             vline1 = self.axs[0].axvline(X1Coord, color=self.pointerColor, alpha=0.5, linestyle='--', linewidth=1, label='vline1')
             vline2 = self.axs[1].axvline(X2Coord, color=self.pointerColor, alpha=0.5, linestyle='--', linewidth=1, label='vline2')
-            self.vline1List.append(vline1)
-            self.vline2List.append(vline2)
             connect = ConnectionPatch(color=self.pointerColor, alpha=0.5, linewidth=1, picker=10, clip_on=True, label='connection',
                         xyA=(X1Coord, self.axs[0].get_ylim()[0]), coordsA=self.axs[0].transData,
                         xyB=(X2Coord, self.axs[1].get_ylim()[1]), coordsB=self.axs[1].transData)
             self.interactive_plot.fig.add_artist(connect)
+            self.vline1List.append(vline1)
+            self.vline2List.append(vline2)
             self.artistsList_Dict[id(connect)] = [connect, vline1, vline2]
+    
+            if redefine_LastId:
+                if (vline1.get_xdata() == vline1_Last.get_xdata()) and (vline2.get_xdata() == vline2_Last.get_xdata()):
+                    self.artistsList_LastId = id(connect)
+                    self.artistsList_LastValues = [connect, vline1, vline2]
+                    found_Last_Id = True
 
         self.interactive_plot.fig.canvas.draw()
+
+        if not found_Last_Id:
+            self.artistsList_LastId = None
+            self.artistsList_LastValues = []
 
     #---------------------------------------------------------------------------------------------
     def updateConnections(self):
@@ -462,6 +516,8 @@ class defineInterpolationWindow(QWidget):
                             xyB=(X2Coord, self.axs[1].get_ylim()[1]), coordsB=self.axs[1].transData)
                 self.interactive_plot.fig.add_artist(connect)
                 self.artistsList_Dict[id(connect)] = [connect, self.vline1, self.vline2]
+                self.artistsList_LastId = id(connect)
+                self.artistsList_LastValues = [connect, self.vline1, self.vline2]
                 self.vline1List.append(self.vline1)
                 self.vline2List.append(self.vline2)
                 self.vline1 = None

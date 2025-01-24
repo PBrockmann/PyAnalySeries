@@ -52,10 +52,12 @@ open_insolationWindow= {}
 
 #========================================================================================
 def colorize_item(item, color_name):
+    tree_widget.blockSignals(True)
     color = QColor(color_name)
     brush = QBrush(color)
     for col in range(tree_widget.columnCount()):
         item.setBackground(col, brush)
+    tree_widget.blockSignals(False)
 
 #========================================================================================
 def populate_tree_widget(fileName, itemDict_list):
@@ -146,7 +148,7 @@ def add_item_tree_widget(ws_item, itemDict, position=None):
 
     buttonColor = QPushButton()
     buttonColor.setFixedSize(30, 15)
-    buttonColor.setStyleSheet(f"background-color: {itemDict['Color']};")
+    buttonColor.setStyleSheet(f"background-color: {itemDict['Color']}; border: none; border-radius: 3px;")
     buttonColor.clicked.connect(lambda: selectColor(buttonColor, item))
     tree_widget.setItemWidget(item, 5, buttonColor)
 
@@ -182,9 +184,10 @@ def on_item_changed(item, column):
 
 #========================================================================================
 def selectColor(buttonColor, serie_item):
-    color = CustomQColorDialog.getColor()
+    serieDict = serie_item.data(0, Qt.UserRole)
+    starting_color = serieDict['Color']
+    color = CustomQColorDialog.getColor(starting_color)
     if color:
-        serieDict = serie_item.data(0, Qt.UserRole)
         serieDict = serieDict | {'Color': color.name()}
         serie_item.setData(0, Qt.UserRole, serieDict)
         update_items_from_data(serie_item)
@@ -208,13 +211,14 @@ def update_items_from_data(ref_item):
         if itemDict['Id'] == ref_itemDict['Id']:
             if  itemDict['Type'].startswith('Serie'):
                 buttonColor = tree_widget.itemWidget(item, 5)
-                if buttonColor: buttonColor.setStyleSheet(f"background-color: {ref_itemDict['Color']}")
+                if buttonColor: buttonColor.setStyleSheet(f"background-color: {ref_itemDict['Color']}; border: none; border-radius: 3px;")
                 checkboxInverted = tree_widget.itemWidget(item, 6)
                 if checkboxInverted: checkboxInverted.setChecked(ref_itemDict["Y axis inverted"])
                 sync_window_with_item(item)
             item.setText(0, ref_itemDict['Name'])
             item.setData(0, Qt.UserRole, ref_itemDict)
-            mark_ws(item.parent())
+            if ref_item.parent() == item.parent():
+                mark_ws(item.parent())
 
 #========================================================================================
 def sync_window_with_item(item):
@@ -653,7 +657,6 @@ def displaySingleSerie_selected_series():
     main_window.setFocus()                  # replace selection
     tree_widget.clearSelection()
     for item in items:
-        colorize_item(item, 'white')
         item.setSelected(True)
 
 #========================================================================================
@@ -1004,14 +1007,14 @@ def paste_items():
 
 #========================================================================================
 def on_item_double_clicked(item, column):
+    tree_widget.blockSignals(True)
     if column in [0]:                       # editable for specific columns
         item.setFlags(item.flags() | Qt.ItemIsEditable)
         if not item.parent():
-            tree_widget.blockSignals(True)
             item.setText(0, item.text(0).replace(" *", ""))  # Remove visual cue
-            tree_widget.blockSignals(False)
     else:
         item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+    tree_widget.blockSignals(False)
 
 #========================================================================================
 def show_dialog(title, fileHTML, width, height):
@@ -1088,19 +1091,19 @@ menu_bar = main_window.menuBar()
 file_menu = menu_bar.addMenu("File")
 
 newWS_action = QAction("New worksheet", main_window)
-newWS_action.setShortcut('Ctrl+N')
+newWS_action.setShortcut('Ctrl+n')
 newWS_action.triggered.connect(new_WorkSheet)
 openWS_action = QAction("Open worksheet", main_window)
-openWS_action.setShortcut('Ctrl+O')
+openWS_action.setShortcut('Ctrl+o')
 openWS_action.triggered.connect(open_WorkSheet)
 saveWSs_action = QAction("Save worksheets", main_window)
-saveWSs_action.setShortcut('Ctrl+S')
+saveWSs_action.setShortcut('Ctrl+s')
 saveWSs_action.triggered.connect(save_WorkSheets)
 import_action = QAction("Import data", main_window)
-import_action.setShortcut('Ctrl+M')
+import_action.setShortcut('Ctrl+m')
 import_action.triggered.connect(import_Series)
 exit_action = QAction('Exit', main_window)
-exit_action.setShortcut('Q')
+exit_action.setShortcut('q')
 exit_action.triggered.connect(exit_confirm)
 
 file_menu.addAction(newWS_action)
@@ -1115,27 +1118,27 @@ file_menu.addAction(exit_action)
 edit_menu = menu_bar.addMenu("Edit")
 
 cut_action = QAction("Cut", main_window)
-cut_action.setShortcuts([QKeySequence("Ctrl+X"), QKeySequence(Qt.Key_Delete)])
+cut_action.setShortcuts([QKeySequence("Ctrl+x"), QKeySequence(Qt.Key_Delete)])
 cut_action.triggered.connect(cut_items)
 
 copy_action = QAction("Copy", main_window)
-copy_action.setShortcut(QKeySequence("Ctrl+C"))
+copy_action.setShortcut(QKeySequence("Ctrl+c"))
 copy_action.triggered.connect(copy_items)
 
 paste_action = QAction("Paste", main_window)
-paste_action.setShortcut(QKeySequence("Ctrl+V"))
+paste_action.setShortcut(QKeySequence("Ctrl+v"))
 paste_action.triggered.connect(paste_items)
 
 display_action = QAction("Display Single", main_window)
-display_action.setShortcut('Ctrl+D')
+display_action.setShortcut('Ctrl+d')
 display_action.triggered.connect(displaySingleSerie_selected_series)
 
 displayOverlaidSeries_action = QAction("Display Overlaid", main_window)
-displayOverlaidSeries_action.setShortcut('Ctrl+T')
+displayOverlaidSeries_action.setShortcut('Ctrl+t')
 displayOverlaidSeries_action.triggered.connect(lambda: displayMultipleSeries_selected_series(overlaid=True))
 
 displayStackedSeries_action = QAction("Display Stacked", main_window)
-displayStackedSeries_action.setShortcut('Ctrl+R')
+displayStackedSeries_action.setShortcut('Ctrl+r')
 displayStackedSeries_action.triggered.connect(lambda: displayMultipleSeries_selected_series(overlaid=False))
 
 close_all_action = QAction("Close all Display windows")
@@ -1154,13 +1157,13 @@ edit_menu.addAction(close_all_action)
 math_menu = menu_bar.addMenu("Processing")
 
 defineFilter_action = QAction("Define Filter smoothing average", main_window)
-defineFilter_action.setShortcut('Ctrl+F')
+defineFilter_action.setShortcut('Ctrl+f')
 defineFilter_action.triggered.connect(define_filter)
 applyFilter_action = QAction("Apply Filter smoothing average", main_window)
 applyFilter_action.triggered.connect(apply_filter)
 
 defineInterpolation_action = QAction("Define Interpolation", main_window)
-defineInterpolation_action.setShortcut('Ctrl+I')
+defineInterpolation_action.setShortcut('Ctrl+i')
 defineInterpolation_action.triggered.connect(define_interpolation)
 applyInterpolationLinear_action = QAction("Apply Interpolation linear", main_window)
 applyInterpolationLinear_action.triggered.connect(lambda: apply_interpolation('Linear'))

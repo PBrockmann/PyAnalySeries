@@ -57,7 +57,7 @@ class displayOverlaidSeriesWindow(QWidget):
         self.setLayout(main_layout)
 
         #----------------------------------------------
-        exit_shortcut = QShortcut(QKeySequence('Q'), self)
+        exit_shortcut = QShortcut('q', self)
         exit_shortcut.activated.connect(self.close)
 
         self.interactive_plot.fig.canvas.setFocus()
@@ -151,7 +151,7 @@ if __name__ == "__main__":
     item1.setData(0, Qt.UserRole, serie1Dict)
 
     x2 = np.linspace(5, 15, 100)
-    y2 = np.cos(x2)
+    y2 = np.cos(x2)*4
     serie2 = pd.Series(y2, index=x2)
 
     serie2Dict = {

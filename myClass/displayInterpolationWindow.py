@@ -152,7 +152,7 @@ class displayInterpolationWindow(QWidget):
         #----------------------------------------------
         self.setLayout(main_layout)
 
-        exit_shortcut = QShortcut(QKeySequence('Q'), self)
+        exit_shortcut = QShortcut('q', self)
         exit_shortcut.activated.connect(self.close)
 
     #---------------------------------------------------------------------------------------------
