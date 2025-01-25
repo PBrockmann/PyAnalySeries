@@ -130,24 +130,23 @@ def add_item_tree_widget(ws_item, itemDict, position=None):
     item.setText(1, itemDict['Id'])
     item.setText(2, itemDict['Type'])
 
-    font = QFont('Monospace', 12)
-    font.setFamily("Monospace")
-    item.setFont(1, font)             # format Id
+    fontMono = QFont('Monospace', 12)
+    item.setFont(1, fontMono)             # format Id
 
     if itemDict['Type'] == 'INTERPOLATION':
         item.setText(3, itemDict['X1Name'])
-        item.setFont(3, font)
+        item.setFont(3, fontMono)
 
     if not itemDict['Type'].startswith('Serie'):
         return
 
     item.setText(3, itemDict['X'])
     item.setText(4, itemDict['Y'])
-    item.setFont(3, font)
-    item.setFont(4, font)
+    item.setFont(3, fontMono)
+    item.setFont(4, fontMono)
 
     buttonColor = QPushButton()
-    buttonColor.setFixedSize(30, 15)
+    buttonColor.setFixedSize(40, 15)
     buttonColor.setStyleSheet(f"background-color: {itemDict['Color']}; border: none; border-radius: 3px;")
     buttonColor.clicked.connect(lambda: selectColor(buttonColor, item))
     tree_widget.setItemWidget(item, 5, buttonColor)
@@ -162,9 +161,8 @@ def add_item_tree_widget(ws_item, itemDict, position=None):
 def on_item_changed(item, column):
     global open_ws
 
-    if column !=0: return
-
     if not item.parent():
+        if column !=0: return
         new_wsName = item.text(0).replace(' *', '')
         old_wsName = open_ws[id(item)]
         if new_wsName == old_wsName: 
@@ -179,6 +177,9 @@ def on_item_changed(item, column):
     else: 
         itemDict = item.data(0, Qt.UserRole)
         itemDict['Name'] = item.text(0)
+        if 'X' in itemDict.keys():
+            itemDict['X'] = item.text(3)
+            itemDict['Y'] = item.text(4)
         item.setData(0, Qt.UserRole, itemDict)
         update_items_from_data(item)
 
@@ -216,6 +217,9 @@ def update_items_from_data(ref_item):
                 if checkboxInverted: checkboxInverted.setChecked(ref_itemDict["Y axis inverted"])
                 sync_window_with_item(item)
             item.setText(0, ref_itemDict['Name'])
+            if 'X' in ref_itemDict.keys():
+                item.setText(3, ref_itemDict['X'])
+                item.setText(4, ref_itemDict['Y'])
             item.setData(0, Qt.UserRole, ref_itemDict)
             if ref_item.parent() == item.parent():
                 mark_ws(item.parent())
@@ -535,7 +539,7 @@ def define_insolationSerie():
 #========================================================================================
 def create_tree_widget():
 
-    font = QFont('Monospace', 12)
+    fontMono = QFont('Monospace', 12)
 
     tree_widget = CustomTreeWidget()
     tree_widget.setColumnCount(7)
@@ -557,9 +561,9 @@ def create_tree_widget():
         }
     """)
     tree_widget.setFocusPolicy(Qt.ClickFocus)
-    tree_widget.headerItem().setFont(1, font)
-    tree_widget.headerItem().setFont(3, font)
-    tree_widget.headerItem().setFont(4, font)
+    tree_widget.headerItem().setFont(1, fontMono)
+    tree_widget.headerItem().setFont(3, fontMono)
+    tree_widget.headerItem().setFont(4, fontMono)
 
     tree_widget.setDragEnabled(True)
     tree_widget.setAcceptDrops(True)
@@ -797,7 +801,7 @@ def apply_filter():
     #-------------------------------------------------------------
     main_window.setFocus()                  # replace selection
     tree_widget.clearSelection()
-    for item in itemSeries_selected + itemFilters_selected:
+    for item in itemSeries_selected + itemFilter:
         colorize_item(item, 'white')
         item.setSelected(True)
 
@@ -841,8 +845,9 @@ def define_interpolation():
     #-------------------------------------------------------------
     main_window.setFocus()                  # replace selection
     tree_widget.clearSelection()
-    items[-2].setSelected(True)
-    items[-1].setSelected(True)
+    for item in itemSeries_selected + itemInterpolation:
+        colorize_item(item, 'white')
+        item.setSelected(True)
 
 #========================================================================================
 def apply_interpolation(interpolationMode):
@@ -916,7 +921,7 @@ def apply_interpolation(interpolationMode):
     #-------------------------------------------------------------
     main_window.setFocus()                  # replace selection
     tree_widget.clearSelection()
-    for item in itemSeries_selected + itemInterpolations_selected:
+    for item in itemSeries_selected + itemInterpolation:
         colorize_item(item, 'white')
         item.setSelected(True)
 
@@ -1007,13 +1012,24 @@ def paste_items():
 
 #========================================================================================
 def on_item_double_clicked(item, column):
+
     tree_widget.blockSignals(True)
+
+    itemDict = item.data(0, Qt.UserRole)
+    if itemDict['Type'].startswith('Serie'): 
+        serieType = True
+    else:    
+        serieType = False
+
     if column in [0]:                       # editable for specific columns
         item.setFlags(item.flags() | Qt.ItemIsEditable)
         if not item.parent():
             item.setText(0, item.text(0).replace(" *", ""))  # Remove visual cue
+    elif column in [3,4] and serieType:                       # editable for specific columns
+        item.setFlags(item.flags() | Qt.ItemIsEditable)
     else:
         item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+
     tree_widget.blockSignals(False)
 
 #========================================================================================
@@ -1061,8 +1077,8 @@ def exit_confirm():
 #========================================================================================
 app = QApplication(sys.argv)
 
-font = QFont('Arial', 12)
-app.setFont(font)
+fontArial = QFont('Arial', 12)
+app.setFont(fontArial)
 
 icon = QIcon('PyAnalySeries_icon.ico')
 app.setWindowIcon(icon)
