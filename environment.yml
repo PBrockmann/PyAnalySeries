@@ -1,0 +1,11 @@
+name: env_PyAnalySeries
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10.16
+  - numpy=2.2.2
+  - pandas=2.2.3
+  - matplotlib=3.10.0
+  - scipy=1.15.1
+  - openpyxl=3.1.5
+  - pyqt=5.15.9
