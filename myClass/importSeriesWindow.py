@@ -188,7 +188,6 @@ class importSeriesWindow(QWidget):
             'X': self.data_table.horizontalHeaderItem(0).text(),
             'Y': self.data_table.horizontalHeaderItem(1).text(),
             'Y axis inverted': False,
-            'Y range': '',
             'Color': generate_color(),
             'History': 'Imported data',
             'Comment': '',

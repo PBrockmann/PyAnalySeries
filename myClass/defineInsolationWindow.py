@@ -108,7 +108,6 @@ class defineInsolationWindow(QWidget):
             'X': 'aaaaa',
             'Y': 'bbbbb',
             'Y axis inverted': False,
-            'Y range': '',
             'Color': generate_color(),
             'History': 'Insolation serie',
             'Comment': '',

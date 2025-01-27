@@ -241,6 +241,8 @@ def sync_window_with_item(item):
 #========================================================================================
 def load_WorkSheet(fileName):
 
+    if not os.path.exists(fileName): return
+
     if fileName in open_ws.values():
         msg = f'{fileName} already loaded'
         main_window.statusBar().showMessage(msg, 5000)
@@ -272,7 +274,6 @@ def load_WorkSheet(fileName):
                     'X':  df.columns[0],
                     'Y':  df.columns[1],
                     'Y axis inverted': bool(df['Y axis inverted'][0]),
-                    'Y range': df['Y range'][0],
                     'Color': Color,
                     'Comment': df['Comment'][0],
                     'History': df['History'][0],
@@ -284,15 +285,16 @@ def load_WorkSheet(fileName):
                         'InterpolationMode': df['InterpolationMode'][0],
                         'X1Coords': cleanList(df['X1Coords']),
                         'X2Coords': cleanList(df['X2Coords']),
-                        'XOriginal': df.columns[12],
-                        'XOriginalValues': cleanList(df.iloc[:,12])
+                        'XOriginal': df.columns[11],
+                        'XOriginalValues': cleanList(df.iloc[:,11])
                     }
+
+                itemDict_list.append(serieDict)
 
             except:
                 serieDict = None
                 msg = f"The file '{fileName}' contains a serie that is wrongly formatted in {sheetName} sheet."
                 main_window.statusBar().showMessage(msg, 5000)
-            itemDict_list.append(serieDict)
 
         #-------------------------------------
         elif sheetName.startswith('FILTER Id-'):
@@ -308,11 +310,12 @@ def load_WorkSheet(fileName):
                         'History': df['History'][0]
                 }
 
+                itemDict_list.append(filterDict)
+
             except:
                 filterDict = None
                 msg = f"The file '{fileName}' contains a FILTER that is wrongly formatted in {sheetName} sheet."
                 main_window.statusBar().showMessage(msg, 5000)
-            itemDict_list.append(filterDict)
 
         #-------------------------------------
         elif sheetName.startswith('INTERPOLATION Id-'):
@@ -330,11 +333,12 @@ def load_WorkSheet(fileName):
                         'History': df['History'][0]
                 }
 
+                itemDict_list.append(interpolationDict)
+
             except:
                 interpolationDict = None
                 msg = f"The file '{fileName}' contains an INTERPOLATION that is wrongly formatted in {sheetName} sheet."
                 main_window.statusBar().showMessage(msg, 5000)
-            itemDict_list.append(interpolationDict)
 
     #--------------------------------------------------------------------
     populate_tree_widget(fileName, itemDict_list)
@@ -399,10 +403,9 @@ def save_WorkSheet(ws_item):
                 ws.cell(row=1, column=3, value='Type')
                 ws.cell(row=1, column=4, value='Name')
                 ws.cell(row=1, column=5, value='Y axis inverted')
-                ws.cell(row=1, column=6, value='Y range')
-                ws.cell(row=1, column=7, value='Color')
-                ws.cell(row=1, column=8, value='Comment')
-                ws.cell(row=1, column=9, value='History')
+                ws.cell(row=1, column=6, value='Color')
+                ws.cell(row=1, column=7, value='Comment')
+                ws.cell(row=1, column=8, value='History')
 
                 for i, (index, value) in enumerate(itemDict['Serie'].items(), start=2):
                     ws.cell(row=i, column=1, value=index)
@@ -410,24 +413,23 @@ def save_WorkSheet(ws_item):
                 ws.cell(row=2, column=3, value=itemDict['Type'])
                 ws.cell(row=2, column=4, value=itemDict['Name'])
                 ws.cell(row=2, column=5, value=itemDict['Y axis inverted'])
-                ws.cell(row=2, column=6, value=itemDict['Y range'])
-                ws.cell(row=2, column=7, value=itemDict['Color'])
-                ws.cell(row=2, column=8, value=itemDict['Comment'])
-                ws.cell(row=2, column=9, value=itemDict['History'])
+                ws.cell(row=2, column=6, value=itemDict['Color'])
+                ws.cell(row=2, column=7, value=itemDict['Comment'])
+                ws.cell(row=2, column=8, value=itemDict['History'])
     
                 if 'InterpolationMode' in itemDict:
-                    ws.cell(row=1, column=10, value='InterpolationMode')
-                    ws.cell(row=1, column=11, value='X1Coords')
-                    ws.cell(row=1, column=12, value='X2Coords')
-                    ws.cell(row=1, column=13, value=itemDict['XOriginal'])
+                    ws.cell(row=1, column=9, value='InterpolationMode')
+                    ws.cell(row=1, column=10, value='X1Coords')
+                    ws.cell(row=1, column=11, value='X2Coords')
+                    ws.cell(row=1, column=12, value=itemDict['XOriginal'])
 
-                    ws.cell(row=2, column=10, value=itemDict['InterpolationMode'])
+                    ws.cell(row=2, column=9, value=itemDict['InterpolationMode'])
                     for i, value in enumerate(itemDict['X1Coords'], start=2):
-                        ws.cell(row=i, column=11, value=value)
+                        ws.cell(row=i, column=10, value=value)
                     for i, value in enumerate(itemDict['X2Coords'], start=2):
-                        ws.cell(row=i, column=12, value=value)
+                        ws.cell(row=i, column=11, value=value)
                     for i, value in enumerate(itemDict['XOriginalValues'], start=2):
-                        ws.cell(row=i, column=13, value=value)
+                        ws.cell(row=i, column=12, value=value)
 
             #-----------------------
             elif itemDict["Type"] == 'FILTER':
@@ -801,7 +803,7 @@ def apply_filter():
     #-------------------------------------------------------------
     main_window.setFocus()                  # replace selection
     tree_widget.clearSelection()
-    for item in itemSeries_selected + itemFilter:
+    for item in itemSeries_selected + itemFilters_selected:
         colorize_item(item, 'white')
         item.setSelected(True)
 
@@ -845,7 +847,7 @@ def define_interpolation():
     #-------------------------------------------------------------
     main_window.setFocus()                  # replace selection
     tree_widget.clearSelection()
-    for item in itemSeries_selected + itemInterpolation:
+    for item in itemSeries_selected + itemInterpolations_selected:
         colorize_item(item, 'white')
         item.setSelected(True)
 
@@ -921,7 +923,7 @@ def apply_interpolation(interpolationMode):
     #-------------------------------------------------------------
     main_window.setFocus()                  # replace selection
     tree_widget.clearSelection()
-    for item in itemSeries_selected + itemInterpolation:
+    for item in itemSeries_selected + itemInterpolations_selected:
         colorize_item(item, 'white')
         item.setSelected(True)
 
@@ -1015,15 +1017,20 @@ def on_item_double_clicked(item, column):
 
     tree_widget.blockSignals(True)
 
-    itemDict = item.data(0, Qt.UserRole)
-    if itemDict['Type'].startswith('Serie'): 
-        serieType = True
-    else:    
+    if not item.parent(): 
+        item_isWS = True
         serieType = False
+    else:  
+        item_isWS = False
+        itemDict = item.data(0, Qt.UserRole)
+        if itemDict['Type'].startswith('Serie'): 
+            serieType = True
+        else:    
+            serieType = False
 
     if column in [0]:                       # editable for specific columns
         item.setFlags(item.flags() | Qt.ItemIsEditable)
-        if not item.parent():
+        if item_isWS:
             item.setText(0, item.text(0).replace(" *", ""))  # Remove visual cue
     elif column in [3,4] and serieType:                       # editable for specific columns
         item.setFlags(item.flags() | Qt.ItemIsEditable)
