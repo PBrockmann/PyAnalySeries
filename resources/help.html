@@ -13,18 +13,21 @@ code {
 table {
   margin: 10px;
   border-collapse: collapse;
-  width: 600px;
+  width: 800px;
   font-family: arial;
 }
 table tr th,
 table tr td {
   border: 1px solid #bbb;
   padding: 5px;
+  text-align: left;
+  vertical-align: top;
 }
 table tr th {
   background: #eee;
   border: 1px solid #bbb;
   text-align: left;
+  vertical-align: top;
 }
 </style>
 </head>
@@ -32,60 +35,74 @@ table tr th {
     <table>
 	<thead>
     	<tr>
+        	<th>Location</th>
         	<th>Action</th>
         	<th>Description</th>
     	</tr>
     	</thead>
 	<tbody>
 	<tr>
+		<td>Interpolation window</td>
 		<td>Hold <code>shift key</code> while left click on a curve</td>
 		<td>Create or move a pointer</td>
 	</tr>
 	<tr>
+		<td>Display and Interpolation window</td>
 		<td>Hold down <code>ctrl key</code> on a plot</td>
 		<td>Display points of the curve</td>
 	</tr>
 	<tr>
+		<td>Interpolation window</td>
 		<td>Hold down <code>ctrl key</code> on a plot while <code>left click</code> on a curve</td>
 		<td>Create or move a pointer hooked on a point</td>
 	</tr>
 	<tr>
+		<td>Interpolation window</td>
 		<td>Press <code>c key</code></td>
 		<td>Connect pointers</td>
 	</tr>
 	<tr>
+		<td>Interpolation window</td>
 		<td>Hold down <code>x key</code> while <code>left click</code> on a connection</td>
 		<td>Delete the connection and its associated pointers</td>
 	</tr>
 	<tr>
+		<td>Display and Interpolation window</td>
 		<td>Use <code>wheel mouse</code> or <code>two-finger scroll on trackpad</code> on a plot</td>
 		<td>Zoom in/out in the plot</td>
 	</tr>
 	<tr>
+		<td>Display and Interpolation window</td>
 		<td>Use <code>wheel mouse</code> or <code>two-finger scroll on trackpad</code> on axis</td>
 		<td>Zoom in/out on horizontal/vertical axis</td>
 	</tr>
 	<tr>
+		<td>Display and Interpolation window</td>
 		<td>Hold down <code>left key</code> mouse on a plot</td>
 		<td>Pan in the plot</td>
 	</tr>
 	<tr>
-		<td>Press <code>a key</code> on a plot</td>
-		<td>Plot the 2 curves with an automatic vertical range and a horizontal range according to pointers</td>
+		<td>Display and Interpolation window</td>
+		<td>Press <code>a key</code> on a plot or its axis</td>
+		<td>Set automatic range</td>
 	</tr>
 	<tr>
-		<td>Press <code>A key</code> on a plot</td>
-		<td>Plot the curve with automatic vertical and horizontal ranges</td>
-	</tr>
-	<tr>
+		<td>Interpolation window</td>
 		<td>Press <code>X key</code></td>
 		<td>Delete all pointers and connections</td>
 	</tr>
 	<tr>
+		<td>Interpolation window</td>
 		<td>Press <code>z key</code></td>
 		<td>Display/Hide interpolated curve</td>
 	</tr>
 	<tr>
+		<td>Interpolation window</td>
+		<td>Press <code>u key</code></td>
+		<td>Do/Undo last connection setting</td>
+	</tr>
+	<tr>
+		<td>Display and Interpolation window</td>
 		<td>Press <code>q key</code></td>
 		<td>Quit the application</td>
 	</tr>

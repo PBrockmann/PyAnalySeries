@@ -14,22 +14,22 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import * 
 from PyQt5.QtGui import *
 
-from myClass.misc import *
-from myClass.CustomQColorDialog import CustomQColorDialog 
+from resources.misc import *
+from resources.CustomQColorDialog import CustomQColorDialog 
 
-from myClass.displaySingleSerieWindow import displaySingleSerieWindow
-from myClass.displayOverlaidSeriesWindow import displayOverlaidSeriesWindow
-from myClass.displayStackedSeriesWindow import displayStackedSeriesWindow
+from resources.displaySingleSerieWindow import displaySingleSerieWindow
+from resources.displayOverlaidSeriesWindow import displayOverlaidSeriesWindow
+from resources.displayStackedSeriesWindow import displayStackedSeriesWindow
 
-from myClass.defineFilterWindow import defineFilterWindow
-from myClass.displayFilterWindow import displayFilterWindow
+from resources.defineFilterWindow import defineFilterWindow
+from resources.displayFilterWindow import displayFilterWindow
 
-from myClass.defineInterpolationWindow import defineInterpolationWindow
-from myClass.displayInterpolationWindow import displayInterpolationWindow
+from resources.defineInterpolationWindow import defineInterpolationWindow
+from resources.displayInterpolationWindow import displayInterpolationWindow
 
-from myClass.importSeriesWindow import importSeriesWindow
+from resources.importSeriesWindow import importSeriesWindow
 
-from myClass.defineInsolationWindow import defineInsolationWindow
+from resources.defineInsolationWindow import defineInsolationWindow
 
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
@@ -65,7 +65,7 @@ def populate_tree_widget(fileName, itemDict_list):
 
     tree_widget.blockSignals(True)
 
-    ws_icon = QIcon("icons/icon_folder.png")
+    ws_icon = QIcon("resources/icon_folder.png")
 
     ws_item = QTreeWidgetItem(tree_widget)
     ws_item.setIcon(0, ws_icon)
@@ -87,10 +87,10 @@ def populate_tree_widget(fileName, itemDict_list):
 #========================================================================================
 def add_item_tree_widget(ws_item, itemDict, position=None):
 
-    icon_serie = QIcon("icons/icon_document.png")
-    icon_serieDuplicated = QIcon("icons/icon_copy.png")
-    icon_filter = QIcon("icons/icon_filter.png")
-    icon_interpolate = QIcon("icons/icon_interpolate.png")
+    icon_serie = QIcon("resources/icon_document.png")
+    icon_serieDuplicated = QIcon("resources/icon_copy.png")
+    icon_filter = QIcon("resources/icon_filter.png")
+    icon_interpolate = QIcon("resources/icon_interpolate.png")
 
     item = QTreeWidgetItem()
     item.setFlags(item.flags() & ~Qt.ItemIsDropEnabled)
@@ -1039,7 +1039,7 @@ def on_item_double_clicked(item, column):
 #========================================================================================
 def show_dialog(title, fileHTML, width, height):
     with open(fileHTML, 'r') as file:
-        help_text = file.read()
+        html_text = file.read()
     
     dialog = QDialog()
     dialog.setWindowTitle(title)
@@ -1048,7 +1048,7 @@ def show_dialog(title, fileHTML, width, height):
     main_layout = QVBoxLayout()
     dialog.setLayout(main_layout)
     text_browser = QTextBrowser()
-    text_browser.setHtml(help_text)
+    text_browser.setHtml(html_text)
     main_layout.addWidget(text_browser)
     
     button_layout = QHBoxLayout()
@@ -1082,7 +1082,7 @@ app = QApplication(sys.argv)
 fontArial = QFont('Arial', 12)
 app.setFont(fontArial)
 
-icon = QIcon('icons/PyAnalySeries_icon.ico')
+icon = QIcon('resources/PyAnalySeries_icon.ico')
 app.setWindowIcon(icon)
 
 main_window = QMainWindow()
@@ -1205,10 +1205,17 @@ insolation_action.triggered.connect(define_insolationSerie)
 basicSeries_menu.addAction(insolation_action)
 
 #----------------------------------------------
+help_menu = menu_bar.addMenu('Help')
+
+help_action = QAction('Help', main_window)
+help_action.triggered.connect(lambda: show_dialog('About', 'resources/help.html', 1000, 800))
+help_menu.addAction(help_action)
+
+#----------------------------------------------
 about_menu = menu_bar.addMenu('About')
 
 about_action = QAction('About', main_window)
-about_action.triggered.connect(lambda: show_dialog('About', 'about.html', 800, 600))
+about_action.triggered.connect(lambda: show_dialog('About', 'resources/about.html', 1000, 600))
 about_menu.addAction(about_action)
 
 #----------------------------------------------
