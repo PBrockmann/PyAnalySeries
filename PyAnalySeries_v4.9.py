@@ -65,7 +65,7 @@ def populate_tree_widget(fileName, itemDict_list):
 
     tree_widget.blockSignals(True)
 
-    ws_icon = QIcon("icon_folder.png")
+    ws_icon = QIcon("icons/icon_folder.png")
 
     ws_item = QTreeWidgetItem(tree_widget)
     ws_item.setIcon(0, ws_icon)
@@ -87,10 +87,10 @@ def populate_tree_widget(fileName, itemDict_list):
 #========================================================================================
 def add_item_tree_widget(ws_item, itemDict, position=None):
 
-    icon_serie = QIcon("icon_document.png")
-    icon_serieDuplicated = QIcon("icon_copy.png")
-    icon_filter = QIcon("icon_filter.png")
-    icon_interpolate = QIcon("icon_interpolate.png")
+    icon_serie = QIcon("icons/icon_document.png")
+    icon_serieDuplicated = QIcon("icons/icon_copy.png")
+    icon_filter = QIcon("icons/icon_filter.png")
+    icon_interpolate = QIcon("icons/icon_interpolate.png")
 
     item = QTreeWidgetItem()
     item.setFlags(item.flags() & ~Qt.ItemIsDropEnabled)
@@ -1087,7 +1087,7 @@ app = QApplication(sys.argv)
 fontArial = QFont('Arial', 12)
 app.setFont(fontArial)
 
-icon = QIcon('PyAnalySeries_icon.ico')
+icon = QIcon('icons/PyAnalySeries_icon.ico')
 app.setWindowIcon(icon)
 
 main_window = QMainWindow()
