@@ -177,9 +177,9 @@ def on_item_changed(item, column):
     else: 
         itemDict = item.data(0, Qt.UserRole)
         itemDict['Name'] = item.text(0)
-        if 'X' in itemDict.keys():
-            itemDict['X'] = item.text(3)
-            itemDict['Y'] = item.text(4)
+        if 'X' in itemDict.keys(): itemDict['X'] = item.text(3)
+        if 'X1Name' in itemDict.keys(): itemDict['X1Name'] = item.text(3)
+        if 'Y' in itemDict.keys(): itemDict['Y'] = item.text(4)
         item.setData(0, Qt.UserRole, itemDict)
         update_items_from_data(item)
 
@@ -217,9 +217,9 @@ def update_items_from_data(ref_item):
                 if checkboxInverted: checkboxInverted.setChecked(ref_itemDict["Y axis inverted"])
                 sync_window_with_item(item)
             item.setText(0, ref_itemDict['Name'])
-            if 'X' in ref_itemDict.keys():
-                item.setText(3, ref_itemDict['X'])
-                item.setText(4, ref_itemDict['Y'])
+            if 'X' in ref_itemDict.keys(): item.setText(3, ref_itemDict['X'])
+            if 'X1Name' in ref_itemDict.keys(): item.setText(3, ref_itemDict['X1Name'])
+            if 'Y' in ref_itemDict.keys(): item.setText(4, ref_itemDict['Y'])
             item.setData(0, Qt.UserRole, ref_itemDict)
             if ref_item.parent() == item.parent():
                 mark_ws(item.parent())
@@ -1017,22 +1017,19 @@ def on_item_double_clicked(item, column):
 
     tree_widget.blockSignals(True)
 
-    if not item.parent(): 
-        item_isWS = True
-        serieType = False
-    else:  
-        item_isWS = False
-        itemDict = item.data(0, Qt.UserRole)
-        if itemDict['Type'].startswith('Serie'): 
-            serieType = True
-        else:    
-            serieType = False
+    if not item.parent(): item_isWS = True
+    else: item_isWS = False
 
-    if column in [0]:                       # editable for specific columns
+    itemDict = item.data(0, Qt.UserRole)
+
+    if column == 0:
         item.setFlags(item.flags() | Qt.ItemIsEditable)
         if item_isWS:
             item.setText(0, item.text(0).replace(" *", ""))  # Remove visual cue
-    elif column in [3,4] and serieType:                       # editable for specific columns
+    elif column == 3 and (itemDict['Type'].startswith('Serie') or
+                          itemDict['Type'] == "INTERPOLATION"): 
+        item.setFlags(item.flags() | Qt.ItemIsEditable)
+    elif column == 4 and itemDict['Type'].startswith('Serie'):
         item.setFlags(item.flags() | Qt.ItemIsEditable)
     else:
         item.setFlags(item.flags() & ~Qt.ItemIsEditable)
@@ -1067,8 +1064,6 @@ def show_dialog(title, fileHTML, width, height):
 
 #========================================================================================
 def exit_confirm():
-    app.quit()
-    return
 
     reply = QMessageBox.question(
         main_window, 
