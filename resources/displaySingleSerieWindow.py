@@ -208,6 +208,7 @@ class displaySingleSerieWindow(QWidget):
             second_xaxis.set_xlabel(XOriginal)
             plt.setp(second_xaxis.get_xticklabels(), horizontalalignment='left')
 
+            self.interactive_plot.left_margin = 100
             self.interactive_plot.top_margin = 100
 
         if limits:
