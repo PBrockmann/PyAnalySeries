@@ -10,6 +10,9 @@ import matplotlib.pyplot as plt
 from .misc import *
 from .interactivePlot import interactivePlot
 
+from .insolation import inso
+from .insolation import astro
+
 #=========================================================================================
 for key in plt.rcParams.keys():
     if key.startswith('keymap.'):
@@ -33,26 +36,72 @@ class defineInsolationWindow(QWidget):
 
         #----------------------------------------------
         groupbox1 = QGroupBox('Parameters')
-        groupbox1_layout = QVBoxLayout()
-        groupbox1.setFixedHeight(150)
+        groupbox1.setFixedWidth(400)
 
-        layout_s1 = QHBoxLayout()
+        form_layout = QFormLayout()
 
-        label_s1 = QLabel('Latitude on the Earth :')
-        self.spin_box = QSpinBox(self)
-        self.spin_box.setRange(-90, 90)
-        self.spin_box.setSingleStep(1)
-        self.spin_box.setValue(60)
-        self.spin_box.setFixedWidth(50)
-        layout_s1.addWidget(label_s1)
-        layout_s1.addWidget(self.spin_box)
-        layout_s1.addStretch()
+        #-------------------------------
+        # Astronomical solution dropdown
+        self.solutionAstro_dropdown = QComboBox()
+        self.solutionAstro_dropdown.addItems(["Berger1978", "Laskar2004"])
+        self.solutionAstro_dropdown.setCurrentIndex(1)
+        
+        #-------------------------------
+        # Solar constant input
+        self.solar_constant_input = QSpinBox()
+        self.solar_constant_input.setRange(1000, 1500)
+        self.solar_constant_input.setValue(1365)
+        self.solar_constant_input.setSingleStep(5)
 
-        groupbox1_layout.addLayout(layout_s1)
-        groupbox1_layout.addStretch()
+        #-------------------------------
+        # Latitude slider
+        self.latitude_input = QSpinBox()
+        self.latitude_input.setRange(-90, 90)
+        self.latitude_input.setValue(0)
+        self.latitude_input.setSingleStep(5)
 
-        groupbox1.setLayout(groupbox1_layout)
+        #-------------------------------
+        # True longitude slider
+        self.trueLongitude_input = QSpinBox()
+        self.trueLongitude_input.setRange(0, 360)
+        self.trueLongitude_input.setValue(0)
+        self.trueLongitude_input.setSingleStep(5)
+
+        #-------------------------------
+        # Time inputs (Start, End, Step)
+        self.tstart_input = QSpinBox()
+        self.tstart_input.setRange(-101000, 21000)
+        self.tstart_input.setValue(-1000)
+        self.tstart_input.setSingleStep(1000)
+        
+        self.tend_input = QSpinBox()
+        self.tend_input.setRange(-101000, 21000)
+        self.tend_input.setValue(0)
+        self.tend_input.setSingleStep(1000)
+
+        self.tstep_input = QSpinBox()
+        self.tstep_input.setRange(1, 1000)
+        self.tstep_input.setValue(1)
+
+        form_layout.addRow("Astronomical solution:", self.solutionAstro_dropdown)
+        form_layout.addRow("Solar constant [W/m2]:", self.solar_constant_input)
+        form_layout.addRow("Latitude [°]:", self.latitude_input)
+        form_layout.addRow("True longitude [°]:", self.trueLongitude_input)
+        form_layout.addRow("Start [t]:", self.tstart_input)
+        form_layout.addRow("End [t]:", self.tend_input)
+        form_layout.addRow("Step [t]:", self.tstep_input)
+
+        #-------------------------------
+        groupbox1.setLayout(form_layout)
         main_layout.addWidget(groupbox1)
+
+        self.solutionAstro_dropdown.currentIndexChanged.connect(self.myplot)
+        self.solar_constant_input.valueChanged.connect(self.myplot)
+        self.latitude_input.valueChanged.connect(self.myplot)
+        self.trueLongitude_input.valueChanged.connect(self.myplot)
+        self.tstart_input.valueChanged.connect(self.myplot)
+        self.tend_input.valueChanged.connect(self.myplot)
+        self.tstep_input.valueChanged.connect(self.myplot)
 
         #----------------------------------------------
         self.interactive_plot = interactivePlot()
@@ -90,7 +139,36 @@ class defineInsolationWindow(QWidget):
     #---------------------------------------------------------------------------------------------
     def myplot(self):
 
-        self.interactive_plot.axs[0].plot([1,2,3], [1,2,3])
+        solar_constant = self.solar_constant_input.value()
+        latitude = self.latitude_input.value()
+        trueLongitude = self.trueLongitude_input.value()
+        t_start = self.tstart_input.value()
+        t_end = self.tend_input.value()
+        t_step = self.tstep_input.value()
+
+        t = np.arange(t_start, t_end+1, t_step)
+
+        deg_to_rad = np.pi/180.
+        
+        astro_params = eval(f"astro.Astro{self.solutionAstro_dropdown.currentText()}()")
+        ecc = astro_params.eccentricity(t)
+        pre = astro_params.precession_angle(t)
+        obl = astro_params.obliquity(t)
+
+        inso_daily = np.empty(len(t))
+        for i in range(len(t)):
+            inso_daily[i] = solar_constant * \
+                            inso.inso_daily_radians(inso.trueLongitude(trueLongitude*deg_to_rad, ecc[i], pre[i]), 
+                                                    latitude*deg_to_rad, 
+                                                    obl[i], 
+                                                    ecc[i], 
+                                                    pre[i])
+
+        self.index = t
+        self.values = inso_daily 
+
+        self.interactive_plot.axs[0].clear()
+        self.interactive_plot.axs[0].plot(self.index, self.values, linewidth=0.5)
 
         self.interactive_plot.fig.canvas.draw()
         self.interactive_plot.fig.canvas.setFocus()
@@ -98,20 +176,22 @@ class defineInsolationWindow(QWidget):
     #---------------------------------------------------------------------------------------------
     def import_serie(self):
 
-        index = []
-        values = []
-
         serieDict = {
             'Id': generate_Id(), 
             'Type': 'Serie', 
             'Name': '', 
-            'X': 'aaaaa',
-            'Y': 'bbbbb',
+            'X': 'years',
+            'Y': 'Daily insolation [w/m2]',
             'Y axis inverted': False,
             'Color': generate_color(),
-            'History': 'Insolation serie',
+            'History': f'Insolation daily serie with parameters:' + 
+                        '<ul>' +
+                        f'<li>Solar constant [W/m2]: {self.solar_constant_input.value()}' +
+                        f'<li>Latitude [°]: {self.latitude_input.value()}' +
+                        f'<li>True longitude [°]: {self.trueLongitude_input.value()}' +
+                        '</ul>',
             'Comment': '',
-            'Serie': pd.Series(values, index=index),
+            'Serie': pd.Series(self.values, index=self.index),
             }
 
         self.add_item_tree_widget(None, serieDict)          # will be added on parent from current index
