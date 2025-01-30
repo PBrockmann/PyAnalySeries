@@ -36,9 +36,20 @@ class defineInsolationWindow(QWidget):
 
         #----------------------------------------------
         groupbox1 = QGroupBox('Parameters')
-        groupbox1.setFixedWidth(400)
+        groupbox1.setFixedWidth(600)
 
         form_layout = QFormLayout()
+
+        #-------------------------------
+        # Insolation type dropdown
+        self.insolationType_dropdown = QComboBox()
+        self.insolationType_dropdown.addItems([
+            "Daily insolation",
+            "Integrated insolation between 2 true longitudes",
+            "Caloric summer insolation",
+            "Caloric winter insolation"
+        ])
+        self.insolationType_dropdown.setCurrentIndex(0)
 
         #-------------------------------
         # Astronomical solution dropdown
@@ -61,11 +72,19 @@ class defineInsolationWindow(QWidget):
         self.latitude_input.setSingleStep(5)
 
         #-------------------------------
-        # True longitude slider
-        self.trueLongitude_input = QSpinBox()
-        self.trueLongitude_input.setRange(0, 360)
-        self.trueLongitude_input.setValue(0)
-        self.trueLongitude_input.setSingleStep(5)
+        # True longitude #1
+        self.trueLongitude1_input = QSpinBox()
+        self.trueLongitude1_input.setRange(0, 360)
+        self.trueLongitude1_input.setValue(0)
+        self.trueLongitude1_input.setSingleStep(5)
+        self.trueLongitude1_input.valueChanged.connect(self.updateTrueLongitude2Limit)
+
+        #-------------------------------
+        # True longitude #2
+        self.trueLongitude2_input = QSpinBox()
+        self.trueLongitude2_input.setRange(1, 360)
+        self.trueLongitude2_input.setValue(0)
+        self.trueLongitude2_input.setSingleStep(5)
 
         #-------------------------------
         # Time inputs (Start, End, Step)
@@ -83,10 +102,12 @@ class defineInsolationWindow(QWidget):
         self.tstep_input.setRange(1, 1000)
         self.tstep_input.setValue(1)
 
+        form_layout.addRow("Type:", self.insolationType_dropdown)
         form_layout.addRow("Astronomical solution:", self.solutionAstro_dropdown)
         form_layout.addRow("Solar constant [W/m2]:", self.solar_constant_input)
         form_layout.addRow("Latitude [°]:", self.latitude_input)
-        form_layout.addRow("True longitude [°]:", self.trueLongitude_input)
+        form_layout.addRow("True longitude #1 [°]:", self.trueLongitude1_input)
+        form_layout.addRow("True longitude #2 [°]:", self.trueLongitude2_input)
         form_layout.addRow("Start [t]:", self.tstart_input)
         form_layout.addRow("End [t]:", self.tend_input)
         form_layout.addRow("Step [t]:", self.tstep_input)
@@ -95,10 +116,12 @@ class defineInsolationWindow(QWidget):
         groupbox1.setLayout(form_layout)
         main_layout.addWidget(groupbox1)
 
+        self.insolationType_dropdown.currentIndexChanged.connect(self.parameters_change)
         self.solutionAstro_dropdown.currentIndexChanged.connect(self.myplot)
         self.solar_constant_input.valueChanged.connect(self.myplot)
         self.latitude_input.valueChanged.connect(self.myplot)
-        self.trueLongitude_input.valueChanged.connect(self.myplot)
+        self.trueLongitude1_input.valueChanged.connect(self.myplot)
+        self.trueLongitude2_input.valueChanged.connect(self.myplot)
         self.tstart_input.valueChanged.connect(self.myplot)
         self.tend_input.valueChanged.connect(self.myplot)
         self.tstep_input.valueChanged.connect(self.myplot)
@@ -134,14 +157,36 @@ class defineInsolationWindow(QWidget):
         exit_shortcut = QShortcut('q', self)
         exit_shortcut.activated.connect(self.close)
 
+        self.parameters_change()
         #self.status_bar.showMessage('Ready', 5000)
+
+    #---------------------------------------------------------------------------------------------
+    def updateTrueLongitude2Limit(self, value):
+        self.trueLongitude2_input.setMinimum(value + 1)
+
+    #---------------------------------------------------------------------------------------------
+    def parameters_change(self):
+        if self.insolationType_dropdown.currentIndex() == 0:
+            self.trueLongitude1_input.setEnabled(True)
+            self.trueLongitude2_input.setEnabled(False)
+        elif self.insolationType_dropdown.currentIndex() == 1:
+            self.trueLongitude1_input.setEnabled(True)
+            self.trueLongitude2_input.setEnabled(True)
+        elif self.insolationType_dropdown.currentIndex() == 2:
+            self.trueLongitude1_input.setEnabled(False)
+            self.trueLongitude2_input.setEnabled(False)
+        elif self.insolationType_dropdown.currentIndex() == 3:
+            self.trueLongitude1_input.setEnabled(False)
+            self.trueLongitude2_input.setEnabled(False)
+        self.myplot()
 
     #---------------------------------------------------------------------------------------------
     def myplot(self):
 
         solar_constant = self.solar_constant_input.value()
         latitude = self.latitude_input.value()
-        trueLongitude = self.trueLongitude_input.value()
+        trueLongitude1 = self.trueLongitude1_input.value()
+        trueLongitude2 = self.trueLongitude2_input.value()
         t_start = self.tstart_input.value()
         t_end = self.tend_input.value()
         t_step = self.tstep_input.value()
@@ -155,17 +200,41 @@ class defineInsolationWindow(QWidget):
         pre = astro_params.precession_angle(t)
         obl = astro_params.obliquity(t)
 
-        inso_daily = np.empty(len(t))
-        for i in range(len(t)):
-            inso_daily[i] = solar_constant * \
-                            inso.inso_daily_radians(inso.trueLongitude(trueLongitude*deg_to_rad, ecc[i], pre[i]), 
+        insoValues = np.empty(len(t))
+        if self.insolationType_dropdown.currentIndex() == 0:
+            for i in range(len(t)): insoValues[i] = solar_constant * \
+                            inso.inso_daily_radians(
+                                    trueLongitude1*deg_to_rad,
+                                    latitude*deg_to_rad, 
+                                    obl[i], 
+                                    ecc[i], 
+                                    pre[i])
+        elif self.insolationType_dropdown.currentIndex() == 1:
+            for i in range(len(t)): insoValues[i] = solar_constant * \
+                            inso.inso_mean_radians(
+                                    trueLongitude1*deg_to_rad,
+                                    trueLongitude2*deg_to_rad,
+                                    latitude*deg_to_rad, 
+                                    obl[i], 
+                                    ecc[i], 
+                                    pre[i])
+        elif self.insolationType_dropdown.currentIndex() == 2:
+            for i in range(len(t)): insoValues[i] = solar_constant * \
+                            inso.inso_caloric_summer_NH(
+                                                    latitude*deg_to_rad, 
+                                                    obl[i], 
+                                                    ecc[i], 
+                                                    pre[i])
+        elif self.insolationType_dropdown.currentIndex() == 3:
+            for i in range(len(t)): insoValues[i] = solar_constant * \
+                            inso.inso_caloric_winter_NH(
                                                     latitude*deg_to_rad, 
                                                     obl[i], 
                                                     ecc[i], 
                                                     pre[i])
 
         self.index = t
-        self.values = inso_daily 
+        self.values = insoValues
 
         self.interactive_plot.axs[0].clear()
         self.interactive_plot.axs[0].plot(self.index, self.values, linewidth=0.5)
@@ -176,20 +245,44 @@ class defineInsolationWindow(QWidget):
     #---------------------------------------------------------------------------------------------
     def import_serie(self):
 
+        if self.insolationType_dropdown.currentIndex() == 0:
+            # "Daily insolation",
+            history = f'Insolation serie "{self.insolationType_dropdown.currentText()}" with parameters:' + \
+                        '<ul>' + \
+                        f'<li>Solar constant [W/m2]: {self.solar_constant_input.value()}' + \
+                        f'<li>Latitude [°]: {self.latitude_input.value()}' + \
+                        f'<li>True longitude [°]: {self.trueLongitude1_input.value()}' + \
+                        '</ul>'
+            shortName = "Daily insolation [W/m2]"
+        elif self.insolationType_dropdown.currentIndex() == 1:
+            # "Integrated insolation between 2 true longitudes",
+            history = f'Insolation serie "{self.insolationType_dropdown.currentText()}" with parameters:' + \
+                        '<ul>' + \
+                        f'<li>Solar constant [W/m2]: {self.solar_constant_input.value()}' + \
+                        f'<li>Latitude [°]: {self.latitude_input.value()}' + \
+                        f'<li>True longitude #1 [°]: {self.trueLongitude1_input.value()}' + \
+                        f'<li>True longitude #2 [°]: {self.trueLongitude2_input.value()}' + \
+                        '</ul>'
+            shortName = "Integrated insolation [W/m2]"
+        elif self.insolationType_dropdown.currentIndex() >= 1:
+            # "Caloric summer insolation",
+            # "Caloric winter insolation"
+            history = f'Insolation serie "{self.insolationType_dropdown.currentText()}" with parameters:' + \
+                        '<ul>' + \
+                        f'<li>Solar constant [W/m2]: {self.solar_constant_input.value()}' + \
+                        f'<li>Latitude [°]: {self.latitude_input.value()}' + \
+                        '</ul>'
+            shortName = f"{self.insolationType_dropdown.currentText()} [W/m2]"
+
         serieDict = {
             'Id': generate_Id(), 
             'Type': 'Serie', 
             'Name': '', 
             'X': 'years',
-            'Y': 'Daily insolation [w/m2]',
+            'Y': shortName,
             'Y axis inverted': False,
             'Color': generate_color(),
-            'History': f'Insolation daily serie with parameters:' + 
-                        '<ul>' +
-                        f'<li>Solar constant [W/m2]: {self.solar_constant_input.value()}' +
-                        f'<li>Latitude [°]: {self.latitude_input.value()}' +
-                        f'<li>True longitude [°]: {self.trueLongitude_input.value()}' +
-                        '</ul>',
+            'History': history,
             'Comment': '',
             'Serie': pd.Series(self.values, index=self.index),
             }
