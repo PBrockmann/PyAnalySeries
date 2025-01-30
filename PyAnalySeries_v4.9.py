@@ -822,17 +822,18 @@ def define_interpolation():
             itemInterpolations_selected.append(item)
 
     if not (len(itemInterpolations_selected) <= 1 and len(itemSeries_selected) >= 2):
-        main_window.statusBar().showMessage('Please select at least 2 series (reference, series to interpolate) and optionnaly 1 existing INTERPOLATION', 5000)
+        main_window.statusBar().showMessage('Please select at least 2 series and optionnaly 1 existing INTERPOLATION', 5000)
         return
        
     #-------------------------------------------------------------
     if len(itemInterpolations_selected) == 1:
         itemInterpolation = itemInterpolations_selected[0]
+        itemDict = itemInterpolation.data(0, Qt.UserRole)
+        Id_interpolationWindow = itemDict['Id']
     else:
         itemInterpolation = None
+        Id_interpolationWindow = generate_Id()
     items = itemSeries_selected
-    serieDict = items[0].data(0, Qt.UserRole)
-    Id_interpolationWindow = serieDict['Id']
 
     if Id_interpolationWindow in open_interpolationWindows:
         interpolationWindow = open_interpolationWindows[Id_interpolationWindow]

@@ -30,7 +30,6 @@ class defineInterpolationWindow(QWidget):
         self.open_interpolationWindows = open_interpolationWindows
         self.itemINTERPOLATION = itemINTERPOLATION
         self.items = items
-        self.item = self.items[1]                   # self.items[O] is reference serie
         self.add_item_tree_widget = add_item_tree_widget
 
         self.serieWidth = 0.8
@@ -106,18 +105,54 @@ class defineInterpolationWindow(QWidget):
 
         #----------------------------------------------
         control_layout1 = QHBoxLayout()
-
-        self.selectSerie_combo_label = QLabel("Change serie:")
-        self.selectSerie_combo = QComboBox()
+        
+        self.selectSerieRef_combo_label = QLabel("Reference serie:")
+        self.selectSerieRef_combo = QComboBox()
         font = QFont("Monospace", 12)
-        self.selectSerie_combo.setFont(font)
+        self.selectSerieRef_combo.setFont(font)
 
-        for n,item in enumerate(self.items[1:]):
+        for n,item in enumerate(self.items):
             serieDict = item.data(0, Qt.UserRole)
-            X1Name = serieDict['X']
-            Y1Name = serieDict['Y']
+            XName = serieDict['X']
+            YName = serieDict['Y']
             Id = serieDict['Id']
-            self.selectSerie_combo.addItem(f'{n+1} with {Id}: {X1Name} / {Y1Name}')
+            self.selectSerieRef_combo.addItem(f'{n+1} with {Id}: {XName} / {YName}')
+        self.selectSerieRef_combo.setCurrentIndex(0)
+
+        control_layout1.addWidget(self.selectSerieRef_combo_label)
+        control_layout1.addWidget(self.selectSerieRef_combo)
+        control_layout1.addStretch()
+
+        main_layout.addLayout(control_layout1)
+
+        self.selectSerieRef_combo.currentIndexChanged.connect(self.selectSerie_change)
+
+        #----------------------------------------------
+        control_layout2 = QHBoxLayout()
+
+        self.selectSerieDist_combo_label = QLabel("Distorded serie:")
+        self.selectSerieDist_combo = QComboBox()
+        font = QFont("Monospace", 12)
+        self.selectSerieDist_combo.setFont(font)
+
+        for n,item in enumerate(self.items):
+            serieDict = item.data(0, Qt.UserRole)
+            XName = serieDict['X']
+            YName = serieDict['Y']
+            Id = serieDict['Id']
+            self.selectSerieDist_combo.addItem(f'{n+1} with {Id}: {XName} / {YName}')
+        self.selectSerieDist_combo.setCurrentIndex(1)
+
+        control_layout2.addWidget(self.selectSerieDist_combo_label)
+        control_layout2.addWidget(self.selectSerieDist_combo)
+        control_layout2.addStretch()
+
+        main_layout.addLayout(control_layout2)
+
+        self.selectSerieDist_combo.currentIndexChanged.connect(self.selectSerie_change)
+
+        #----------------------------------------------
+        control_layout3 = QHBoxLayout()
 
         self.showInterp = QCheckBox("Show interpolated curve")
         self.showInterp.setChecked(True)
@@ -137,30 +172,19 @@ class defineInterpolationWindow(QWidget):
         self.save_button = QPushButton("Save interpolation and serie interpolated", self)
         self.close_button = QPushButton("Close", self)
 
-        control_layout1.addWidget(self.selectSerie_combo_label)
-        control_layout1.addWidget(self.selectSerie_combo)
-        control_layout1.addStretch()
+        control_layout3.addWidget(self.showInterp)
+        control_layout3.addWidget(self.removeAddLastPointer)
+        control_layout3.addWidget(self.interp_combo_label)
+        control_layout3.addWidget(self.interp_combo)
+        control_layout3.addStretch()
+        control_layout3.addWidget(self.save_button)
+        control_layout3.addWidget(self.close_button)
 
-        main_layout.addLayout(control_layout1)
-
-        self.selectSerie_combo.currentIndexChanged.connect(self.selectSerie_change)
-        self.interp_combo.currentIndexChanged.connect(self.interpMode_change)
-
-        #----------------------------------------------
-        control_layout2 = QHBoxLayout()
-
-        control_layout2.addWidget(self.showInterp)
-        control_layout2.addWidget(self.removeAddLastPointer)
-        control_layout2.addWidget(self.interp_combo_label)
-        control_layout2.addWidget(self.interp_combo)
-        control_layout2.addStretch()
-        control_layout2.addWidget(self.save_button)
-        control_layout2.addWidget(self.close_button)
-
-        main_layout.addLayout(control_layout2)
+        main_layout.addLayout(control_layout3)
 
         self.showInterp.stateChanged.connect(self.showInterp_change)
         self.removeAddLastPointer.stateChanged.connect(self.removeAddLastPointer_change)
+        self.interp_combo.currentIndexChanged.connect(self.interpMode_change)
         self.save_button.clicked.connect(self.save_serie)
         self.close_button.clicked.connect(self.close)
 
@@ -205,10 +229,7 @@ class defineInterpolationWindow(QWidget):
     #---------------------------------------------------------------------------------------------
     def selectSerie_change(self):
 
-        #print('change', self.selectSerie_combo.currentIndex())
-
         xlim0 = self.axs[0].get_xlim()      # keep axs[0] range 
-        ylim0 = self.axs[0].get_ylim()
 
         self.deleteConnections()
         self.axs[0].clear()
@@ -219,7 +240,6 @@ class defineInterpolationWindow(QWidget):
         self.myplot()
 
         self.axs[0].set_xlim(xlim0)
-        self.axs[0].set_ylim(ylim0)
 
         self.updateConnections()
 
@@ -352,10 +372,12 @@ class defineInterpolationWindow(QWidget):
 
         #----------------------------------------------------
         # self.axs[0] --> Reference 
-        # self.axs[1] --> to interpolate
+        # self.axs[1] --> Distorded to interpolate
 
         #----------------------------------------------------
-        self.serie1Dict = self.items[0].data(0, Qt.UserRole)
+        self.itemRef = self.items[self.selectSerieRef_combo.currentIndex()]
+
+        self.serie1Dict = self.itemRef.data(0, Qt.UserRole)
         self.X1Name = self.serie1Dict['X']
         self.Y1Name = self.serie1Dict['Y']
         self.serie1 = self.serie1Dict['Serie']
@@ -380,9 +402,9 @@ class defineInterpolationWindow(QWidget):
         self.linecursor1 = self.axs[0].axvline(color='k', alpha=0.25, linewidth=1)
 
         #----------------------------------------------------
-        self.item = self.items[self.selectSerie_combo.currentIndex()+1]
+        self.itemDist = self.items[self.selectSerieDist_combo.currentIndex()]
 
-        self.serie2Dict = self.item.data(0, Qt.UserRole)
+        self.serie2Dict = self.itemDist.data(0, Qt.UserRole)
         self.X2Name = self.serie2Dict['X']
         self.Y2Name = self.serie2Dict['Y']
         self.serie2 = self.serie2Dict['Serie']
@@ -756,8 +778,8 @@ class defineInterpolationWindow(QWidget):
                 f'serie <i><b>{self.serie2Dict["Id"]}</i></b> interpolated with INTERPOLATION <i><b>{interpolation_Id}</i></b> with mode {self.interpolationMode}<BR>---> serie <i><b>{interpolated_Id}</b></i>'),
             'Comment': ''
         }
-        position = self.item.parent().indexOfChild(self.item)
-        self.add_item_tree_widget(self.item.parent(), interpolated_serieDict, position+1)
+        position = self.item.parent().indexOfChild(self.itemDist)
+        self.add_item_tree_widget(self.itemDist.parent(), interpolated_serieDict, position+1)
 
     #---------------------------------------------------------------------------------------------
     def sync_with_item(self, item):
