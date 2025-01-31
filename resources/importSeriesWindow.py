@@ -19,14 +19,14 @@ class importSeriesWindow(QWidget):
 
         title = 'Series importer'
         self.setWindowTitle(title)
-        self.setGeometry(200, 200, 400, 600)
+        self.setGeometry(200, 200, 800, 600)
         
         #----------------------------------------------
         data_layout = QVBoxLayout()
         self.data_table = CustomQTableWidget()
-        self.data_table.setColumnCount(2)
+        self.data_table.setColumnCount(3)
         self.data_table.setRowCount(0)
-        self.data_table.setHorizontalHeaderLabels(['X column', 'Y column'])
+        self.data_table.setHorizontalHeaderLabels(['X column', 'Y1 column', '(Y2 column)'])
         self.data_table.resizeColumnsToContents()
 
         data_layout.addWidget(self.data_table)
@@ -38,7 +38,7 @@ class importSeriesWindow(QWidget):
         #----------------------------------------------
         button_layout = QHBoxLayout()
 
-        self.import_button = QPushButton("Import serie", self)
+        self.import_button = QPushButton("Import series", self)
         self.clear_button = QPushButton("Clear table", self)
         self.close_button = QPushButton("Close", self)
         button_layout.addStretch()
@@ -49,7 +49,7 @@ class importSeriesWindow(QWidget):
         button_layout.addWidget(self.close_button)
         main_layout.addLayout(button_layout)
 
-        self.import_button.clicked.connect(self.import_serie)
+        self.import_button.clicked.connect(self.import_series)
         self.clear_button.clicked.connect(self.clear_table)
         self.close_button.clicked.connect(self.close)
 
@@ -74,7 +74,6 @@ class importSeriesWindow(QWidget):
             QMessageBox.warning(self, "No Data", "The clipboard is empty.")
             return
 
-        print(text)
         rows = text.split("\n")
         clean_rows = [row.strip() for row in rows if row.strip()]
 
@@ -85,15 +84,14 @@ class importSeriesWindow(QWidget):
         data = []
 
         for row in clean_rows:
-            print(row)
             columns = row.split("\t")
             non_empty_columns = [col for col in columns if col.strip()]
 
-            if len(non_empty_columns) == 2:
+            if len(non_empty_columns) >= 2:
                 data.append(non_empty_columns)
 
         if not data:
-            QMessageBox.warning(self, "Invalid Data", "No valid data found with exactly 2 columns.")
+            QMessageBox.warning(self, "Invalid Data", "At least 2 columns (X,Y) or (X,Y1,Y2,...)")
             return
 
         headers = data.pop(0)
@@ -118,10 +116,10 @@ class importSeriesWindow(QWidget):
     #---------------------------------------------------------------------------------------------
     def clear_table(self):
         
-        self.data_table.setColumnCount(2)
+        self.data_table.setColumnCount(3)
         self.data_table.setRowCount(0)
         self.data_table.clearContents()
-        self.data_table.setHorizontalHeaderLabels(['X column', 'Y column'])
+        self.data_table.setHorizontalHeaderLabels(['X column', 'Y1 column', '(Y2 column)'])
         self.data_table.resizeColumnsToContents()
 
     #---------------------------------------------------------------------------------------------
@@ -145,17 +143,15 @@ class importSeriesWindow(QWidget):
     #---------------------------------------------------------------------------------------------
     def data_table_values_check(self):
 
-        for row in range(self.data_table.rowCount()):
-            item1 = self.data_table.item(row, 0)
-            if item1 is None or not self.is_numeric(item1.text()):
-                return False
-            item2 = self.data_table.item(row, 1)
-            if item2 is None or not self.is_numeric(item2.text()):
-                return False
+        for col in range(self.data_table.columnCount()):
+            for row in range(self.data_table.rowCount()):
+                item = self.data_table.item(row, col)
+                if item is None or not self.is_numeric(item.text()):
+                    return False
         return True
 
     #---------------------------------------------------------------------------------------------
-    def import_serie(self):
+    def import_series(self):
 
         if self.data_table.rowCount() == 0:
             msg = 'No data to import'
@@ -172,29 +168,26 @@ class importSeriesWindow(QWidget):
             self.status_bar.showMessage(msg, 5000)
             return
 
-        index = []
-        values = []
-        for row in range(self.data_table.rowCount()):
-            key_item = self.data_table.item(row, 0)
-            value_item = self.data_table.item(row, 1)
-            if key_item and value_item:
-                index.append(float(key_item.text()))
-                values.append(float(value_item.text()))
+        index = [float(self.data_table.item(row, 0).text()) for row in range(self.data_table.rowCount())] 
+        X = self.data_table.horizontalHeaderItem(0).text()
 
-        serieDict = {
-            'Id': generate_Id(), 
-            'Type': 'Serie', 
-            'Name': '', 
-            'X': self.data_table.horizontalHeaderItem(0).text(),
-            'Y': self.data_table.horizontalHeaderItem(1).text(),
-            'Y axis inverted': False,
-            'Color': generate_color(),
-            'History': 'Imported data',
-            'Comment': '',
-            'Serie': pd.Series(values, index=index),
-            }
-
-        self.add_item_tree_widget(None, serieDict)          # will be added on parent from current index
+        for col in range(1, self.data_table.columnCount()):
+            values = [float(self.data_table.item(row, col).text()) for row in range(self.data_table.rowCount())] 
+            Y = self.data_table.horizontalHeaderItem(col).text()
+            serieDict = {
+                'Id': generate_Id(), 
+                'Type': 'Serie', 
+                'Name': '', 
+                'X': X,
+                'Y': Y,
+                'Y axis inverted': False,
+                'Color': generate_color(),
+                'History': 'Imported data',
+                'Comment': '',
+                'Serie': pd.Series(values, index=index),
+                }
+            self.add_item_tree_widget(None, serieDict)          # will be added on parent from current index
+            #print(f"{X} / {Y}")
 
     #---------------------------------------------------------------------------------------------
     def closeEvent(self, event):

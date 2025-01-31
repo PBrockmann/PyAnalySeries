@@ -107,6 +107,7 @@ class defineInterpolationWindow(QWidget):
         control_layout1 = QHBoxLayout()
         
         self.selectSerieRef_combo_label = QLabel("Reference serie:")
+        self.selectSerieRef_combo_label.setFixedWidth(120)
         self.selectSerieRef_combo = QComboBox()
         font = QFont("Monospace", 12)
         self.selectSerieRef_combo.setFont(font)
@@ -131,6 +132,7 @@ class defineInterpolationWindow(QWidget):
         control_layout2 = QHBoxLayout()
 
         self.selectSerieDist_combo_label = QLabel("Distorded serie:")
+        self.selectSerieDist_combo_label.setFixedWidth(120)
         self.selectSerieDist_combo = QComboBox()
         font = QFont("Monospace", 12)
         self.selectSerieDist_combo.setFont(font)

@@ -109,9 +109,10 @@ class displayStackedSeriesWindow(QWidget):
         sharexLists = [n for n in XDict.values() if len(n) > 1]
         #print(sharexLists)
         for sharexList in sharexLists:
+            base_ax = self.interactive_plot.axs[sharexList[0]]
             for n in sharexList[1:]:
                 #print("sharex", sharexList[0], n)
-                self.interactive_plot.axs[sharexList[0]].sharex(self.interactive_plot.axs[n])
+                self.interactive_plot.axs[n].sharex(base_ax) 
 
         #-----------------------------------
         self.interactive_plot.fig.canvas.draw()

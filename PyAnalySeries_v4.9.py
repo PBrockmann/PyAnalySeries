@@ -248,6 +248,9 @@ def load_WorkSheet(fileName):
         main_window.statusBar().showMessage(msg, 5000)
         return 
 
+    main_window.statusBar().showMessage(fileName + ' loading', 5000)
+    QApplication.processEvents()
+
     #--------------------------------------------------------------------
     sheetNames = pd.read_excel(fileName, sheet_name=None).keys()
 
@@ -295,6 +298,7 @@ def load_WorkSheet(fileName):
                 serieDict = None
                 msg = f"The file '{fileName}' contains a serie that is wrongly formatted in {sheetName} sheet."
                 main_window.statusBar().showMessage(msg, 5000)
+                QApplication.processEvents()
 
         #-------------------------------------
         elif sheetName.startswith('FILTER Id-'):
@@ -316,6 +320,7 @@ def load_WorkSheet(fileName):
                 filterDict = None
                 msg = f"The file '{fileName}' contains a FILTER that is wrongly formatted in {sheetName} sheet."
                 main_window.statusBar().showMessage(msg, 5000)
+                QApplication.processEvents()
 
         #-------------------------------------
         elif sheetName.startswith('INTERPOLATION Id-'):
@@ -339,6 +344,7 @@ def load_WorkSheet(fileName):
                 interpolationDict = None
                 msg = f"The file '{fileName}' contains an INTERPOLATION that is wrongly formatted in {sheetName} sheet."
                 main_window.statusBar().showMessage(msg, 5000)
+                QApplication.processEvents()
 
     #--------------------------------------------------------------------
     populate_tree_widget(fileName, itemDict_list)
@@ -822,7 +828,7 @@ def define_interpolation():
             itemInterpolations_selected.append(item)
 
     if not (len(itemInterpolations_selected) <= 1 and len(itemSeries_selected) >= 2):
-        main_window.statusBar().showMessage('Please select at least 2 series and optionnaly 1 existing INTERPOLATION', 5000)
+        main_window.statusBar().showMessage('Please select at least 2 series and optionnaly 1 INTERPOLATION', 5000)
         return
        
     #-------------------------------------------------------------
