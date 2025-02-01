@@ -232,8 +232,6 @@ class defineInterpolationWindow(QWidget):
 
         xlim0 = self.axs[0].get_xlim()      # keep axs[0] range 
 
-        self.removeAddLastPointer()
-
         self.deleteConnections()
         self.axs[0].clear()
         self.axs[1].clear()
@@ -758,7 +756,7 @@ class defineInterpolationWindow(QWidget):
             'Comment': '',
             'History': '',
         }
-        self.add_item_tree_widget(self.item.parent(), interpolationDict)
+        self.add_item_tree_widget(self.itemRef.parent(), interpolationDict)
 
         f_1to2, f_2to1 = self.defineInterpolationFunctions(self.X1Coords, self.X2Coords, interpolationMode=self.interpolationMode)
 
@@ -777,7 +775,7 @@ class defineInterpolationWindow(QWidget):
                 f'serie <i><b>{self.serie2Dict["Id"]}</i></b> interpolated with INTERPOLATION <i><b>{interpolation_Id}</i></b> with mode {self.interpolationMode}<BR>---> serie <i><b>{interpolated_Id}</b></i>'),
             'Comment': ''
         }
-        position = self.item.parent().indexOfChild(self.itemDist)
+        position = self.itemDist.parent().indexOfChild(self.itemDist)
         self.add_item_tree_widget(self.itemDist.parent(), interpolated_serieDict, position+1)
 
     #---------------------------------------------------------------------------------------------
