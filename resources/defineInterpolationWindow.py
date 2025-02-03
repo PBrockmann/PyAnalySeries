@@ -625,6 +625,8 @@ class defineInterpolationWindow(QWidget):
             if self.key_x:
                 objectId = id(event.artist)
                 for artist in self.artistsList_Dict[objectId]:
+                    self.artistsList_LastId = objectId
+                    self.artistsList_LastValues = self.artistsList_Dict[objectId] 
                     artist.remove()
                     if artist in self.vline1List:
                         self.vline1List.remove(artist)
