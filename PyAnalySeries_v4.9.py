@@ -36,9 +36,9 @@ from openpyxl.utils import get_column_letter
 
 #========================================================================================
 if len(sys.argv[1:]) >= 1:
-    fileWS = sys.argv[1]
+    filesWS = sys.argv[1:]
 else:
-    fileWS = None
+    filesWS = None
 
 #========================================================================================
 version = 'v4.9'
@@ -572,6 +572,14 @@ def create_tree_widget():
     tree_widget.headerItem().setFont(1, fontMono)
     tree_widget.headerItem().setFont(3, fontMono)
     tree_widget.headerItem().setFont(4, fontMono)
+
+    delegate = QStyledItemDelegate()
+    delegate.createEditor = lambda parent, option, index: (
+        QLineEdit(parent, font=fontMono)
+    )
+    tree_widget.setItemDelegateForColumn(1, delegate)
+    tree_widget.setItemDelegateForColumn(3, delegate)
+    tree_widget.setItemDelegateForColumn(4, delegate)
 
     tree_widget.setDragEnabled(True)
     tree_widget.setAcceptDrops(True)
@@ -1226,9 +1234,10 @@ about_action.triggered.connect(lambda: show_dialog('About', 'resources/about.htm
 about_menu.addAction(about_action)
 
 #----------------------------------------------
-if fileWS:
-    #print('-------------------', fileWS)
-    load_WorkSheet(fileWS)
+if filesWS:
+    for fileWS in filesWS: 
+        print('Loading...', fileWS)
+        load_WorkSheet(fileWS)
 
 #----------------------------------------------
 main_window.setStatusBar(QStatusBar())

@@ -218,7 +218,7 @@ class defineInterpolationWindow(QWidget):
             del self.artistsList_Dict[self.artistsList_LastId]
             self.vline1List.remove(vline1)
             self.vline2List.remove(vline2)
-            self.removeAddLastPointer_button.setText("Replace last pointer")
+            self.removeAddLastPointer_button.setText("Reposition last pointer")
             self.removeAddLastPointer_button.setShortcut("u")
         else:
             self.artistsList_Dict[self.artistsList_LastId] = self.artistsList_LastValues
@@ -643,7 +643,7 @@ class defineInterpolationWindow(QWidget):
                     self.artistsList_LastId = objectId
                     self.artistsList_LastValues = self.artistsList_Dict[objectId] 
                     self.removeAddLastPointer_button.setEnabled(True)
-                    self.removeAddLastPointer_button.setText("Replace last pointer")
+                    self.removeAddLastPointer_button.setText("Reposition last pointer")
                     self.removeAddLastPointer_button.setShortcut("u")
                     artist.remove()
                     if artist in self.vline1List:
