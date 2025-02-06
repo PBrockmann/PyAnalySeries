@@ -23,8 +23,8 @@ Based on:
  * `conda activate env_PyAnalySeries`
 
 ##### Test
- * `python PyAnalySeries_v4.9.py`
- * `python PyAnalySeries_v4.9.py test/ws_ex_4.9.xlsx`
+ * `python PyAnalySeries_v5.0.py`
+ * `python PyAnalySeries_v5.0.py test/ws_ex_5.0.xlsx`
 
 #### Captures
 
