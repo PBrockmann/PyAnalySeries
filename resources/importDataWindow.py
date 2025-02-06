@@ -22,18 +22,26 @@ class importDataWindow(QWidget):
         self.setGeometry(200, 200, 800, 600)
         
         #----------------------------------------------
-        data_layout = QVBoxLayout()
+        #data_layout = QVBoxLayout()
+
+        #----------------------------------------------
+        self.label = QLabel("📋 Press 'Ctrl+V' (or 'Cmd+V' on Mac) to paste the copied spreadsheet data.", self)
+        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label.setStyleSheet(
+            "padding: 10px;"
+        )
+
+        #----------------------------------------------
         self.data_table = CustomQTableWidget()
         self.data_table.setColumnCount(3)
         self.data_table.setRowCount(0)
         self.data_table.setHorizontalHeaderLabels(['X column', 'Y1 column', '(Y2 column)'])
         self.data_table.resizeColumnsToContents()
 
-        data_layout.addWidget(self.data_table)
-
         #----------------------------------------------
         main_layout = QVBoxLayout()
-        main_layout.addLayout(data_layout)
+        main_layout.addWidget(self.label)
+        main_layout.addWidget(self.data_table)
 
         #----------------------------------------------
         button_layout = QHBoxLayout()
