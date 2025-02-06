@@ -65,8 +65,8 @@ class displayInterpolationWindow(QWidget):
         points = pointersPlot_ax.scatter(self.X2Coords, self.X1Coords, s=10, marker='o', color='steelblue')
 
         pointersPlot_ax.grid(visible=True, which='major', color='lightgray', linestyle='dashed', linewidth=1)
-        pointersPlot_ax.set_xlabel(self.X1Name)
-        pointersPlot_ax.set_ylabel('X')
+        pointersPlot_ax.set_xlabel('X')
+        pointersPlot_ax.set_ylabel(self.X1Name)
 
         pointersPlot_axGradient = pointersPlot_ax.twinx()
         pointersPlot_axGradient.set_ylabel('Gradients (dx/dy)', color='darkorange')

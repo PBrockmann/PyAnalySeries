@@ -5,6 +5,9 @@ from matplotlib.lines import Line2D
 import numpy as np
 
 #=========================================================================================
+plt.rcParams["toolbar"] = "None" 
+
+#=========================================================================================
 def is_axvline(line):
     xdata = line.get_xdata()
     ydata = line.get_ydata()

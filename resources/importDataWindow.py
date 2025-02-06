@@ -9,7 +9,7 @@ from .misc import *
 from .CustomQTableWidget import CustomQTableWidget 
 
 #=========================================================================================
-class importSeriesWindow(QWidget):
+class importDataWindow(QWidget):
     #---------------------------------------------------------------------------------------------
     def __init__(self, open_importWindow, add_item_tree_widget):
         super().__init__()
@@ -38,18 +38,21 @@ class importSeriesWindow(QWidget):
         #----------------------------------------------
         button_layout = QHBoxLayout()
 
-        self.import_button = QPushButton("Import series", self)
+        self.importPointers_button = QPushButton("Import pointers", self)
+        self.importSeries_button = QPushButton("Import series", self)
         self.clear_button = QPushButton("Clear table", self)
         self.close_button = QPushButton("Close", self)
         button_layout.addStretch()
 
-        button_layout.addWidget(self.import_button)
+        button_layout.addWidget(self.importPointers_button)
+        button_layout.addWidget(self.importSeries_button)
         button_layout.addWidget(self.clear_button)
         button_layout.addSpacing(50)
         button_layout.addWidget(self.close_button)
         main_layout.addLayout(button_layout)
 
-        self.import_button.clicked.connect(self.import_series)
+        self.importPointers_button.clicked.connect(self.import_pointers)
+        self.importSeries_button.clicked.connect(self.import_series)
         self.clear_button.clicked.connect(self.clear_table)
         self.close_button.clicked.connect(self.close)
 
@@ -190,6 +193,10 @@ class importSeriesWindow(QWidget):
             #print(f"{X} / {Y}")
 
     #---------------------------------------------------------------------------------------------
+    def import_pointers(self):
+        return
+
+    #---------------------------------------------------------------------------------------------
     def closeEvent(self, event):
         self.open_importWindow.pop('123456', None)
         event.accept()
@@ -206,7 +213,7 @@ if __name__ == "__main__":
     Id_importWindow = '1234'
     open_importWindow = {}
 
-    importWindow = importSeriesWindow(open_importWindow, handle_item)
+    importWindow = importDataWindow(open_importWindow, handle_item)
     open_importWindow[Id_importWindow] = importWindow
     importWindow.show()
 
