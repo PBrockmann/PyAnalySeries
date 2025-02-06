@@ -17,15 +17,12 @@ class importDataWindow(QWidget):
         self.open_importWindow = open_importWindow
         self.add_item_tree_widget = add_item_tree_widget
 
-        title = 'Series importer'
+        title = 'Data importer'
         self.setWindowTitle(title)
         self.setGeometry(200, 200, 800, 600)
         
         #----------------------------------------------
-        #data_layout = QVBoxLayout()
-
-        #----------------------------------------------
-        self.label = QLabel("📋 Press 'Ctrl+V' (or 'Cmd+V' on Mac) to paste the copied spreadsheet data.", self)
+        self.label = QLabel("Press 'Ctrl+V' (or 'Cmd+V' on Mac) to paste the copied spreadsheet data.", self)
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label.setStyleSheet(
             "padding: 10px;"
@@ -33,10 +30,6 @@ class importDataWindow(QWidget):
 
         #----------------------------------------------
         self.data_table = CustomQTableWidget()
-        self.data_table.setColumnCount(3)
-        self.data_table.setRowCount(0)
-        self.data_table.setHorizontalHeaderLabels(['X column', 'Y1 column', '(Y2 column)'])
-        self.data_table.resizeColumnsToContents()
 
         #----------------------------------------------
         main_layout = QVBoxLayout()
@@ -47,21 +40,20 @@ class importDataWindow(QWidget):
         button_layout = QHBoxLayout()
 
         self.importPointers_button = QPushButton("Import pointers", self)
+        self.importPointers_button.setToolTip("Order colums as Reference, Distorded")
         self.importSeries_button = QPushButton("Import series", self)
-        self.clear_button = QPushButton("Clear table", self)
+        self.importSeries_button.setToolTip("Order colums as X values, Y1 values, (Y2 values, ...)")
         self.close_button = QPushButton("Close", self)
         button_layout.addStretch()
 
         button_layout.addWidget(self.importPointers_button)
         button_layout.addWidget(self.importSeries_button)
-        button_layout.addWidget(self.clear_button)
         button_layout.addSpacing(50)
         button_layout.addWidget(self.close_button)
         main_layout.addLayout(button_layout)
 
         self.importPointers_button.clicked.connect(self.import_pointers)
         self.importSeries_button.clicked.connect(self.import_series)
-        self.clear_button.clicked.connect(self.clear_table)
         self.close_button.clicked.connect(self.close)
 
         self.status_bar = QStatusBar()
@@ -102,7 +94,7 @@ class importDataWindow(QWidget):
                 data.append(non_empty_columns)
 
         if not data:
-            QMessageBox.warning(self, "Invalid Data", "At least 2 columns (X,Y) or (X,Y1,Y2,...)")
+            QMessageBox.warning(self, "Invalid Data", "At least 2 columns (X,Y), (X,Y1,Y2,...) or (X Reference, X Distorded)")
             return
 
         headers = data.pop(0)
@@ -123,15 +115,7 @@ class importDataWindow(QWidget):
                 self.data_table.item(row_index, col_index).setBackground(background_color)
 
         self.data_table.resizeColumnsToContents()
-
-    #---------------------------------------------------------------------------------------------
-    def clear_table(self):
-        
-        self.data_table.setColumnCount(3)
-        self.data_table.setRowCount(0)
-        self.data_table.clearContents()
-        self.data_table.setHorizontalHeaderLabels(['X column', 'Y1 column', '(Y2 column)'])
-        self.data_table.resizeColumnsToContents()
+        self.data_table.horizontalHeader().setSectionsMovable(True)
 
     #---------------------------------------------------------------------------------------------
     def is_numeric(self, value):
@@ -143,13 +127,13 @@ class importDataWindow(QWidget):
 
     #---------------------------------------------------------------------------------------------
     def data_table_headers_check(self):
-        header0 = self.data_table.horizontalHeaderItem(0).text()
-        header1 = self.data_table.horizontalHeaderItem(1).text()
 
-        if not self.is_numeric(header0) and not self.is_numeric(header1):
-            return True
-        else:
-            return False
+        for col in range(self.data_table.columnCount()):
+            header = self.data_table.horizontalHeaderItem(col).text()
+            if not self.is_numeric(header):
+                return True
+            else:
+                return False
 
     #---------------------------------------------------------------------------------------------
     def data_table_values_check(self):
@@ -165,17 +149,17 @@ class importDataWindow(QWidget):
     def import_series(self):
 
         if self.data_table.rowCount() == 0:
-            msg = 'No data to import'
+            msg = 'Error: No data to import'
             self.status_bar.showMessage(msg, 5000)
             return
 
         if not self.data_table_headers_check():
-            msg = 'Headers are not text'
+            msg = 'Error: Headers are not text'
             self.status_bar.showMessage(msg, 5000)
             return
 
         if not self.data_table_values_check():
-            msg = 'Values are not numeric'
+            msg = 'Error: Values are not numeric'
             self.status_bar.showMessage(msg, 5000)
             return
 
@@ -185,8 +169,9 @@ class importDataWindow(QWidget):
         for col in range(1, self.data_table.columnCount()):
             values = [float(self.data_table.item(row, col).text()) for row in range(self.data_table.rowCount())] 
             Y = self.data_table.horizontalHeaderItem(col).text()
+            serie_Id =  generate_Id()
             serieDict = {
-                'Id': generate_Id(), 
+                'Id': serie_Id, 
                 'Type': 'Serie', 
                 'Name': '', 
                 'X': X,
@@ -199,6 +184,9 @@ class importDataWindow(QWidget):
                 }
             self.add_item_tree_widget(None, serieDict)          # will be added on parent from current index
             #print(f"{X} / {Y}")
+
+            msg = f'{X} / {Y} imported as {serie_Id}'
+            self.status_bar.showMessage(msg, 2000)
 
     #---------------------------------------------------------------------------------------------
     def import_pointers(self):

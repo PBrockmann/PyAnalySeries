@@ -40,7 +40,9 @@ class displayInterpolationWindow(QWidget):
         pointers_table = CustomQTableWidget()
         pointers_table.setRowCount(len(self.X1Coords))
         pointers_table.setColumnCount(2)
-        pointers_table.setHorizontalHeaderLabels([self.X1Name, 'X'])
+        pointers_table.setHorizontalHeaderLabels([f"Reference:\n{self.X1Name}", 
+                                                  f"Distorded:\nX"])
+
         for i in range(len(self.X1Coords)):
             pointers_table.setItem(i, 0, QTableWidgetItem(str(f'{self.X1Coords[i]:.6f}')))
             pointers_table.setItem(i, 1, QTableWidgetItem(str(f'{self.X2Coords[i]:.6f}')))

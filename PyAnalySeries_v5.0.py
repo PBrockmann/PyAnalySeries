@@ -740,9 +740,7 @@ def define_filter():
         return
 
     #-------------------------------------------------------------
-    item = items_selected[0]
-    serieDict = item.data(0, Qt.UserRole)
-    Id_filterWindow = serieDict['Id']
+    Id_filterWindow = generate_Id()
 
     if Id_filterWindow in open_filterWindows:
         filterWindow = open_filterWindows[Id_filterWindow]
