@@ -162,6 +162,7 @@ class defineInterpolationWindow(QWidget):
         self.showInterp.setToolTip("Type key 'z' as shortcut")
 
         self.removeAddLastPointer_button = QPushButton()
+        self.removeAddLastPointer_button.setFixedWidth(150)
         self.removeAddLastPointer_button.setText("Remove last pointer")
         self.removeAddLastPointer_button.setShortcut("u")
         self.removeAddLastPointer_button.setEnabled(False)
@@ -813,7 +814,7 @@ class defineInterpolationWindow(QWidget):
     #---------------------------------------------------------------------------------------------
     def contextMenuEvent(self, event):
         current_tab_index = self.tabs.currentIndex()
-        if current_tab_index == 0:                  # Plot
+        if current_tab_index == 0 or current_tab_index == 2:                  # Plots or Pointers plot
             context_menu = QMenu(self)
             print_action = QAction("Save plot as PNG or PDF", self)
             print_action.triggered.connect(self.savePlot)

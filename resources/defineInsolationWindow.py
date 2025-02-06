@@ -68,14 +68,14 @@ class defineInsolationWindow(QWidget):
         # Latitude slider
         self.latitude_input = QSpinBox()
         self.latitude_input.setRange(-90, 90)
-        self.latitude_input.setValue(0)
+        self.latitude_input.setValue(65)
         self.latitude_input.setSingleStep(5)
 
         #-------------------------------
         # True longitude #1
         self.trueLongitude1_input = QSpinBox()
         self.trueLongitude1_input.setRange(0, 360)
-        self.trueLongitude1_input.setValue(0)
+        self.trueLongitude1_input.setValue(90)
         self.trueLongitude1_input.setSingleStep(5)
         self.trueLongitude1_input.valueChanged.connect(self.updateTrueLongitude2Limit)
 
@@ -83,7 +83,7 @@ class defineInsolationWindow(QWidget):
         # True longitude #2
         self.trueLongitude2_input = QSpinBox()
         self.trueLongitude2_input.setRange(1, 360)
-        self.trueLongitude2_input.setValue(0)
+        self.trueLongitude2_input.setValue(180)
         self.trueLongitude2_input.setSingleStep(5)
 
         #-------------------------------
@@ -101,34 +101,64 @@ class defineInsolationWindow(QWidget):
         self.tstep_input = QSpinBox()
         self.tstep_input.setRange(1, 1000)
         self.tstep_input.setValue(1)
+        self.tstep_input.setSingleStep(1)
 
+        #-------------------------------
+        self.timeDirection_dropdown = QComboBox()
+        self.timeDirection_dropdown.addItems([
+            "Past > 0",
+            "Past < 0"
+        ])
+        self.timeDirection_dropdown.setCurrentIndex(0)
+
+        #-------------------------------
+        self.timeUnit_dropdown = QComboBox()
+        self.timeUnit_dropdown.addItems([
+            "yr",
+            "kyr"
+        ])
+        self.timeUnit_dropdown.setCurrentIndex(1)
+        self.timeUnit = self.timeUnit_dropdown.currentText()
+
+        #-------------------------------
         form_layout.addRow("Type:", self.insolationType_dropdown)
         form_layout.addRow("Astronomical solution:", self.solutionAstro_dropdown)
         form_layout.addRow("Solar constant [W/m2]:", self.solar_constant_input)
         form_layout.addRow("Latitude [°]:", self.latitude_input)
         form_layout.addRow("True longitude #1 [°]:", self.trueLongitude1_input)
         form_layout.addRow("True longitude #2 [°]:", self.trueLongitude2_input)
-        form_layout.addRow("Start [t]:", self.tstart_input)
-        form_layout.addRow("End [t]:", self.tend_input)
-        form_layout.addRow("Step [t]:", self.tstep_input)
+        form_layout.addRow("Time direction:", self.timeDirection_dropdown)
+        form_layout.addRow("Time unit:", self.timeUnit_dropdown)
+        self.label_tstart = QLabel(f"Start [{self.timeUnit}]:")
+        form_layout.addRow(self.label_tstart, self.tstart_input)
+        self.label_tend = QLabel(f"End [{self.timeUnit}]:")
+        form_layout.addRow(self.label_tend, self.tend_input)
+        self.label_tstep = QLabel(f"Step [{self.timeUnit}]:")
+        form_layout.addRow(self.label_tstep, self.tstep_input)
 
         #-------------------------------
         groupbox1.setLayout(form_layout)
         main_layout.addWidget(groupbox1)
 
+        #----------------------------------------------
+        self.update_timer = QTimer()
+        self.update_timer.setSingleShot(True)
+        self.update_timer.timeout.connect(self.myplot)
+
         self.insolationType_dropdown.currentIndexChanged.connect(self.parameters_change)
-        self.solutionAstro_dropdown.currentIndexChanged.connect(self.myplot)
-        self.solar_constant_input.valueChanged.connect(self.myplot)
-        self.latitude_input.valueChanged.connect(self.myplot)
-        self.trueLongitude1_input.valueChanged.connect(self.myplot)
-        self.trueLongitude2_input.valueChanged.connect(self.myplot)
-        self.tstart_input.valueChanged.connect(self.myplot)
-        self.tend_input.valueChanged.connect(self.myplot)
-        self.tstep_input.valueChanged.connect(self.myplot)
+        self.solutionAstro_dropdown.currentIndexChanged.connect(self.delayed_update)
+        self.solar_constant_input.valueChanged.connect(self.delayed_update)
+        self.latitude_input.valueChanged.connect(self.delayed_update)
+        self.trueLongitude1_input.valueChanged.connect(self.delayed_update)
+        self.trueLongitude2_input.valueChanged.connect(self.delayed_update)
+        self.timeUnit_dropdown.currentIndexChanged.connect(self.timeUnit_change)
+        self.tstart_input.valueChanged.connect(self.delayed_update)
+        self.tend_input.valueChanged.connect(self.delayed_update)
+        self.tstep_input.valueChanged.connect(self.delayed_update)
+        self.timeDirection_dropdown.currentIndexChanged.connect(self.delayed_update)
 
         #----------------------------------------------
         self.interactive_plot = interactivePlot()
-        self.myplot()
 
         main_layout.addWidget(self.interactive_plot.fig.canvas)
 
@@ -158,7 +188,61 @@ class defineInsolationWindow(QWidget):
         exit_shortcut.activated.connect(self.close)
 
         self.parameters_change()
-        #self.status_bar.showMessage('Ready', 5000)
+        self.myplot()
+
+    #---------------------------------------------------------------------------------------------
+    def timeUnit_change(self):
+
+        self.timeUnit = self.timeUnit_dropdown.currentText()
+        self.label_tstart.setText(f"Start [{self.timeUnit}]:")
+        self.label_tend.setText(f"End [{self.timeUnit}]:")
+        self.label_tstep.setText(f"Step [{self.timeUnit}]:")
+
+        if self.timeUnit == 'yr':
+            self.tstart_input.blockSignals(True)
+            current_value = self.tstart_input.value()
+            self.tstart_input.setRange(-101000*1000, 21000*1000)
+            self.tstart_input.setValue(current_value * 1000)
+            self.tstart_input.setSingleStep(1000)
+            self.tstart_input.blockSignals(False)
+
+            self.tend_input.blockSignals(True)
+            current_value = self.tend_input.value()
+            self.tend_input.setRange(-101000*1000, 21000*1000)
+            self.tend_input.setValue(current_value * 1000)
+            self.tend_input.setSingleStep(1000)
+            self.tend_input.blockSignals(False)
+
+            self.tstep_input.blockSignals(True)
+            current_value = self.tstep_input.value()
+            self.tstep_input.setRange(1, 1000*1000)
+            self.tstep_input.setValue(current_value * 1000)
+            self.tstep_input.setSingleStep(1000)
+            self.tstep_input.blockSignals(False)
+
+        else:               # kyr
+            self.tstart_input.blockSignals(True)
+            current_value = self.tstart_input.value()
+            self.tstart_input.setRange(-101000, 21000)
+            self.tstart_input.setValue(current_value // 1000)
+            self.tstart_input.setSingleStep(1)
+            self.tstart_input.blockSignals(False)
+
+            self.tend_input.blockSignals(True)
+            current_value = self.tend_input.value()
+            self.tend_input.setRange(-101000, 21000)
+            self.tend_input.setValue(current_value // 1000)
+            self.tend_input.setSingleStep(1)
+            self.tend_input.blockSignals(False)
+
+            self.tstep_input.blockSignals(True)
+            current_value = self.tstep_input.value()
+            self.tstep_input.setRange(1, 1000)
+            self.tstep_input.setValue(current_value // 1000)
+            self.tstep_input.setSingleStep(1)
+            self.tstep_input.blockSignals(False)
+
+        self.delayed_update()
 
     #---------------------------------------------------------------------------------------------
     def updateTrueLongitude2Limit(self, value):
@@ -178,7 +262,13 @@ class defineInsolationWindow(QWidget):
         elif self.insolationType_dropdown.currentIndex() == 3:
             self.trueLongitude1_input.setEnabled(False)
             self.trueLongitude2_input.setEnabled(False)
-        self.myplot()
+
+        self.delayed_update()
+
+    #---------------------------------------------------------------------------------------------
+    def delayed_update(self):
+        self.status_bar.showMessage('Waiting', 1000)
+        self.update_timer.start(1000)
 
     #---------------------------------------------------------------------------------------------
     def myplot(self):
@@ -191,7 +281,16 @@ class defineInsolationWindow(QWidget):
         t_end = self.tend_input.value()
         t_step = self.tstep_input.value()
 
-        t = np.arange(t_start, t_end+1, t_step)
+        if self.timeDirection_dropdown.currentIndex() == 0:
+            t_direction = -1
+        else:
+            t_direction = 1
+
+        if self.timeUnit == 'yr':
+            t = np.arange(t_start, (t_end+1), t_step)/1000
+        else:
+            print((t_start, (t_end+1), t_step))
+            t = np.arange(t_start, t_end+1, t_step)
 
         deg_to_rad = np.pi/180.
         
@@ -202,7 +301,8 @@ class defineInsolationWindow(QWidget):
 
         insoValues = np.empty(len(t))
         if self.insolationType_dropdown.currentIndex() == 0:
-            for i in range(len(t)): insoValues[i] = solar_constant * \
+            for i in range(len(t)): 
+                insoValues[i] = solar_constant * \
                             inso.inso_daily_radians(
                                     trueLongitude1*deg_to_rad,
                                     latitude*deg_to_rad, 
@@ -210,7 +310,8 @@ class defineInsolationWindow(QWidget):
                                     ecc[i], 
                                     pre[i])
         elif self.insolationType_dropdown.currentIndex() == 1:
-            for i in range(len(t)): insoValues[i] = solar_constant * \
+            for i in range(len(t)): 
+                insoValues[i] = solar_constant * \
                             inso.inso_mean_radians(
                                     trueLongitude1*deg_to_rad,
                                     trueLongitude2*deg_to_rad,
@@ -219,28 +320,45 @@ class defineInsolationWindow(QWidget):
                                     ecc[i], 
                                     pre[i])
         elif self.insolationType_dropdown.currentIndex() == 2:
-            for i in range(len(t)): insoValues[i] = solar_constant * \
+            for i in range(len(t)): 
+                insoValues[i] = solar_constant * \
                             inso.inso_caloric_summer_NH(
                                                     latitude*deg_to_rad, 
                                                     obl[i], 
                                                     ecc[i], 
                                                     pre[i])
         elif self.insolationType_dropdown.currentIndex() == 3:
-            for i in range(len(t)): insoValues[i] = solar_constant * \
+            for i in range(len(t)): 
+                insoValues[i] = solar_constant * \
                             inso.inso_caloric_winter_NH(
                                                     latitude*deg_to_rad, 
                                                     obl[i], 
                                                     ecc[i], 
                                                     pre[i])
 
-        self.index = t
+        if self.timeUnit == 'yr':
+            self.index = t * t_direction * 1000
+        else:
+            self.index = t * t_direction
         self.values = insoValues
 
-        self.interactive_plot.axs[0].clear()
-        self.interactive_plot.axs[0].plot(self.index, self.values, linewidth=0.5)
+        ax = self.interactive_plot.axs[0]
+
+        ax.clear()
+        ax.grid(visible=True, which='major', color='lightgray', linestyle='dashed', linewidth=0.5)
+
+        color = "darkorange"
+        line1, = ax.plot(self.index, self.values, linewidth=0.5, color=color)
+        points1 = ax.scatter(self.index, self.values, s=5, marker='o', color=color, visible=False)
+        ax.line_points_pairs.append((line1, points1))
+
+        ax.set_xlabel(self.timeUnit)
+        ax.set_ylabel("Insolation [W/m2]")
+        ax.autoscale()
 
         self.interactive_plot.fig.canvas.draw()
         self.interactive_plot.fig.canvas.setFocus()
+        self.status_bar.showMessage('Updated', 1000)
 
     #---------------------------------------------------------------------------------------------
     def import_serie(self):

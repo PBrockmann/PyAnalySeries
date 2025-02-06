@@ -545,6 +545,10 @@ def define_insolationSerie():
         insolationWindow.show()
 
 #========================================================================================
+def define_astroSerie():
+    return
+
+#========================================================================================
 def create_tree_widget():
 
     fontMono = QFont('Monospace', 12)
@@ -1216,8 +1220,12 @@ basicSeries_menu = menu_bar.addMenu("Basic series")
 
 insolation_action = QAction("Insolation", main_window)
 insolation_action.triggered.connect(define_insolationSerie)
+astro_action = QAction("Astronomical parameters", main_window)
+astro_action.triggered.connect(define_astroSerie)
 
 basicSeries_menu.addAction(insolation_action)
+basicSeries_menu.addSeparator()
+basicSeries_menu.addAction(astro_action)
 
 #----------------------------------------------
 help_menu = menu_bar.addMenu('Help')
