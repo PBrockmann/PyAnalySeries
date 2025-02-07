@@ -68,11 +68,12 @@ class displaySingleSerieWindow(QWidget):
         stats_tab = QWidget()
         stats_layout = QVBoxLayout()
         stats_table = CustomQTableWidget()
-        stats_table.setRowCount(4)
+        stats_table.setRowCount(5)
         stats_table.setColumnCount(2)
         stats_table.setHorizontalHeaderLabels(["Stat", "Value"])
         stats = {
             "Number of points": (len(serie), 'd'),
+            "Number of duplicates": ((serie.index.value_counts() > 1).sum(), 'd'),
             "Mean": (serie.mean(), '.2f'),
             "Maximum": (serie.max(), '.2f'),
             "Minimum": (serie.min(), '.2f'),
