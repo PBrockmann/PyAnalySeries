@@ -51,7 +51,7 @@ class displayFilterWindow(QWidget):
             QTextEdit[readOnly="true"] {
                 background-color: #f8f8f8;
                 border: 1px solid lightgray;
-                font-family: Monospace;
+                font-family: Courier New;
                 font-size: 12;
             }
         """)

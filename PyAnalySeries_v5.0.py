@@ -130,20 +130,20 @@ def add_item_tree_widget(ws_item, itemDict, position=None):
     item.setText(1, itemDict['Id'])
     item.setText(2, itemDict['Type'])
 
-    fontMono = QFont('Monospace', 12)
-    item.setFont(1, fontMono)             # format Id
+    font = QFont('Courier New', 12)
+    item.setFont(1, font)             # format Id
 
     if itemDict['Type'] == 'INTERPOLATION':
         item.setText(3, itemDict['X1Name'])
-        item.setFont(3, fontMono)
+        item.setFont(3, font)
 
     if not itemDict['Type'].startswith('Serie'):
         return
 
     item.setText(3, itemDict['X'])
     item.setText(4, itemDict['Y'])
-    item.setFont(3, fontMono)
-    item.setFont(4, fontMono)
+    item.setFont(3, font)
+    item.setFont(4, font)
 
     buttonColor = QPushButton()
     buttonColor.setFixedSize(40, 15)
@@ -551,7 +551,7 @@ def define_astroSerie():
 #========================================================================================
 def create_tree_widget():
 
-    fontMono = QFont('Monospace', 12)
+    font = QFont('Courier New', 12)
 
     tree_widget = CustomTreeWidget()
     tree_widget.setColumnCount(7)
@@ -559,8 +559,8 @@ def create_tree_widget():
     tree_widget.setColumnWidth(0, 300)
     tree_widget.setColumnWidth(1, 150)
     tree_widget.setColumnWidth(2, 150)
-    tree_widget.setColumnWidth(3, 300)
-    tree_widget.setColumnWidth(4, 300)
+    tree_widget.setColumnWidth(3, 250)
+    tree_widget.setColumnWidth(4, 250)
     tree_widget.setColumnWidth(5, 50)
     tree_widget.setColumnWidth(6, 50)
     tree_widget.setTextElideMode(Qt.ElideLeft)
@@ -573,13 +573,13 @@ def create_tree_widget():
         }
     """)
     tree_widget.setFocusPolicy(Qt.ClickFocus)
-    tree_widget.headerItem().setFont(1, fontMono)
-    tree_widget.headerItem().setFont(3, fontMono)
-    tree_widget.headerItem().setFont(4, fontMono)
+    tree_widget.headerItem().setFont(1, font)
+    tree_widget.headerItem().setFont(3, font)
+    tree_widget.headerItem().setFont(4, font)
 
     delegate = QStyledItemDelegate()
     delegate.createEditor = lambda parent, option, index: (
-        QLineEdit(parent, font=fontMono)
+        QLineEdit(parent, font=font)
     )
     tree_widget.setItemDelegateForColumn(1, delegate)
     tree_widget.setItemDelegateForColumn(3, delegate)

@@ -146,7 +146,7 @@ class importDataWindow(QWidget):
         return True
 
     #---------------------------------------------------------------------------------------------
-    def import_series(self):
+    def data_table_check(self):
 
         if self.data_table.rowCount() == 0:
             msg = 'Error: No data to import'
@@ -163,12 +163,19 @@ class importDataWindow(QWidget):
             self.status_bar.showMessage(msg, 5000)
             return
 
+    #---------------------------------------------------------------------------------------------
+    def import_series(self):
+
+        self.data_table_check()
+
         index = [float(self.data_table.item(row, 0).text()) for row in range(self.data_table.rowCount())] 
         X = self.data_table.horizontalHeaderItem(0).text()
 
         for col in range(1, self.data_table.columnCount()):
+
             values = [float(self.data_table.item(row, col).text()) for row in range(self.data_table.rowCount())] 
             Y = self.data_table.horizontalHeaderItem(col).text()
+
             serie_Id =  generate_Id()
             serieDict = {
                 'Id': serie_Id, 
@@ -178,19 +185,45 @@ class importDataWindow(QWidget):
                 'Y': Y,
                 'Y axis inverted': False,
                 'Color': generate_color(),
-                'History': 'Imported data',
+                'History': 'Imported serie',
                 'Comment': '',
                 'Serie': pd.Series(values, index=index),
                 }
             self.add_item_tree_widget(None, serieDict)          # will be added on parent from current index
             #print(f"{X} / {Y}")
 
-            msg = f'{X} / {Y} imported as {serie_Id}'
+            msg = f'{X} / {Y} imported as serie {serie_Id}'
             self.status_bar.showMessage(msg, 2000)
 
     #---------------------------------------------------------------------------------------------
     def import_pointers(self):
-        return
+
+        self.data_table_check()
+
+        # column order may have been changed
+        header = self.data_table.horizontalHeader()
+        column_order = [header.logicalIndex(i) for i in range(self.data_table.columnCount())]
+
+        index = [float(self.data_table.item(row, column_order[0]).text()) for row in range(self.data_table.rowCount())] 
+        X1Name = self.data_table.horizontalHeaderItem(column_order[0]).text()
+        values = [float(self.data_table.item(row, column_order[1]).text()) for row in range(self.data_table.rowCount())] 
+
+        item_Id =  generate_Id()
+        itemDict = {
+            'Id': item_Id, 
+            'Type': 'INTERPOLATION', 
+            'X1Coords': index,
+            'X2Coords': values,
+            'X1Name': X1Name,
+            'History': 'Imported INTERPOLATION',
+            'Name': '', 
+            'Comment': '',
+            }
+        self.add_item_tree_widget(None, itemDict)          # will be added on parent from current index
+        #print(f"{X} / {Y}")
+
+        msg = f'Interpolation pointers with {X1Name} for reference imported as INTERPOLATION {item_Id}'
+        self.status_bar.showMessage(msg, 2000)
 
     #---------------------------------------------------------------------------------------------
     def closeEvent(self, event):
