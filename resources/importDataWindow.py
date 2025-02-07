@@ -151,22 +151,24 @@ class importDataWindow(QWidget):
         if self.data_table.rowCount() == 0:
             msg = 'Error: No data to import'
             self.status_bar.showMessage(msg, 5000)
-            return
+            return False
 
         if not self.data_table_headers_check():
             msg = 'Error: Headers are not text'
             self.status_bar.showMessage(msg, 5000)
-            return
+            return False
 
         if not self.data_table_values_check():
             msg = 'Error: Values are not numeric'
             self.status_bar.showMessage(msg, 5000)
-            return
+            return False
+
+        return True
 
     #---------------------------------------------------------------------------------------------
     def import_series(self):
 
-        self.data_table_check()
+        if not self.data_table_check(): return
 
         index = [float(self.data_table.item(row, 0).text()) for row in range(self.data_table.rowCount())] 
         X = self.data_table.horizontalHeaderItem(0).text()
@@ -198,7 +200,7 @@ class importDataWindow(QWidget):
     #---------------------------------------------------------------------------------------------
     def import_pointers(self):
 
-        self.data_table_check()
+        if not self.data_table_check(): return
 
         # column order may have been changed
         header = self.data_table.horizontalHeader()
