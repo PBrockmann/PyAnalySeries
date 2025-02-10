@@ -40,7 +40,7 @@ class importDataWindow(QWidget):
         button_layout = QHBoxLayout()
 
         self.importPointers_button = QPushButton("Import pointers", self)
-        self.importPointers_button.setToolTip("Order colums as Reference, Distorded")
+        self.importPointers_button.setToolTip("Order colums as Distorded, Reference")
         self.importSeries_button = QPushButton("Import series", self)
         self.importSeries_button.setToolTip("Order colums as X values, Y1 values, (Y2 values, ...)")
         self.close_button = QPushButton("Close", self)
@@ -212,16 +212,17 @@ class importDataWindow(QWidget):
         header = self.data_table.horizontalHeader()
         column_order = [header.logicalIndex(i) for i in range(self.data_table.columnCount())]
 
-        index = [float(self.data_table.item(row, column_order[0]).text()) for row in range(self.data_table.rowCount())] 
-        X1Name = self.data_table.horizontalHeaderItem(column_order[0]).text()
-        values = [float(self.data_table.item(row, column_order[1]).text()) for row in range(self.data_table.rowCount())] 
+        # Distorded (X2Coords), Reference (X1Coords) as columns
+        X2Coords = [float(self.data_table.item(row, column_order[0]).text()) for row in range(self.data_table.rowCount())] 
+        X1Coords = [float(self.data_table.item(row, column_order[1]).text()) for row in range(self.data_table.rowCount())] 
+        X1Name = self.data_table.horizontalHeaderItem(column_order[1]).text()
 
         item_Id =  generate_Id()
         itemDict = {
             'Id': item_Id, 
             'Type': 'INTERPOLATION', 
-            'X1Coords': index,
-            'X2Coords': values,
+            'X1Coords': X1Coords,
+            'X2Coords': X2Coords,
             'X1Name': X1Name,
             'History': 'Imported INTERPOLATION',
             'Name': '', 

@@ -364,11 +364,13 @@ class defineInterpolationWindow(QWidget):
 
         self.pointers_table.setRowCount(len(self.X1Coords))
         self.pointers_table.setColumnCount(2)
-        self.pointers_table.setHorizontalHeaderLabels([f"Reference:\n{self.X1Name}", 
-                                                       f"Distorded:\nX"])
+        self.pointers_table.setHorizontalHeaderLabels([
+            f"Distorded:\nX",
+            f"Reference:\n{self.X1Name}", 
+        ])
         for i in range(len(self.X1Coords)):
-            self.pointers_table.setItem(i, 0, QTableWidgetItem(str(f'{self.X1Coords[i]:.6f}')))
-            self.pointers_table.setItem(i, 1, QTableWidgetItem(str(f'{self.X2Coords[i]:.6f}')))
+            self.pointers_table.setItem(i, 0, QTableWidgetItem(str(f'{self.X2Coords[i]:.6f}')))
+            self.pointers_table.setItem(i, 1, QTableWidgetItem(str(f'{self.X1Coords[i]:.6f}')))
             background_color = QColor('whitesmoke') if i % 2 == 0 else QColor('white')
             self.pointers_table.item(i, 0).setBackground(background_color)
             self.pointers_table.item(i, 1).setBackground(background_color)
