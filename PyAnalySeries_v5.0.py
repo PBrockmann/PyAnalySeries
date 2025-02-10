@@ -507,7 +507,7 @@ def save_WorkSheets():
         main_window.statusBar().showMessage('Worksheets saved', 5000)
 
 #========================================================================================
-def import_Series():
+def import_Data():
     global open_importWindow
 
     current_index = tree_widget.currentItem()
@@ -1136,7 +1136,7 @@ saveWSs_action.setShortcut('Ctrl+s')
 saveWSs_action.triggered.connect(save_WorkSheets)
 import_action = QAction("Import data", main_window)
 import_action.setShortcut('Ctrl+m')
-import_action.triggered.connect(import_Series)
+import_action.triggered.connect(import_Data)
 exit_action = QAction('Exit', main_window)
 exit_action.setShortcut('q')
 exit_action.triggered.connect(exit_confirm)

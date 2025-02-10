@@ -65,8 +65,14 @@ class importDataWindow(QWidget):
         exit_shortcut = QShortcut('q', self)
         exit_shortcut.activated.connect(self.close)
 
-        paste_shortcut = QShortcut('Ctrl+v', self)
-        paste_shortcut.activated.connect(self.paste_data)
+        menu_bar = QMenuBar(self)
+        main_layout.setMenuBar(menu_bar)
+        edit_menu = menu_bar.addMenu("Edit")
+
+        paste_action = QAction("Paste", self)
+        paste_action.setShortcut('Ctrl+v')
+        paste_action.triggered.connect(self.paste_data)
+        edit_menu.addAction(paste_action)
 
     #---------------------------------------------------------------------------------------------
     def paste_data(self):
