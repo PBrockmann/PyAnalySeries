@@ -2,6 +2,9 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import * 
 from PyQt5.QtGui import *
 
+import matplotlib
+matplotlib.use("Qt5Agg")
+
 from .misc import *
 from .interactivePlot import interactivePlot
 
@@ -9,10 +12,6 @@ import sys
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
-#=========================================================================================
-import matplotlib
-matplotlib.use("Qt5Agg")
 
 #=========================================================================================
 for key in plt.rcParams.keys():
@@ -175,7 +174,7 @@ class defineFilterWindow(QWidget):
         filterDict = {
             'Id': filter_Id,
             'Type': 'FILTER', 
-            'Name': '', 
+            'Name': f'Moving average {self.window_size} pts', 
             'Parameters': f'{self.window_size}',
             'Comment': '',
             'History': f'filter as a moving average of size {self.window_size}',

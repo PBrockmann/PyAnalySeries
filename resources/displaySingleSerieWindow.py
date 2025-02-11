@@ -164,6 +164,8 @@ class displaySingleSerieWindow(QWidget):
         exit_shortcut = QShortcut('q', self)
         exit_shortcut.activated.connect(self.close)
 
+    #---------------------------------------------------------------------------------------------
+
         self.interactive_plot.fig.canvas.setFocus()
 
     #---------------------------------------------------------------------------------------------

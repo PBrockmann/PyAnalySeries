@@ -777,7 +777,7 @@ class defineInterpolationWindow(QWidget):
         interpolationDict = {
             'Id': interpolation_Id,
             'Type': 'INTERPOLATION',
-            'Name': '', 
+            'Name': 'Pointers', 
             'X1Coords': self.X1Coords,
             'X2Coords': self.X2Coords,
             'X1Name': self.X1Name,              # interpolated to reference that is X1
