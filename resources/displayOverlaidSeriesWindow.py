@@ -10,6 +10,10 @@ import matplotlib.pyplot as plt
 from .interactivePlot import interactivePlot
 
 #=========================================================================================
+import matplotlib
+matplotlib.use("Qt5Agg")
+
+#=========================================================================================
 for key in plt.rcParams.keys():
     if key.startswith('keymap.'):
         plt.rcParams[key] = []

@@ -11,6 +11,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 #=========================================================================================
+import matplotlib
+matplotlib.use("Qt5Agg")
+
+#=========================================================================================
 for key in plt.rcParams.keys():
     if key.startswith('keymap.'):
         plt.rcParams[key] = []

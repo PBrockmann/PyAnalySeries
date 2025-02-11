@@ -16,6 +16,10 @@ from matplotlib.patches import ConnectionPatch
 from scipy import interpolate
 
 #=========================================================================================
+import matplotlib
+matplotlib.use("Qt5Agg")
+
+#=========================================================================================
 for key in plt.rcParams.keys():
     if key.startswith('keymap.'):
         plt.rcParams[key] = []
