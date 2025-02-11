@@ -1006,11 +1006,6 @@ def remark_ws(ws_item):
 
 #========================================================================================
 def copy_items():
-    
-    if main_window.focusWidget() and isinstance(main_window.focusWidget(), CustomQTableWidget):
-        return
-    print("Copy action triggered in QTreeWidget")
-
     selected_items = tree_widget.selectedItems()
     tree_widget.clipboard_items = selected_items
 
