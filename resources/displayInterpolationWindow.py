@@ -156,6 +156,9 @@ class displayInterpolationWindow(QWidget):
         #----------------------------------------------
         self.setLayout(main_layout)
 
+        menu_bar = QMenuBar(self)
+        main_layout.setMenuBar(menu_bar)
+
         exit_shortcut = QShortcut('q', self)
         exit_shortcut.activated.connect(self.close)
 
