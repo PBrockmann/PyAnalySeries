@@ -5,15 +5,14 @@ from PyQt5.QtGui import *
 import sys
 import numpy as np
 import pandas as pd
+
+import matplotlib
+matplotlib.use("Qt5Agg")
 import matplotlib.pyplot as plt
 
 from .CustomQTableWidget import CustomQTableWidget 
 from .interactivePlot import interactivePlot
 from .defineInterpolationWindow import defineInterpolationWindow
-
-#=========================================================================================
-import matplotlib
-matplotlib.use("Qt5Agg")
 
 #=========================================================================================
 for key in plt.rcParams.keys():

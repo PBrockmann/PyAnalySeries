@@ -4,6 +4,7 @@ from PyQt5.QtGui import *
 
 import matplotlib
 matplotlib.use("Qt5Agg")
+import matplotlib.pyplot as plt
 
 from .misc import *
 from .interactivePlot import interactivePlot
@@ -11,7 +12,6 @@ from .interactivePlot import interactivePlot
 import sys
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
 #=========================================================================================
 for key in plt.rcParams.keys():
