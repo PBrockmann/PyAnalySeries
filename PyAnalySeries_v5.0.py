@@ -31,7 +31,7 @@ from resources.CustomQTableWidget import CustomQTableWidget
 
 from resources.importDataWindow import importDataWindow
 
-from resources.defineInsolationWindow import defineInsolationWindow
+from resources.defineInsolationAstroWindow import defineInsolationAstroWindow
 
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
@@ -50,7 +50,7 @@ open_displayWindows = {}
 open_filterWindows = {} 
 open_interpolationWindows = {} 
 open_importWindow = {}
-open_insolationWindow= {}
+open_insolationAstroWindow= {}
 
 #========================================================================================
 def colorize_item(item, color_name):
@@ -528,27 +528,23 @@ def import_Data():
         importWindow.show()
 
 #========================================================================================
-def define_insolationSerie():
-    global open_insolationWindow
+def define_insolationAstroSerie():
+    global open_insolationAstroWindow
 
     current_index = tree_widget.currentItem()
     if not current_index:
         new_WorkSheet()
     
-    Id_insolationWindow = '123456'
+    Id_insolationAstroWindow = '123456'
 
-    if open_insolationWindow:
-        insolationWindow = open_insolationWindow[Id_insolationWindow]
-        insolationWindow.raise_()
-        insolationWindow.activateWindow()
+    if open_insolationAstroWindow:
+        insolationAstroWindow = open_insolationAstroWindow[Id_insolationAstroWindow]
+        insolationAstroWindow.raise_()
+        insolationAstroWindow.activateWindow()
     else:
-        insolationWindow = defineInsolationWindow(open_insolationWindow, add_item_tree_widget)
-        open_insolationWindow[Id_insolationWindow] = insolationWindow
-        insolationWindow.show()
-
-#========================================================================================
-def define_astroSerie():
-    return
+        insolationAstroWindow = defineInsolationAstroWindow(open_insolationAstroWindow, add_item_tree_widget)
+        open_insolationAstroWindow[Id_insolationAstroWindow] = insolationAstroWindow
+        insolationAstroWindow.show()
 
 #========================================================================================
 def create_tree_widget():
@@ -604,6 +600,11 @@ class CustomTreeWidget(QTreeWidget):
         self.clipboard_items = []
 
     def dropEvent(self, event):
+        dragged_item = self.currentItem()
+        mark_ws(dragged_item.parent())
+        super().dropEvent(event)
+
+    def dropEvent2(self, event):
         dragged_item = self.currentItem()
         target_item = self.itemAt(event.pos())
 
@@ -1218,14 +1219,10 @@ math_menu.addAction(applyInterpolationPCHIP_action)
 #----------------------------------------------
 basicSeries_menu = menu_bar.addMenu("Basic series")
 
-insolation_action = QAction("Insolation", main_window)
-insolation_action.triggered.connect(define_insolationSerie)
-astro_action = QAction("Astronomical parameters", main_window)
-astro_action.triggered.connect(define_astroSerie)
+insolationAstro_action = QAction("Insolation / Astronomical parameters", main_window)
+insolationAstro_action.triggered.connect(define_insolationAstroSerie)
 
-basicSeries_menu.addAction(insolation_action)
-basicSeries_menu.addSeparator()
-basicSeries_menu.addAction(astro_action)
+basicSeries_menu.addAction(insolationAstro_action)
 
 #----------------------------------------------
 help_menu = menu_bar.addMenu('Help')

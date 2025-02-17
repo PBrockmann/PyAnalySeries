@@ -203,7 +203,7 @@ def inso_ac(a,b):
     else:
         return s, p, np.pi/2
 #
-#  dimensionless daily inso at distance 'semi-major axis' of the Sun
+#  dimensionless dayly inso at distance 'semi-major axis' of the Sun
 #
 def inso_g(a,b):
     s,p,ac = inso_ac( a, b )
@@ -264,7 +264,7 @@ def inso_radians(h,lon,phi,eps,e,per):
 
 ###################
 #
-#   dimensionless daily insolation - should be multiplied by solar constant
+#   dimensionless dayly insolation - should be multiplied by solar constant
 #   inputs
 #       lon: true longitude (radians)
 #       phi: latitude (radians)
@@ -272,7 +272,7 @@ def inso_radians(h,lon,phi,eps,e,per):
 #       e: eccentricity
 #       per: true longitude of perihelion (=climatic precession) (radians)
 #
-def inso_daily_radians(lon,phi,eps,e,per):
+def inso_dayly_radians(lon,phi,eps,e,per):
     sineps = np.sin(eps)
     sinphi = np.sin(phi)
     sinlon = np.sin(lon)
@@ -283,8 +283,8 @@ def inso_daily_radians(lon,phi,eps,e,per):
 #   idem with
 #       tr: time of the year (in radians) from reference refL (0 = spring equinox)
 #
-def inso_daily_time_radians(tr,phi,eps,e,per,refL=0):
-    return inso_daily_radians(trueLongitude(tr,e,per,refL),phi,eps,e,per)
+def inso_dayly_time_radians(tr,phi,eps,e,per,refL=0):
+    return inso_dayly_radians(trueLongitude(tr,e,per,refL),phi,eps,e,per)
 
 ###################
 #
@@ -314,7 +314,7 @@ def inso_caloric_winter_NH(phi,eps,e,per):
 
 ###################
 #
-#   integrated (dimensionless) daily insolation between 2 latitudes - should be multiplied by solar constant
+#   integrated (dimensionless) dayly insolation between 2 latitudes - should be multiplied by solar constant
 #
 def inso_mean_lat_radians(lon,phi1,phi2,eps,e,per):
     sineps = np.sin(eps)
@@ -333,15 +333,12 @@ def inso_mean_lat_radians(lon,phi1,phi2,eps,e,per):
 
 if __name__ == '__main__':
 
-    import astro
-
-    astro.astrofiles_path = "./astrofiles/"
-    
     deg_to_rad = np.pi/180.
     
     #  define timescale : between 0 and 1000 kyrBP, included... (the time unit in astro.py is 1000 years, from past to future)
     t0,t1 = (-1000,0.)
     t=np.arange(t0,t1+1,1)                     # -1000 to 0 included !
+   
     
     #  choose astronomical solution
     astro_params = astro.AstroLaskar2004()
@@ -361,27 +358,27 @@ if __name__ == '__main__':
     print("obliquity = ",obl[-1]/deg_to_rad)
 
     #   print obliquity
-    obliq = obl/deg_to_rad
-    plt.plot(-t,obliq)
-    plt.show()
+    #obliq = obl/deg_to_rad
+    #plt.plot(-t,obliq)
+    #plt.show()
     
     #  choose solar constant, latitude and true longitude (simplified calendar?)
     solar_constante = 1365
     latitude = 65*deg_to_rad
     trueLon = 90*deg_to_rad
 
-    #   print daily inso, summer solstice 65°N, at time t1 = 0 (today)
-    print("daily inso, summer solstice 65°N = ",solar_constante*inso_daily_radians(trueLon,latitude,obl[-1],ecc[-1],pre[-1]))
+    #   print dayly inso, summer solstice 65°N, at time t1 = 0 (today)
+    print("dayly inso, summer solstice 65°N = ",solar_constante*inso_dayly_radians(trueLon,latitude,obl[-1],ecc[-1],pre[-1]))
     inso65 = np.empty(len(t))
     for i in range(len(t)):
-        inso65[i] = solar_constante*inso_daily_radians(trueLon,latitude,obl[i],ecc[i],pre[i])
+        inso65[i] = solar_constante*inso_dayly_radians(trueLon,latitude,obl[i],ecc[i],pre[i])
     plt.plot(-t,inso65)
     plt.show()
 
-    print("daily inso 65°N spring + 1/4 year = ",solar_constante*inso_daily_radians(trueLongitude(np.pi/2,ecc[-1],pre[-1]),latitude,obl[-1],ecc[-1],pre[-1]))
+    print("dayly inso 65°N spring + 1/4 year = ",solar_constante*inso_dayly_radians(trueLongitude(np.pi/2,ecc[-1],pre[-1]),latitude,obl[-1],ecc[-1],pre[-1]))
 
     latitude2 = 75*deg_to_rad
-    print("daily inso, summer solstice 65-75°N = ",solar_constante*inso_mean_lat_radians(trueLon,latitude,latitude2,obl[-1],ecc[-1],pre[-1]))
+    print("dayly inso, summer solstice 65-75°N = ",solar_constante*inso_mean_lat_radians(trueLon,latitude,latitude2,obl[-1],ecc[-1],pre[-1]))
     Minso65 = np.empty(len(t))
     for i in range(len(t)):
         Minso65[i] = solar_constante*inso_mean_lat_radians(trueLon,latitude,latitude2,obl[i],ecc[i],pre[i])
