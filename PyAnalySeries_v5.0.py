@@ -967,14 +967,34 @@ def delete_parent_node(item):
     del open_ws[id(item)]
 
 #========================================================================================
+def moveWS(direction):
+    selected_item = tree_widget.currentItem()
+
+    if selected_item and not selected_item.parent():
+        index = tree_widget.indexOfTopLevelItem(selected_item)
+        new_index = index + direction
+
+        if 0 <= new_index < tree_widget.topLevelItemCount():
+            tree_widget.takeTopLevelItem(index)
+            tree_widget.insertTopLevelItem(new_index, selected_item)
+            tree_widget.setCurrentItem(selected_item)
+
+#========================================================================================
 def show_context_menu(point):
     item = tree_widget.itemAt(point)
     if item and not item.parent():  # Only allow delete on parents (ws)
         context_menu = QMenu(tree_widget)
+        up_action = context_menu.addAction("Up")
+        down_action = context_menu.addAction("Down")
+        context_menu.addSeparator()
         delete_action = context_menu.addAction("Remove")
         action = context_menu.exec_(tree_widget.mapToGlobal(point))
         if action == delete_action:
             delete_parent_node(item)
+        elif action == up_action:
+            moveWS(-1)
+        elif action == down_action:
+            moveWS(1)
 
 #========================================================================================
 def is_item_in_ws(ws_item, child_item):
