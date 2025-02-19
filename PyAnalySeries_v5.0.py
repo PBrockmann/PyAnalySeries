@@ -175,7 +175,10 @@ def on_item_changed(item, column):
             item.setText(0, old_wsName)
         else:
             open_ws[id(item)] = new_wsName
-            mark_ws(item)
+            if os.path.exists(old_wsName):
+                os.rename(old_wsName, new_wsName)
+                #print(f"Change name ws: {old_wsName} --> {new_wsName}")
+            #mark_ws(item)
     else: 
         itemDict = item.data(0, Qt.UserRole)
         itemDict['Name'] = item.text(0)
@@ -601,13 +604,9 @@ class CustomTreeWidget(QTreeWidget):
 
     def dropEvent(self, event):
         dragged_item = self.currentItem()
-        mark_ws(dragged_item.parent())
-        super().dropEvent(event)
-
-    def dropEvent2(self, event):
-        dragged_item = self.currentItem()
         target_item = self.itemAt(event.pos())
 
+        # drag only in same WS
         if not target_item or dragged_item.parent() != target_item.parent():
             event.ignore()
             return
@@ -948,6 +947,10 @@ def apply_interpolation(interpolationMode):
         item.setSelected(True)
 
 #========================================================================================
+def define_sampling():
+    return
+
+#========================================================================================
 def close_all_windows():
     global open_displayWindows
 
@@ -1223,6 +1226,14 @@ insolationAstro_action = QAction("Insolation / Astronomical parameters", main_wi
 insolationAstro_action.triggered.connect(define_insolationAstroSerie)
 
 basicSeries_menu.addAction(insolationAstro_action)
+
+#----------------------------------------------
+math_menu = menu_bar.addMenu('Math')
+
+sampling_action = QAction('Sampling', main_window)
+sampling_action.triggered.connect(define_sampling)
+
+math_menu.addAction(sampling_action)
 
 #----------------------------------------------
 help_menu = menu_bar.addMenu('Help')
