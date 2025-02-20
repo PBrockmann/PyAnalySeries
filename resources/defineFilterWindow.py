@@ -184,6 +184,7 @@ class defineFilterWindow(QWidget):
         filtered_Id = generate_Id()
         filtered_serieDict = self.serieDict | {'Id': filtered_Id, 
             'Type': 'Serie filtered', 
+            'Name': f'Serie filtered with moving average {self.window_size} pts', 
             'Serie': self.moving_average(self.serie, self.window_size),
             'Color': generate_color(exclude_color=self.serieDict['Color']),
             'History': append_to_htmlText(self.serieDict['History'], 

@@ -87,7 +87,7 @@ def populate_tree_widget(fileName, itemDict_list):
     return ws_item
 
 #========================================================================================
-def add_item_tree_widget(ws_item, itemDict, position=None):
+def add_item_tree_widget(ws_item, itemDict, position=None, mark=True):
 
     icon_serie = QIcon("resources/icon_document.png")
     icon_serieDuplicated = QIcon("resources/icon_copy.png")
@@ -124,7 +124,8 @@ def add_item_tree_widget(ws_item, itemDict, position=None):
     else:
         ws_item.addChild(item)
 
-    mark_ws(ws_item)            # Mark as to be saved
+    if mark:
+        mark_ws(ws_item)            # Mark as to be saved
 
     item.setData(0, Qt.UserRole, itemDict)
 
@@ -557,7 +558,7 @@ def create_tree_widget():
     tree_widget = CustomTreeWidget()
     tree_widget.setColumnCount(7)
     tree_widget.setHeaderLabels(["Name", "Id", "Type", "X", "Y", "Color", "Y axis inverted"])
-    tree_widget.setColumnWidth(0, 300)
+    tree_widget.setColumnWidth(0, 400)
     tree_widget.setColumnWidth(1, 150)
     tree_widget.setColumnWidth(2, 150)
     tree_widget.setColumnWidth(3, 250)
@@ -609,6 +610,7 @@ class CustomTreeWidget(QTreeWidget):
         # drag only in same WS
         if not target_item or dragged_item.parent() != target_item.parent():
             event.ignore()
+            main_window.statusBar().showMessage('Items can only be dragged within the same worksheet.', 5000)
             return
         
         # Find the position where to move the drag item
@@ -967,17 +969,47 @@ def delete_parent_node(item):
     del open_ws[id(item)]
 
 #========================================================================================
-def moveWS(direction):
+def move_WorkSheet(direction):
     selected_item = tree_widget.currentItem()
 
-    if selected_item and not selected_item.parent():
+    if selected_item and not selected_item.parent():  # Ensure it's a top-level parent
         index = tree_widget.indexOfTopLevelItem(selected_item)
         new_index = index + direction
 
-        if 0 <= new_index < tree_widget.topLevelItemCount():
-            tree_widget.takeTopLevelItem(index)
+        if 0 <= new_index < tree_widget.topLevelItemCount():  # Check if the new position is valid
+    
+            tree_widget.blockSignals(True)
+
+            # Preserve the expanded/collapsed state
+            was_expanded = selected_item.isExpanded()
+
+            # Extract the selected item
+            selected_item = tree_widget.takeTopLevelItem(index)
+
+            # Store children data before removing them
+            children_data = []
+            for i in range(selected_item.childCount()):
+                child = selected_item.child(i)
+                itemDict = child.data(0, Qt.UserRole)  # Get the data for the child
+                children_data.append(itemDict)
+
+            # Remove all children to ensure a fresh start
+            selected_item.takeChildren()
+
+            # Insert the parent at the new position
             tree_widget.insertTopLevelItem(new_index, selected_item)
+
+            # Restore children using add_item_tree_widget
+            for itemDict in children_data:
+                add_item_tree_widget(selected_item, itemDict, mark=False)       # do not mark as to be saved
+
+            # Restore expanded/collapsed state
+            selected_item.setExpanded(was_expanded)
+
+            # Ensure it's still selected after moving
             tree_widget.setCurrentItem(selected_item)
+
+            tree_widget.blockSignals(False)
 
 #========================================================================================
 def show_context_menu(point):
@@ -992,9 +1024,9 @@ def show_context_menu(point):
         if action == delete_action:
             delete_parent_node(item)
         elif action == up_action:
-            moveWS(-1)
+            move_WorkSheet(-1)
         elif action == down_action:
-            moveWS(1)
+            move_WorkSheet(1)
 
 #========================================================================================
 def is_item_in_ws(ws_item, child_item):
