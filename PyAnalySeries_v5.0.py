@@ -599,10 +599,30 @@ def create_tree_widget():
 #========================================================================================
 class CustomTreeWidget(QTreeWidget):
 
+    #-----------------------------------
     def __init__(self):
         super().__init__()
         self.clipboard_items = []
+        self.setMouseTracking(True)
+        self.viewport().setAttribute(Qt.WA_Hover, True)
+        self.viewport().installEventFilter(self)
 
+        # 🔹 Custom QLabel as tooltip replacement
+        self.custom_tooltip = QLabel(self)
+        self.custom_tooltip.setStyleSheet("""
+            background-color: lightyellow;
+            border: 1px solid lightgray;
+            padding: 4px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: Courier New;
+        """)
+        self.custom_tooltip.setWindowFlags(Qt.ToolTip)
+        self.custom_tooltip.setFixedSize(600, 200)
+        self.custom_tooltip.setAlignment(Qt.AlignTop | Qt.AlignLeft)  # Align top-left
+        self.custom_tooltip.hide()
+
+    #-----------------------------------
     def dropEvent(self, event):
         dragged_item = self.currentItem()
         target_item = self.itemAt(event.pos())
@@ -629,13 +649,39 @@ class CustomTreeWidget(QTreeWidget):
         mark_ws(target_item.parent())
 
         tree_widget.blockSignals(False)
-        
+       
+    #-----------------------------------
+    def eventFilter(self, obj, event):
+        """ Event filter to detect mouse hover and display a tooltip """
+        if event.type() == QEvent.HoverMove:
+            pos = event.pos()
+            item = self.itemAt(pos)
+            col = self.columnAt(pos.x())
+
+            if item and col == 1:  # Tooltip only for column 1
+                data = item.data(0, Qt.UserRole)
+                if isinstance(data, dict):
+                    tooltip_text = f"History: {data['History']}\n\nComment: {data['Comment']}"
+
+                    global_pos = self.viewport().mapToGlobal(pos)
+                    self.custom_tooltip.setText(tooltip_text)
+                    self.custom_tooltip.move(global_pos + QPoint(10, 10))
+                    self.custom_tooltip.show()
+                    return True
+
+            else:
+                self.custom_tooltip.hide()
+
+        return super().eventFilter(obj, event)
+
+    #-----------------------------------
     def get_parents(self):
         parents = []
         for i in range(self.topLevelItemCount()):
             parents.append(self.topLevelItem(i))
         return parents
 
+    #-----------------------------------
     def get_children(self):
         children = []
         for i in range(self.topLevelItemCount()):
