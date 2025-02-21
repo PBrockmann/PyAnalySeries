@@ -78,7 +78,7 @@ def populate_tree_widget(fileName, itemDict_list):
     open_ws[id(ws_item)] = ws_item.text(0)
 
     for itemDict in itemDict_list:
-        add_item_tree_widget(ws_item, itemDict)
+        add_item_tree_widget(ws_item, itemDict, mark=False)
 
     unmark_ws(ws_item)
 
@@ -613,17 +613,23 @@ class CustomTreeWidget(QTreeWidget):
             main_window.statusBar().showMessage('Items can only be dragged within the same worksheet.', 5000)
             return
         
+        tree_widget.blockSignals(True)
+
         # Find the position where to move the drag item
         position = target_item.parent().indexOfChild(target_item)
         # Retrieve the data from the dragged item
         itemDict = dragged_item.data(0, Qt.UserRole)
         dragged_item.parent().removeChild(dragged_item)
         # Use the `add_item_tree_widget` function to add the dragged item to the target parent
-        add_item_tree_widget(target_item.parent(), itemDict, position)
+        add_item_tree_widget(target_item.parent(), itemDict, position, mark=False)
 
         # Call the default implementation if the drop is valid
         super().dropEvent(event)
 
+        mark_ws(target_item.parent())
+
+        tree_widget.blockSignals(False)
+        
     def get_parents(self):
         parents = []
         for i in range(self.topLevelItemCount()):
@@ -1080,12 +1086,16 @@ def paste_items():
     target_item = tree_widget.currentItem()
     ws_item = target_item.parent() if target_item.parent() else target_item
 
+    tree_widget.blockSignals(True)
+
     for item in tree_widget.clipboard_items:
         if is_item_in_ws(ws_item, item):
             main_window.statusBar().showMessage('Item already in', 5000)
             continue
         itemDict = item.data(0, Qt.UserRole)
-        add_item_tree_widget(ws_item, itemDict)
+        add_item_tree_widget(ws_item, itemDict, mark=False)
+
+    tree_widget.blockSignals(False)
 
 #========================================================================================
 def on_item_double_clicked(item, column):
