@@ -27,6 +27,9 @@ from resources.displayFilterWindow import displayFilterWindow
 from resources.defineInterpolationWindow import defineInterpolationWindow
 from resources.displayInterpolationWindow import displayInterpolationWindow
 
+from resources.defineSampleWindow import defineSampleWindow
+from resources.displaySampleWindow import displaySampleWindow
+
 from resources.CustomQTableWidget import CustomQTableWidget
 
 from resources.importDataWindow import importDataWindow
@@ -48,6 +51,7 @@ version = 'v5.0'
 open_ws = {}
 open_displayWindows = {} 
 open_filterWindows = {} 
+open_sampleWindows = {} 
 open_interpolationWindows = {} 
 open_importWindow = {}
 open_insolationAstroWindow= {}
@@ -92,6 +96,7 @@ def add_item_tree_widget(ws_item, itemDict, position=None, mark=True):
     icon_serie = QIcon("resources/icon_document.png")
     icon_serieDuplicated = QIcon("resources/icon_copy.png")
     icon_filter = QIcon("resources/icon_filter.png")
+    icon_sample = QIcon("resources/icon_sample.png")
     icon_interpolate = QIcon("resources/icon_interpolate.png")
 
     item = QTreeWidgetItem()
@@ -105,6 +110,8 @@ def add_item_tree_widget(ws_item, itemDict, position=None, mark=True):
             item.setIcon(0, icon_serie)
     elif itemDict['Type'] == 'FILTER':
             item.setIcon(0, icon_filter)
+    elif itemDict['Type'] == 'SAMPLE':
+            item.setIcon(0, icon_sample)
     elif itemDict['Type'] == 'INTERPOLATION':
             item.setIcon(0, icon_interpolate)
     else:
@@ -728,6 +735,8 @@ def displaySingleSerie_selected_series():
                 displayWindow = displaySingleSerieWindow(Id_displayWindow, open_displayWindows, item)
             elif itemDict['Type'] == 'FILTER':
                 displayWindow = displayFilterWindow(Id_displayWindow, open_displayWindows, item)
+            elif itemDict['Type'] == 'SAMPLE':
+                displayWindow = displaySampleWindow(Id_displayWindow, open_displayWindows, item)
             elif itemDict['Type'] == 'INTERPOLATION':
                 displayWindow = displayInterpolationWindow(Id_displayWindow, open_displayWindows, item)
             open_displayWindows[Id_displayWindow] = displayWindow
@@ -880,6 +889,11 @@ def apply_filter():
         item.setSelected(True)
 
 #========================================================================================
+def apply_sample():
+
+    return
+
+#========================================================================================
 def define_interpolation():
     global open_interpolationWindows
 
@@ -1001,8 +1015,36 @@ def apply_interpolation(interpolationMode):
         item.setSelected(True)
 
 #========================================================================================
-def define_sampling():
-    return
+def define_sample():
+    global open_sampleWindows
+
+    items = get_unique_selected_items(tree_widget)
+    items_selected = []                             # select only series
+    for item in items:
+        serieDict = item.data(0, Qt.UserRole)
+        if  serieDict['Type'].startswith('Serie'): 
+            items_selected.append(item)
+
+    if len(items_selected) != 1 : 
+        main_window.statusBar().showMessage('Please select only 1 serie', 5000)
+        return
+
+    #-------------------------------------------------------------
+    Id_sampleWindow = generate_Id()
+
+    if Id_sampleWindow in open_sampleWindows:
+        sampleWindow = open_sampleWindows[Id_sampleWindow]
+        sampleWindow.raise_()
+        sampleWindow.activateWindow()
+    else:
+        sampleWindow = defineSampleWindow(Id_sampleWindow, open_sampleWindows, item, add_item_tree_widget)
+        open_sampleWindows[Id_sampleWindow] = sampleWindow
+        sampleWindow.show()
+
+    #-------------------------------------------------------------
+    main_window.setFocus()                  # replace selection
+    tree_widget.clearSelection()
+    item.setSelected(True)
 
 #========================================================================================
 def close_all_windows():
@@ -1303,13 +1345,19 @@ edit_menu.addAction(displayStackedSeries_action)
 edit_menu.addAction(close_all_action)
 
 #----------------------------------------------
-math_menu = menu_bar.addMenu("Processing")
+processing_menu = menu_bar.addMenu("Processing")
 
 defineFilter_action = QAction("Define Filter smoothing average", main_window)
 defineFilter_action.setShortcut('Ctrl+f')
 defineFilter_action.triggered.connect(define_filter)
 applyFilter_action = QAction("Apply Filter smoothing average", main_window)
 applyFilter_action.triggered.connect(apply_filter)
+
+defineSample_action = QAction('Define Sampling', main_window)
+defineSample_action.setShortcut('Ctrl+a')
+defineSample_action.triggered.connect(define_sample)
+applySample_action = QAction("Apply Sampling", main_window)
+applySample_action.triggered.connect(apply_sample)
 
 defineInterpolation_action = QAction("Define Interpolation", main_window)
 defineInterpolation_action.setShortcut('Ctrl+i')
@@ -1320,12 +1368,15 @@ applyInterpolationPCHIP_action = QAction("Apply Interpolation PCHIP", main_windo
 applyInterpolationPCHIP_action.setToolTip("This action applies PCHIP interpolation to the selected data.")
 applyInterpolationPCHIP_action.triggered.connect(lambda: apply_interpolation('PCHIP'))
 
-math_menu.addAction(defineFilter_action)
-math_menu.addAction(applyFilter_action)
-math_menu.addSeparator()
-math_menu.addAction(defineInterpolation_action)
-math_menu.addAction(applyInterpolationLinear_action)
-math_menu.addAction(applyInterpolationPCHIP_action)
+processing_menu.addAction(defineFilter_action)
+processing_menu.addAction(applyFilter_action)
+processing_menu.addSeparator()
+processing_menu.addAction(defineSample_action)
+processing_menu.addAction(applySample_action)
+processing_menu.addSeparator()
+processing_menu.addAction(defineInterpolation_action)
+processing_menu.addAction(applyInterpolationLinear_action)
+processing_menu.addAction(applyInterpolationPCHIP_action)
 
 #----------------------------------------------
 basicSeries_menu = menu_bar.addMenu("Basic series")
@@ -1334,14 +1385,6 @@ insolationAstro_action = QAction("Insolation / Astronomical parameters", main_wi
 insolationAstro_action.triggered.connect(define_insolationAstroSerie)
 
 basicSeries_menu.addAction(insolationAstro_action)
-
-#----------------------------------------------
-math_menu = menu_bar.addMenu('Math')
-
-sampling_action = QAction('Sampling', main_window)
-sampling_action.triggered.connect(define_sampling)
-
-math_menu.addAction(sampling_action)
 
 #----------------------------------------------
 help_menu = menu_bar.addMenu('Help')
