@@ -184,8 +184,11 @@ def on_item_changed(item, column):
         else:
             open_ws[id(item)] = new_wsName
             if os.path.exists(old_wsName):
-                os.rename(old_wsName, new_wsName)
                 #print(f"Change name ws: {old_wsName} --> {new_wsName}")
+                if is_open(old_wsName):
+                    QMessageBox.warning(main_window, "WS open in another application", f"The ws '{new_wsName}' is already in use. Please close the file.")
+                else:
+                    os.rename(old_wsName, new_wsName)
             #mark_ws(item)
     else: 
         itemDict = item.data(0, Qt.UserRole)
