@@ -27,7 +27,7 @@ class displaySampleWindow(QWidget):
         parameters_layout = QVBoxLayout()
 
         layout_s1 = QHBoxLayout()
-        label_s1 = QLabel(f"Sample every : {self.sampleDict['Parameters']}")
+        label_s1 = QLabel(f"{self.sampleDict['Parameters']}")
         layout_s1.addWidget(label_s1)
         layout_s1.addStretch()
 
@@ -115,7 +115,7 @@ if __name__ == "__main__":
         'Id': 'abcd',
         'Name': 'A name',
         'Type': 'SAMPLE', 
-        'Parameters': '5',
+        'Parameters': '5 ; linear',
         'Comment': 'A text',
         'History': 'command1 ; command2'
     }

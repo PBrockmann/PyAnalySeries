@@ -27,7 +27,7 @@ class displayFilterWindow(QWidget):
         parameters_layout = QVBoxLayout()
 
         layout_s1 = QHBoxLayout()
-        label_s1 = QLabel(f"Moving average window size : {self.filterDict['Parameters']}")
+        label_s1 = QLabel(f"{self.filterDict['Parameters']}")
         layout_s1.addWidget(label_s1)
         layout_s1.addStretch()
 

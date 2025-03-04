@@ -177,7 +177,10 @@ class defineFilterWindow(QWidget):
             'Name': f'Moving average {self.window_size} pts', 
             'Parameters': f'{self.window_size}',
             'Comment': '',
-            'History': f'filter as a moving average of size {self.window_size}',
+            'History': f'filter with parameters' + \
+                    '<ul>' + \
+                    f'<li>Moving average size : {self.window_size}' + \
+                    '</ul>'
         }
         self.add_item_tree_widget(self.item.parent(), filterDict)
 

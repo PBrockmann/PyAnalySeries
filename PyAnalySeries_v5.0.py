@@ -308,18 +308,17 @@ def load_WorkSheet(fileName):
                 itemDict_list.append(serieDict)
 
             except:
-                serieDict = None
                 msg = f"The file '{fileName}' contains a serie that is wrongly formatted in {sheetName} sheet."
                 main_window.statusBar().showMessage(msg, 5000)
                 QApplication.processEvents()
 
         #-------------------------------------
-        elif sheetName.startswith('FILTER Id-'):
+        elif sheetName.startswith('FILTER Id-') or  sheetName.startswith('SAMPLE Id-'):
             
             try:
                 df = pd.read_excel(fileName, sheet_name=sheetName, na_filter=False)
                 filterDict = {
-                        'Id': 'Id-' + sheetName.split('FILTER Id-')[1],
+                        'Id': 'Id-' + sheetName.split('Id-')[1],
                         'Type': df['Type'][0],
                         'Name': df['Name'][0],
                         'Parameters': str(df['Parameters'][0]),
@@ -330,8 +329,7 @@ def load_WorkSheet(fileName):
                 itemDict_list.append(filterDict)
 
             except:
-                filterDict = None
-                msg = f"The file '{fileName}' contains a FILTER that is wrongly formatted in {sheetName} sheet."
+                msg = f"The file '{fileName}' contains a FILTER/SAMPLE that is wrongly formatted in {sheetName} sheet."
                 main_window.statusBar().showMessage(msg, 5000)
                 QApplication.processEvents()
 
@@ -354,7 +352,6 @@ def load_WorkSheet(fileName):
                 itemDict_list.append(interpolationDict)
 
             except:
-                interpolationDict = None
                 msg = f"The file '{fileName}' contains an INTERPOLATION that is wrongly formatted in {sheetName} sheet."
                 main_window.statusBar().showMessage(msg, 5000)
                 QApplication.processEvents()
@@ -451,7 +448,7 @@ def save_WorkSheet(ws_item):
                         ws.cell(row=i, column=12, value=value)
 
             #-----------------------
-            elif itemDict["Type"] == 'FILTER':
+            elif itemDict["Type"] in ['FILTER', 'SAMPLE']:
                 sheetName = f'{itemDict["Type"]} {itemDict["Id"]}'
                 ws = wb.create_sheet(title=sheetName)
 
@@ -668,7 +665,7 @@ class CustomTreeWidget(QTreeWidget):
             if item and col == 1:  # Tooltip only for column 1
                 data = item.data(0, Qt.UserRole)
                 if isinstance(data, dict):
-                    tooltip_text = f"History: {data['History']}\n\nComment: {data['Comment']}"
+                    tooltip_text = f"History: {data['History']}<BR><BR>Comment: {data['Comment']}"
 
                     global_pos = self.viewport().mapToGlobal(pos)
                     self.custom_tooltip.setText(tooltip_text)
@@ -891,7 +888,71 @@ def apply_filter():
 #========================================================================================
 def apply_sample():
 
-    return
+    items = get_unique_selected_items(tree_widget)
+    itemSeries_selected = []
+    itemSamples_selected = []
+    for item in items:
+        itemDict = item.data(0, Qt.UserRole)
+        if  itemDict['Type'].startswith('Serie'): 
+            itemSeries_selected.append(item)
+        elif itemDict['Type'] == 'SAMPLE':
+            itemSamples_selected.append(item)
+
+    if len(itemSamples_selected) != 1 or len(itemSeries_selected) < 1:
+        main_window.statusBar().showMessage('Please select 1 SAMPLE and at least 1 serie', 5000)
+        return
+       
+    #-------------------------------------------------------------
+    tree_widget.clearSelection()
+    itemFilter = itemSamples_selected[0]
+    colorize_item(itemFilter, 'red')
+    for item in itemSeries_selected:
+        colorize_item(item, 'green')
+
+    reply = QMessageBox.question(
+        main_window, 
+        "Apply sample confirmation",
+        "Do you want to apply sample on selected series ?",
+        QMessageBox.Yes | QMessageBox.No,
+        QMessageBox.No
+    )
+    
+    if reply == QMessageBox.No:
+        for item in items:
+            colorize_item(item, 'white')
+        tree_widget.clearSelection()
+        return
+
+    #-------------------------------------------------------------
+    sampleDict = itemFilter.data(0, Qt.UserRole)
+    param1_str, param2_str = sampleDict['Parameters'].split(';')
+    sample_step = float(param1_str.strip())
+    sample_kind = param2_str.strip()
+
+    for item in itemSeries_selected:
+        serieDict = item.data(0, Qt.UserRole)
+        serie = serieDict['Serie']
+        serie = serie.groupby(serie.index).mean()
+
+        sampled_Id = generate_Id()
+        sampled_serieDict = serieDict | {'Id': sampled_Id,
+            'Type': 'Serie sampled',
+            'Serie': defineSampleWindow.sample(serie, sample_step, sample_kind),
+            'Color': generate_color(exclude_color=serieDict['Color']),
+            'History': append_to_htmlText(serieDict['History'], 
+                f'serie <i><b>{serieDict["Id"]}</i></b> sampled with SAMPLE <i><b>{sampleDict["Id"]}</i></b> every {sample_step}<BR>---> serie <i><b>{sampled_Id}</b></i>'),
+            'Comment': ''
+        }
+        ws_item = item.parent()
+        position = ws_item.indexOfChild(item)
+        add_item_tree_widget(ws_item, sampled_serieDict, position+1)
+
+    #-------------------------------------------------------------
+    main_window.setFocus()                  # replace selection
+    tree_widget.clearSelection()
+    for item in itemSeries_selected + itemSamples_selected:
+        colorize_item(item, 'white')
+        item.setSelected(True)
 
 #========================================================================================
 def define_interpolation():

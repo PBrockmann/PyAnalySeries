@@ -33,6 +33,7 @@ class defineSampleWindow(QWidget):
 
         self.serieWidth = 0.8
         self.step = 5
+        self.kind = 'linear' 
 
         title = 'Define SAMPLE : ' + self.Id
         self.setWindowTitle(title)
@@ -47,20 +48,33 @@ class defineSampleWindow(QWidget):
         groupbox1.setFixedHeight(150)
 
         layout_s1 = QHBoxLayout()
-
         label_s1 = QLabel('Sampling step :')
-        self.spin_box = QDoubleSpinBox(self)
-        self.spin_box.setRange(0.5, 100)
-        self.spin_box.setSingleStep(.5)
-        self.spin_box.setValue(2)
-        self.spin_box.setDecimals(2)
-        self.spin_box.setFixedWidth(80)
-        self.spin_box.valueChanged.connect(self.update_value)
+        self.step_spinbox = QDoubleSpinBox(self)
+        self.step_spinbox.setRange(0.5, 100)
+        self.step_spinbox.setSingleStep(.5)
+        self.step_spinbox.setValue(2)
+        self.step_spinbox.setDecimals(2)
+        self.step_spinbox.setFixedWidth(80)
+        self.step_spinbox.valueChanged.connect(self.update_value)
         layout_s1.addWidget(label_s1)
-        layout_s1.addWidget(self.spin_box)
+        layout_s1.addWidget(self.step_spinbox)
         layout_s1.addStretch()
 
+        layout_s2 = QHBoxLayout()
+        label_s2 = QLabel('Kind of interpolation :')
+        self.kind_dropdown = QComboBox()
+        self.kind_dropdown.addItems([
+             'nearest', 'zero', 'linear', 'quadratic', 'cubic'
+        ])
+        self.kind_dropdown.setFixedWidth(100)
+        self.kind_dropdown.setCurrentText(self.kind)
+        self.kind_dropdown.currentIndexChanged.connect(self.update_value)
+        layout_s2.addWidget(label_s2)
+        layout_s2.addWidget(self.kind_dropdown)
+        layout_s2.addStretch()
+
         groupbox1_layout.addLayout(layout_s1)
+        groupbox1_layout.addLayout(layout_s2)
         groupbox1_layout.addStretch()
 
         groupbox1.setLayout(groupbox1_layout)
@@ -101,9 +115,11 @@ class defineSampleWindow(QWidget):
         #self.status_bar.showMessage('Ready', 5000)
 
     #---------------------------------------------------------------------------------------------
-    def update_value(self, value):
+    def update_value(self):
 
-        self.step = value
+        self.step = self.step_spinbox.value()
+        self.kind = self.kind_dropdown.currentText()
+        print(self.step, self.kind)
         self.interactive_plot.axs[0].clear()
         self.myplot()
 
@@ -123,7 +139,7 @@ class defineSampleWindow(QWidget):
         ax.set_ylabel(self.yName)
         ax.autoscale()
 
-        serieSampled = self.sample(self.serie, self.step)
+        serieSampled = self.sample(self.serie, self.step, self.kind)
         serieColor = self.serieDict['Color']
         Y_axisInverted = self.serieDict['Y axis inverted']
         ax.yaxis.set_inverted(Y_axisInverted)
@@ -162,7 +178,7 @@ class defineSampleWindow(QWidget):
 
     #---------------------------------------------------------------------------------------------
     @staticmethod
-    def sample(serie, step):
+    def sample(serie, step, kind):
 
         index_min = serie.index.min()
         index_max = serie.index.max()
@@ -172,7 +188,7 @@ class defineSampleWindow(QWidget):
 
         sampled_index = np.arange(index_min, index_max + 1E-9, step)
 
-        interpolator = interpolate.interp1d(serie.index, serie.values, kind='linear', fill_value="extrapolate")
+        interpolator = interpolate.interp1d(serie.index, serie.values, kind=kind, fill_value="extrapolate")
         sampled_values = interpolator(sampled_index)
         result_serie = pd.Series(sampled_values, index=sampled_index)
 
@@ -185,9 +201,13 @@ class defineSampleWindow(QWidget):
             'Id': sample_Id,
             'Type': 'SAMPLE', 
             'Name': f'Sample every {self.step}', 
-            'Parameters': f'{self.step}',
+            'Parameters': f'{self.step} ; {self.kind}',
             'Comment': '',
-            'History': f'sample with step : {self.step}',
+            'History': f'sample with parameters' + \
+                    '<ul>' + \
+                    f'<li>Step : {self.step}' + \
+                    f'<li>Kind of interpolation : {self.kind}' + \
+                    '</ul>'
         }
         self.add_item_tree_widget(self.item.parent(), sampleDict)
 
@@ -195,10 +215,10 @@ class defineSampleWindow(QWidget):
         sampled_serieDict = self.serieDict | {'Id': sampled_Id, 
             'Type': 'Serie sampled', 
             'Name': f'Serie sampled every {self.step}', 
-            'Serie': self.sample(self.serie, self.step),
+            'Serie': self.sample(self.serie, self.step, self.kind),
             'Color': generate_color(exclude_color=self.serieDict['Color']),
             'History': append_to_htmlText(self.serieDict['History'], 
-                f'serie <i><b>{self.serieDict["Id"]}</i></b> sampled with SAMPLE <i><b>{sample_Id}</i></b> every {self.step}<BR>---> serie <i><b>{sampled_Id}</b></i>'),
+                f'serie <i><b>{self.serieDict["Id"]}</i></b> sampled with SAMPLE <i><b>{sample_Id}</i></b><BR>every {self.step} using kind of interpolation {self.kind}<BR>---> serie <i><b>{sampled_Id}</b></i>'),
             'Comment': '',
         }
         position = self.item.parent().indexOfChild(self.item)
