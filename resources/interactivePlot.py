@@ -243,14 +243,12 @@ class interactivePlot:
     #---------------------------------------------------------------------------------------------
     def on_key_release(self, event):
 
-        if not event.inaxes:
-            return
-        
         if event.key == 'control':
-            for line, points in event.inaxes.line_points_pairs:
-                if line.get_visible():
-                    points.set_visible(False)
-            event.inaxes.figure.canvas.draw()  # Redraw the canvas
+            for ax in self.axs:
+                for line, points in ax.line_points_pairs:
+                    if line.get_visible():
+                     points.set_visible(False)
+                ax.figure.canvas.draw()  # Redraw the canvas
 
     #---------------------------------------------------------------------------------------------
     def on_pick(self, event):
