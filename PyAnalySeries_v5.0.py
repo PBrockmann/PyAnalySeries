@@ -187,6 +187,7 @@ def on_item_changed(item, column):
                 #print(f"Change name ws: {old_wsName} --> {new_wsName}")
                 if is_open(old_wsName):
                     QMessageBox.warning(main_window, "WS open in another application", f"The ws '{new_wsName}' is already in use. Please close the file.")
+                    item.setText(0, old_wsName)
                 else:
                     os.rename(old_wsName, new_wsName)
             #mark_ws(item)
