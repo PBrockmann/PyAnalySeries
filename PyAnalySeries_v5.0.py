@@ -1235,15 +1235,16 @@ def cut_items():
 def paste_items():
     target_item = tree_widget.currentItem()
     ws_item = target_item.parent() if target_item.parent() else target_item
+    position = ws_item.indexOfChild(target_item)
 
     tree_widget.blockSignals(True)
 
     for item in tree_widget.clipboard_items:
         if is_item_in_ws(ws_item, item):
-            main_window.statusBar().showMessage('Item already in', 5000)
+            main_window.statusBar().showMessage('Item(s) already in', 5000)
             continue
         itemDict = item.data(0, Qt.UserRole)
-        add_item_tree_widget(ws_item, itemDict, mark=False)
+        add_item_tree_widget(ws_item, itemDict, position+1, mark=False)
 
     tree_widget.blockSignals(False)
 
@@ -1303,7 +1304,7 @@ def exit_confirm():
     reply = QMessageBox.question(
         main_window, 
         "Exit confirmation",
-        "Are you sure you want to exit the application?",
+        "Are you sure you want to exit the application ?",
         QMessageBox.Yes | QMessageBox.No,
         QMessageBox.No
     )
@@ -1371,7 +1372,8 @@ file_menu.addAction(exit_action)
 edit_menu = menu_bar.addMenu("Edit")
 
 cut_action = QAction("Cut", main_window)
-cut_action.setShortcuts([QKeySequence("Ctrl+x"), QKeySequence(Qt.Key_Delete)])
+#cut_action.setShortcuts([QKeySequence("Ctrl+x"), QKeySequence(Qt.Key_Delete)])
+cut_action.setShortcut(QKeySequence("Ctrl+x"))
 cut_action.triggered.connect(cut_items)
 
 copy_action = QAction("Copy", main_window)
