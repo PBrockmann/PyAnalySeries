@@ -41,9 +41,9 @@ from openpyxl.utils import get_column_letter
 
 #========================================================================================
 if len(sys.argv[1:]) >= 1:
-    filesWS = sys.argv[1:]
+    filesName = sys.argv[1:]
 else:
-    filesWS = None
+    filesName = None
 
 #========================================================================================
 version = 'v5.0'
@@ -357,6 +357,8 @@ def load_WorkSheet(fileName):
                 QApplication.processEvents()
 
     #--------------------------------------------------------------------
+    base_dir = os.getcwd()
+    fileName = os.path.relpath(fileName, base_dir)          # get relative path
     populate_tree_widget(fileName, itemDict_list)
 
     #--------------------------------------------------------------------
@@ -379,11 +381,10 @@ def new_WorkSheet():
 #========================================================================================
 def open_WorkSheet():
 
-    fileName, _ = QFileDialog.getOpenFileName(main_window, "Open Excel File", "", "Excel Files (*.xlsx)")
-    if fileName:
-        base_dir = os.getcwd()
-        fileName = os.path.relpath(fileName, base_dir)          # get relative path
-        series = load_WorkSheet(fileName)
+    filesName, _ = QFileDialog.getOpenFileNames(main_window, "Open Excel File", "", "Excel Files (*.xlsx)")
+    for fileName in filesName: 
+        print('Loading...', fileName)
+        load_WorkSheet(fileName)
 
 #========================================================================================
 def autofit_columns(worksheet):
@@ -1345,7 +1346,7 @@ file_menu = menu_bar.addMenu("File")
 newWS_action = QAction("New worksheet", main_window)
 newWS_action.setShortcut('Ctrl+n')
 newWS_action.triggered.connect(new_WorkSheet)
-openWS_action = QAction("Open worksheet", main_window)
+openWS_action = QAction("Open worksheet(s)", main_window)
 openWS_action.setShortcut('Ctrl+o')
 openWS_action.triggered.connect(open_WorkSheet)
 saveWSs_action = QAction("Save worksheets", main_window)
@@ -1462,10 +1463,10 @@ about_action.triggered.connect(lambda: show_dialog('About', 'resources/about.htm
 about_menu.addAction(about_action)
 
 #----------------------------------------------
-if filesWS:
-    for fileWS in filesWS: 
-        print('Loading...', fileWS)
-        load_WorkSheet(fileWS)
+if filesName:
+    for fileName in filesName: 
+        print('Loading...', fileName)
+        load_WorkSheet(fileName)
 
 #----------------------------------------------
 main_window.setStatusBar(QStatusBar())
