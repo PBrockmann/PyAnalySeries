@@ -5,6 +5,7 @@ from PyQt5.QtGui import *
 import matplotlib
 matplotlib.use("Qt5Agg")
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 from .misc import *
 from .interactivePlot import interactivePlot
@@ -84,7 +85,8 @@ class defineSampleWindow(QWidget):
         self.interactive_plot = interactivePlot()
         self.myplot()
 
-        main_layout.addWidget(self.interactive_plot.fig.canvas)
+        canvas = FigureCanvas(self.interactive_plot.fig)
+        main_layout.addWidget(canvas)
 
         #----------------------------------------------
         button_layout = QHBoxLayout()
@@ -187,6 +189,8 @@ class defineSampleWindow(QWidget):
         index_max = np.floor(index_max / step) * step
 
         sampled_index = np.arange(index_min, index_max + 1E-9, step)
+        sampled_index = np.sort(np.random.uniform(index_min, index_max, 10))
+        print(sampled_index)
 
         interpolator = interpolate.interp1d(serie.index, serie.values, kind=kind, fill_value="extrapolate")
         sampled_values = interpolator(sampled_index)

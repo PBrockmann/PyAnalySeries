@@ -5,6 +5,7 @@ from PyQt5.QtGui import *
 import matplotlib
 matplotlib.use("Qt5Agg")
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 from .misc import *
 from .interactivePlot import interactivePlot
@@ -67,7 +68,8 @@ class defineFilterWindow(QWidget):
         self.interactive_plot = interactivePlot()
         self.myplot()
 
-        main_layout.addWidget(self.interactive_plot.fig.canvas)
+        canvas = FigureCanvas(self.interactive_plot.fig)
+        main_layout.addWidget(canvas)
 
         #----------------------------------------------
         button_layout = QHBoxLayout()

@@ -9,6 +9,7 @@ import pandas as pd
 import matplotlib
 matplotlib.use("Qt5Agg")
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 from .CustomQTableWidget import CustomQTableWidget 
 from .interactivePlot import interactivePlot
@@ -97,7 +98,8 @@ class displaySingleSerieWindow(QWidget):
         plot_layout = QVBoxLayout()
    
         self.interactive_plot = interactivePlot()
-        plot_layout.addWidget(self.interactive_plot.fig.canvas)
+        canvas = FigureCanvas(self.interactive_plot.fig)
+        plot_layout.addWidget(canvas)
         self.myplot()
         
         plot_tab.setLayout(plot_layout)

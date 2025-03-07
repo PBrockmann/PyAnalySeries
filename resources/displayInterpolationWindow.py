@@ -9,6 +9,7 @@ import pandas as pd
 import matplotlib
 matplotlib.use("Qt5Agg")
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 from .CustomQTableWidget import CustomQTableWidget 
 from .interactivePlot import interactivePlot
@@ -98,7 +99,9 @@ class displayInterpolationWindow(QWidget):
 
         self.interactive_pointersPlot.fig.canvas.draw()
 
-        pointersPlot_layout.addWidget(self.interactive_pointersPlot.fig.canvas)
+        canvas = FigureCanvas(self.interactive_pointersPlot.fig)
+        pointersPlot_layout.addWidget(canvas)
+
         pointersPlot_tab.setLayout(pointersPlot_layout)
 
         #----------------------------------------------

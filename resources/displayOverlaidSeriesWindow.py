@@ -6,6 +6,7 @@ import sys
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 from .interactivePlot import interactivePlot
 
@@ -45,7 +46,9 @@ class displayOverlaidSeriesWindow(QWidget):
         self.myplot()
         
         main_layout = QVBoxLayout()
-        main_layout.addWidget(self.interactive_plot.fig.canvas)
+
+        canvas = FigureCanvas(self.interactive_plot.fig)
+        main_layout.addWidget(canvas)
 
         #----------------------------------------------
         button_layout = QHBoxLayout()

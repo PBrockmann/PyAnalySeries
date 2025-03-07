@@ -13,6 +13,7 @@ import pandas as pd
 import matplotlib
 matplotlib.use("Qt5Agg")
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.patches import ConnectionPatch
 
 from scipy import interpolate
@@ -77,7 +78,9 @@ class defineInterpolationWindow(QWidget):
         self.interactive_pointersPlot.right_margin = 100
         self.pointersPlot_ax = self.interactive_pointersPlot.axs[0]
         self.pointersPlot_axGradient = self.pointersPlot_ax.twinx()
-        pointersPlot_layout.addWidget(self.interactive_pointersPlot.fig.canvas)
+
+        canvas1 = FigureCanvas(self.interactive_pointersPlot.fig)
+        pointersPlot_layout.addWidget(canvas1)
 
         pointersPlot_tab.setLayout(pointersPlot_layout)
 
@@ -89,7 +92,10 @@ class defineInterpolationWindow(QWidget):
         self.interactive_plot.top_margin = 100
         self.interactive_plot.right_margin = 150
         self.axs = self.interactive_plot.axs
-        plots_layout.addWidget(self.interactive_plot.fig.canvas)
+
+        canvas2 = FigureCanvas(self.interactive_plot.fig)
+        plots_layout.addWidget(canvas2)
+
         self.axsInterp = self.axs[0].twinx()
         self.axsInterp.sharey(self.axs[1])
         self.axsInterp.set_zorder(-10)
