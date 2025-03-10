@@ -60,13 +60,22 @@ class interactivePlot:
         self.fig.canvas.mpl_connect('pick_event', self.on_pick)
         self.fig.canvas.mpl_connect("resize_event", self.on_resize)
 
+        self.tooltip = plt.annotate(
+            "", xy=(0, 0), xytext=(20, 30),
+            xycoords="figure pixels",
+            textcoords="offset pixels",
+            arrowprops=dict(arrowstyle="->", color='black')
+        )
+        self.tooltip.set_visible(False)
+
+
     #---------------------------------------------------------------------------------------------
     def plot(self, n, x, y, label=None):
 
         ax = self.axs[n]
 
-        line, = ax.plot(x, y, picker=5, label=label)  # Make the plot pickable with tolerance 5 pixels
-        points = ax.scatter(x, y, s=5, marker='o', visible=False)
+        line, = ax.plot(x, y, picker=5, label=label)
+        points = ax.scatter(x, y, s=5, marker='o', picker=5, visible=False)
         ax.line_points_pairs.append((line, points))
 
         if label:
@@ -162,19 +171,39 @@ class interactivePlot:
     #---------------------------------------------------------------------------------------------
     def on_motion(self, event):
         """Handle panning when the mouse is moved."""
-        if event.inaxes and event.inaxes.pan_start:
-            xstart, ystart = event.inaxes.pan_start
+        if event.inaxes:
 
-            dx = xstart - event.xdata
-            dy = ystart - event.ydata
+            #-------------------------
+            if event.inaxes.pan_start:
+                xstart, ystart = event.inaxes.pan_start
 
-            cur_xlim = event.inaxes.get_xlim()
-            cur_ylim = event.inaxes.get_ylim()
+                dx = xstart - event.xdata
+                dy = ystart - event.ydata
 
-            event.inaxes.set_xlim(cur_xlim[0] + dx, cur_xlim[1] + dx)  # Update limits for panning
-            event.inaxes.set_ylim(cur_ylim[0] + dy, cur_ylim[1] + dy)
+                cur_xlim = event.inaxes.get_xlim()
+                cur_ylim = event.inaxes.get_ylim()
 
-            event.inaxes.figure.canvas.draw()  # Redraw the canvas
+                event.inaxes.set_xlim(cur_xlim[0] + dx, cur_xlim[1] + dx)  # Update limits for panning
+                event.inaxes.set_ylim(cur_ylim[0] + dy, cur_ylim[1] + dy)
+
+                event.inaxes.figure.canvas.draw()  # Redraw the canvas
+
+            #-------------------------
+            for line, points in event.inaxes.line_points_pairs:
+                contains, info = points.contains(event)
+                if contains:
+                    ind = info['ind'][0]
+                    x_data, y_data = points.get_offsets().T
+                    color = points.get_facecolors()[0]
+
+                    position_xy = event.inaxes.transData.transform((x_data[ind], y_data[ind]))
+                    self.tooltip.xy = (position_xy)
+                    self.tooltip.set_text(f"({x_data[ind]:.6f}, {y_data[ind]:.6f})")
+                    self.tooltip.set_bbox(dict(boxstyle="round,pad=0.3", fc=color, alpha=0.2))
+                    self.tooltip.set_visible(True)
+
+                    event.inaxes.figure.canvas.draw_idle()
+                    return
 
     #---------------------------------------------------------------------------------------------
     def on_release(self, event):
@@ -244,6 +273,8 @@ class interactivePlot:
     def on_key_release(self, event):
 
         if event.key == 'control':
+
+            self.tooltip.set_visible(False)
             for ax in self.axs:
                 for line, points in ax.line_points_pairs:
                     if line.get_visible():
