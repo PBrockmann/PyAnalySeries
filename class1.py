@@ -9,5 +9,3 @@ class myplot:
     def __init__(self, rows=1, cols=1):
 
         self.fig, self.ax = plt.subplots(rows, cols)
-
-
