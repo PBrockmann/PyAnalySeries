@@ -2,7 +2,7 @@ import sys
 import matplotlib
 matplotlib.use("Qt5Agg")
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
+from PyQt5.QtWidgets import *
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
 
@@ -25,7 +25,6 @@ central_widget = QWidget()
 layout = QVBoxLayout(central_widget)
 
 width, height = fig.get_size_inches() * fig.dpi
-print(width, height, fig.dpi)
 
 fig.subplots_adjust(
     left = left_margin / width,

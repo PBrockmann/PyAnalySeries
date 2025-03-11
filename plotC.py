@@ -3,6 +3,7 @@ import matplotlib
 matplotlib.use("Qt5Agg")
 
 from PyQt5.QtWidgets import *
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
 
 fig, ax = plt.subplots()
@@ -24,7 +25,6 @@ central_widget = QWidget()
 layout = QVBoxLayout(central_widget)
 
 width, height = fig.get_size_inches() * fig.dpi
-print(width, height, fig.dpi)
 
 fig.subplots_adjust(
     left = left_margin / width,
@@ -35,8 +35,17 @@ fig.subplots_adjust(
     hspace = 0.5
 )
 
-canvas = fig.canvas
+canvas = FigureCanvas(fig)
 layout.addWidget(canvas)
+
+button_layout = QHBoxLayout()
+save_button = QPushButton("Save")
+close_button = QPushButton("Close")
+button_layout.addStretch()
+
+button_layout.addWidget(save_button)
+button_layout.addWidget(close_button)
+layout.addLayout(button_layout)
 
 window.setCentralWidget(central_widget)
 window.show()
