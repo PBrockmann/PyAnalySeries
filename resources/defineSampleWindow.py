@@ -24,14 +24,19 @@ for key in plt.rcParams.keys():
 #=========================================================================================
 class defineSampleWindow(QWidget):
     #---------------------------------------------------------------------------------------------
-    def __init__(self, Id, open_sampleWindows, item, add_item_tree_widget):
+    def __init__(self, Id, open_sampleWindows, items, add_item_tree_widget):
         super().__init__()
 
         self.Id = Id
         self.open_sampleWindows = open_sampleWindows
-        self.item = item
+        self.items = items
         self.add_item_tree_widget = add_item_tree_widget
 
+        self.item = items[0]
+        if len(self.items) == 2:
+            self.itemRef = items[1]
+        else: 
+            self.itemRef = None
         self.serieWidth = 0.8
         self.step = 5
         self.kind = 'linear' 
@@ -134,6 +139,16 @@ class defineSampleWindow(QWidget):
         self.serie = self.serieDict['Serie']
         self.serie = self.serie.groupby(self.serie.index).mean()
 
+        index_min = self.serie.index.min()
+        index_max = self.serie.index.max()
+        index_min = np.ceil(index_min / self.step) * self.step
+        index_max = np.floor(index_max / self.step) * self.step
+        sampled_index = np.arange(index_min, index_max + 1E-9, self.step)
+
+        self.serieRefDict = self.itemRef.data(0, Qt.UserRole)
+        self.serieRef = self.serieRefDict['Serie']
+        sampled_index = self.serieRef.index
+
         ax = self.interactive_plot.axs[0]
 
         ax.grid(visible=True, which='major', color='lightgray', linestyle='dashed', linewidth=0.5)
@@ -141,7 +156,7 @@ class defineSampleWindow(QWidget):
         ax.set_ylabel(self.yName)
         ax.autoscale()
 
-        serieSampled = self.sample(self.serie, self.step, self.kind)
+        serieSampled = self.sample(self.serie, sampled_index, self.kind)
         serieColor = self.serieDict['Color']
         Y_axisInverted = self.serieDict['Y axis inverted']
         ax.yaxis.set_inverted(Y_axisInverted)
@@ -180,17 +195,7 @@ class defineSampleWindow(QWidget):
 
     #---------------------------------------------------------------------------------------------
     @staticmethod
-    def sample(serie, step, kind):
-
-        index_min = serie.index.min()
-        index_max = serie.index.max()
-
-        index_min = np.ceil(index_min / step) * step
-        index_max = np.floor(index_max / step) * step
-
-        sampled_index = np.arange(index_min, index_max + 1E-9, step)
-        sampled_index = np.sort(np.random.uniform(index_min, index_max, 10))
-        print(sampled_index)
+    def sample(serie, sampled_index, kind):
 
         interpolator = interpolate.interp1d(serie.index, serie.values, kind=kind, fill_value="extrapolate")
         sampled_values = interpolator(sampled_index)
@@ -243,20 +248,38 @@ if __name__ == "__main__":
 
     app = QApplication([])
 
-    x = np.linspace(0, 10, 100)
-    y = np.sin(x)
-    serie = pd.Series(y, index=x)
+    #---------------------------------
+    x1 = np.linspace(0, 10, 100)
+    y1 = np.sin(x1)
+    serie1 = pd.Series(y1, index=x1)
 
-    serieDict = {'Id': 'abcd', 'X': 'xName', 'Y': 'yName', 'Serie': serie, 
+    serie1Dict = {'Id': 'abcd', 'X': 'xName', 'Y': 'yName', 'Serie': serie1, 
             'Color': 'darkorange', "Y axis inverted": True, 
             'Comment': 'A text', 'History': 'command1 ; command2'}
-    item = QTreeWidgetItem()
-    item.setData(0, Qt.UserRole, serieDict)
+    item1 = QTreeWidgetItem()
+    item1.setData(0, Qt.UserRole, serie1Dict)
+
+    #---------------------------------
+    x2 = np.linspace(0, 50, 2)
+    y2 = np.cos(x2)
+    serie2 = pd.Series(y2, index=x2)
+
+    serie2Dict = {'Id': 'abcd', 'X': 'xName', 'Y': 'yName', 'Serie': serie2, 
+            'Color': 'darkorange', "Y axis inverted": True, 
+            'Comment': 'A text', 'History': 'command1 ; command2'}
+    item2 = QTreeWidgetItem()
+    item2.setData(0, Qt.UserRole, serie2Dict)
+
+    #---------------------------------
+    items = []
+    items.append(item1)
+    items.append(item2)
 
     open_sampleWindows = {}
     Id_sampleWindow = '1234'
-    sampleWindow = defineSampleWindow(Id_sampleWindow, open_sampleWindows, item, handle_item)
+    sampleWindow = defineSampleWindow(Id_sampleWindow, open_sampleWindows, items, handle_item)
     open_sampleWindows[Id_sampleWindow] = sampleWindow
     sampleWindow.show()
 
     sys.exit(app.exec_())
+

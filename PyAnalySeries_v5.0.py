@@ -1091,8 +1091,8 @@ def define_sample():
         if  serieDict['Type'].startswith('Serie'): 
             items_selected.append(item)
 
-    if len(items_selected) != 1 : 
-        main_window.statusBar().showMessage('Please select only 1 serie', 5000)
+    if len(items_selected) > 2 : 
+        main_window.statusBar().showMessage('Please select at least 1 serie (2nd possible for sampling reference)', 5000)
         return
 
     #-------------------------------------------------------------
@@ -1103,7 +1103,7 @@ def define_sample():
         sampleWindow.raise_()
         sampleWindow.activateWindow()
     else:
-        sampleWindow = defineSampleWindow(Id_sampleWindow, open_sampleWindows, item, add_item_tree_widget)
+        sampleWindow = defineSampleWindow(Id_sampleWindow, open_sampleWindows, items_selected, add_item_tree_widget)
         open_sampleWindows[Id_sampleWindow] = sampleWindow
         sampleWindow.show()
 
