@@ -54,6 +54,7 @@ class defineFilterWindow(QWidget):
         self.spin_box.setValue(5)
         self.spin_box.setFixedWidth(50)
         self.spin_box.valueChanged.connect(self.update_value)
+        self.spin_box.lineEdit().setReadOnly(True)
         layout_s1.addWidget(label_s1)
         layout_s1.addWidget(self.spin_box)
         layout_s1.addStretch()
