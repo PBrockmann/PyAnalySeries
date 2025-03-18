@@ -257,6 +257,9 @@ def sync_window_with_item(item):
     for key in open_filterWindows.keys():
         filterWindow = open_filterWindows[key]
         filterWindow.sync_with_item(item)
+    for key in open_sampleWindows.keys():
+        sampleWindow = open_sampleWindows[key]
+        sampleWindow.sync_with_item(item)
     for key in open_interpolationWindows.keys():
         interpolationWindow = open_interpolationWindows[key]
         interpolationWindow.sync_with_item(item)
@@ -1426,7 +1429,7 @@ displayTogetherSeries_action = QAction("Display Together", main_window)
 displayTogetherSeries_action.setShortcut('Ctrl+t')
 displayTogetherSeries_action.triggered.connect(lambda: displayMultipleSeries_selected_series(overlaid=True))
 
-displayStackedSeries_action = QAction("Display stacKed", main_window)
+displayStackedSeries_action = QAction("Display Stacked", main_window)
 displayStackedSeries_action.setShortcut('Ctrl+k')
 displayStackedSeries_action.triggered.connect(lambda: displayMultipleSeries_selected_series(overlaid=False))
 
