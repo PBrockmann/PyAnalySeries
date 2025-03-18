@@ -1326,7 +1326,7 @@ def show_dialog(title, fileHTML, width, height):
     dialog.exec_()
 
 #========================================================================================
-def exit_confirm(event):
+def exit_confirm():
 
     reply = QMessageBox.question(
         main_window, 
@@ -1338,6 +1338,13 @@ def exit_confirm(event):
     
     if reply == QMessageBox.Yes:
         app.quit()
+
+#========================================================================================
+def close_event(event):
+    if exit_confirm():
+        event.accept()
+    else:
+        event.ignore()
 
 #========================================================================================
 app = QApplication(sys.argv)
@@ -1481,7 +1488,7 @@ basicSeries_menu.addAction(insolationAstro_action)
 help_menu = menu_bar.addMenu('Help')
 
 help_action = QAction('Help', main_window)
-help_action.triggered.connect(lambda: show_dialog('About', 'resources/help.html', 1000, 800))
+help_action.triggered.connect(lambda: show_dialog('Help', 'resources/help.html', 1000, 800))
 help_menu.addAction(help_action)
 
 #----------------------------------------------
@@ -1502,7 +1509,7 @@ main_window.setStatusBar(QStatusBar())
 main_window.statusBar().showMessage('Application ready', 5000)
 main_window.show()
 
-main_window.closeEvent = exit_confirm
+main_window.closeEvent = close_event
 
 #current_directory = os.getcwd()
 #print(current_directory)

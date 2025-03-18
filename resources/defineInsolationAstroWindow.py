@@ -51,12 +51,13 @@ class defineInsolationAstroWindow(QWidget):
             "Eccentricity",
             "Obliquity",
             "Precession angle",
+            "Precession parameter",
             "Daily insolation",
             "Integrated insolation between 2 true longitudes",
             "Caloric summer insolation",
             "Caloric winter insolation"
         ])
-        self.plotType_dropdown.insertSeparator(3)
+        self.plotType_dropdown.insertSeparator(4)
         self.plotType_dropdown.setCurrentText("Daily insolation")
 
         #-------------------------------
@@ -309,7 +310,7 @@ class defineInsolationAstroWindow(QWidget):
 
         self.plotType = self.plotType_dropdown.currentText()
 
-        if self.plotType in ["Eccentricity", "Obliquity", "Precession angle"]:
+        if self.plotType in ["Eccentricity", "Obliquity", "Precession angle", "Precession parameter"]:
             self.solar_constant_input.setEnabled(False)
             self.latitude_input.setEnabled(False)
             self.trueLongitude1_input.setEnabled(False)
@@ -410,22 +411,27 @@ class defineInsolationAstroWindow(QWidget):
         ecc = astro_params.eccentricity(t)
         obl = astro_params.obliquity(t)
         pre = astro_params.precession_angle(t)
+        preParam = astro_params.precession_parameter(t)
 
         values = np.empty(len(t))
 
         piDeg = np.pi/180
 
         if self.plotType == "Eccentricity":
-            values = ecc * piDeg
+            values = ecc / piDeg
             ylabel = "Eccentricity [degrees]"
 
         elif self.plotType == "Obliquity":
-            values = obl * piDeg
+            values = obl / piDeg
             ylabel = "Obliquity [degrees]"
 
         elif self.plotType == "Precession angle":
-            values = pre * piDeg
+            values = pre / piDeg
             ylabel = "Precession angle [degrees]"
+
+        elif self.plotType == "Precession parameter":
+            values = preParam / piDeg
+            ylabel = "Precession parameter [degrees]"
 
         elif self.plotType == "Daily insolation":
             for i in range(len(t)): 
