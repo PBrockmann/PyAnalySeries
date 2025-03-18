@@ -193,6 +193,7 @@ def on_item_changed(item, column):
                     file_path = os.path.dirname(new_wsName)
                     if not os.path.exists(file_path):
                         QMessageBox.warning(main_window, "Missing directory", f"Create first the target directory on the file system.")
+                        item.setText(0, old_wsName)
                     else:
                         os.rename(old_wsName, new_wsName)
             #mark_ws(item)
@@ -424,6 +425,13 @@ def save_WorkSheet(ws_item):
         ws = wb.create_sheet(title=sheetName)
 
         ws.cell(row=1, column=1, value=f'Created with PyAnalyseries {version}')
+
+        text = '''
+        This file has been created with PyAnalySeries software.
+
+        Do not modify or accordingly with documentation 
+        '''
+        ws.cell(row=3, column=1, value=text)
 
         #----------------------------------
         for n in range(ws_item.childCount()):
