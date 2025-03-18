@@ -53,20 +53,55 @@ class defineSampleWindow(QWidget):
         groupbox1_layout = QVBoxLayout()
         groupbox1.setFixedHeight(150)
 
-        layout_s1 = QHBoxLayout()
-        label_s1 = QLabel('Sampling step :')
-        self.step_spinbox = QDoubleSpinBox(self)
+        # ===== 
+        self.group = QButtonGroup(self)
+
+        self.step_radio = QRadioButton("Sampling with step :")
+        self.step_spinbox = QDoubleSpinBox()
         self.step_spinbox.setRange(0.5, 100)
         self.step_spinbox.setSingleStep(.5)
         self.step_spinbox.setValue(2)
         self.step_spinbox.setDecimals(2)
         self.step_spinbox.setFixedWidth(80)
         self.step_spinbox.valueChanged.connect(self.update_value)
-        layout_s1.addWidget(label_s1)
-        layout_s1.addWidget(self.step_spinbox)
-        layout_s1.addStretch()
 
-        layout_s2 = QHBoxLayout()
+        step_layout = QHBoxLayout()
+        step_layout.addWidget(self.step_radio)
+        step_layout.addWidget(self.step_spinbox)
+        step_layout.addStretch()
+
+        self.xvalues_radio = QRadioButton("Sampling using x values of")
+        self.xvalues_label = QLabel('None')
+        font = QFont("Courier New", 12)
+        self.xvalues_label.setFont(font)
+
+        xvalues_layout = QHBoxLayout()
+        xvalues_layout.addWidget(self.xvalues_radio)
+        xvalues_layout.addWidget(self.xvalues_label)
+        xvalues_layout.addStretch()
+
+        self.group.addButton(self.step_radio)
+        self.group.addButton(self.xvalues_radio)
+
+        groupbox1_layout.addLayout(step_layout)
+        groupbox1_layout.addLayout(xvalues_layout)
+
+        if self.itemRef:
+            self.xvalues_radio.setChecked(True)
+            self.serieRefDict = self.itemRef.data(0, Qt.UserRole)
+            self.serieRef_XName = self.serieRefDict['X']
+            self.serieRef_YName = self.serieRefDict['Y']
+            self.serieRef_Id = self.serieRefDict['Id']
+            self.xvalues_label.setText(f'{self.serieRef_Id}: {self.serieRef_XName} / {self.serieRef_YName}')
+            self.sample_from_xvalues = True 
+        else:
+            self.step_radio.setChecked(True)
+            self.xvalues_radio.setEnabled(False)
+            self.xvalues_label.setEnabled(False)
+            self.sample_from_xvalues = False
+
+        # ===== 
+        kind_layout = QHBoxLayout()
         label_s2 = QLabel('Kind of interpolation :')
         self.kind_dropdown = QComboBox()
         self.kind_dropdown.addItems([
@@ -74,17 +109,21 @@ class defineSampleWindow(QWidget):
         ])
         self.kind_dropdown.setFixedWidth(100)
         self.kind_dropdown.setCurrentText(self.kind)
-        self.kind_dropdown.currentIndexChanged.connect(self.update_value)
-        layout_s2.addWidget(label_s2)
-        layout_s2.addWidget(self.kind_dropdown)
-        layout_s2.addStretch()
+        kind_layout.addWidget(label_s2)
+        kind_layout.addWidget(self.kind_dropdown)
+        kind_layout.addStretch()
 
-        groupbox1_layout.addLayout(layout_s1)
-        groupbox1_layout.addLayout(layout_s2)
+        groupbox1_layout.addLayout(kind_layout)
         groupbox1_layout.addStretch()
 
+        # ===== 
         groupbox1.setLayout(groupbox1_layout)
         main_layout.addWidget(groupbox1)
+
+        self.step_radio.toggled.connect(self.update_value)
+        self.xvalues_radio.toggled.connect(self.update_value)
+        self.step_spinbox.valueChanged.connect(self.update_value)
+        self.kind_dropdown.currentIndexChanged.connect(self.update_value)
 
         #----------------------------------------------
         self.interactive_plot = interactivePlot()
@@ -119,19 +158,24 @@ class defineSampleWindow(QWidget):
 
         self.interactive_plot.fig.canvas.setFocus()
 
-        #self.status_bar.showMessage('Ready', 5000)
+        self.status_bar.showMessage('Ready', 5000)
 
     #---------------------------------------------------------------------------------------------
     def update_value(self):
 
         self.step = self.step_spinbox.value()
         self.kind = self.kind_dropdown.currentText()
-        print(self.step, self.kind)
+        self.sample_from_xvalues = self.xvalues_radio.isChecked()
+
+        xlim = self.interactive_plot.axs[0].get_xlim()
+        ylim = self.interactive_plot.axs[0].get_ylim()
         self.interactive_plot.axs[0].clear()
-        self.myplot()
+        self.myplot(limits=[xlim,ylim])
 
     #---------------------------------------------------------------------------------------------
     def myplot(self, limits=None):
+
+        self.interactive_plot.reset()
 
         self.serieDict = self.item.data(0, Qt.UserRole)
         self.xName = self.serieDict['X']
@@ -139,15 +183,16 @@ class defineSampleWindow(QWidget):
         self.serie = self.serieDict['Serie']
         self.serie = self.serie.groupby(self.serie.index).mean()
 
-        index_min = self.serie.index.min()
-        index_max = self.serie.index.max()
-        index_min = np.ceil(index_min / self.step) * self.step
-        index_max = np.floor(index_max / self.step) * self.step
-        sampled_index = np.arange(index_min, index_max + 1E-9, self.step)
-
-        self.serieRefDict = self.itemRef.data(0, Qt.UserRole)
-        self.serieRef = self.serieRefDict['Serie']
-        sampled_index = self.serieRef.index
+        if self.sample_from_xvalues:
+            self.serieRefDict = self.itemRef.data(0, Qt.UserRole)
+            self.serieRef = self.serieRefDict['Serie']
+            self.sample_index = self.serieRef.index
+        else:
+            index_min = self.serie.index.min()
+            index_max = self.serie.index.max()
+            index_min = np.ceil(index_min / self.step) * self.step
+            index_max = np.floor(index_max / self.step) * self.step
+            self.sample_index = np.arange(index_min, index_max + self.step, self.step)
 
         ax = self.interactive_plot.axs[0]
 
@@ -156,7 +201,7 @@ class defineSampleWindow(QWidget):
         ax.set_ylabel(self.yName)
         ax.autoscale()
 
-        serieSampled = self.sample(self.serie, sampled_index, self.kind)
+        serieSampled = self.sample(self.serie, self.sample_index, self.kind)
         serieColor = self.serieDict['Color']
         Y_axisInverted = self.serieDict['Y axis inverted']
         ax.yaxis.set_inverted(Y_axisInverted)
@@ -195,43 +240,78 @@ class defineSampleWindow(QWidget):
 
     #---------------------------------------------------------------------------------------------
     @staticmethod
-    def sample(serie, sampled_index, kind):
+    def sample(serie, sample_index, kind):
 
-        interpolator = interpolate.interp1d(serie.index, serie.values, kind=kind, fill_value="extrapolate")
-        sampled_values = interpolator(sampled_index)
-        result_serie = pd.Series(sampled_values, index=sampled_index)
+        interpolator = interpolate.interp1d(serie.index, serie.values, kind=kind)
+
+        # To limit sample to the range of the serie to be sampled
+        x_min, x_max = serie.index.min(), serie.index.max()
+        valid_sample_index = sample_index[(sample_index >= x_min) & (sample_index <= x_max)]
+
+        sampled_values = interpolator(valid_sample_index)
+
+        result_serie = pd.Series(sampled_values, index=valid_sample_index)
 
         return result_serie
 
     #---------------------------------------------------------------------------------------------
     def save_serie(self):
         sample_Id = generate_Id()
-        sampleDict = {
-            'Id': sample_Id,
-            'Type': 'SAMPLE', 
-            'Name': f'Sample every {self.step}', 
-            'Parameters': f'{self.step} ; {self.kind}',
-            'Comment': '',
-            'History': f'sample with parameters' + \
-                    '<ul>' + \
-                    f'<li>Step : {self.step}' + \
-                    f'<li>Kind of interpolation : {self.kind}' + \
-                    '</ul>'
-        }
+        if not self.sample_from_xvalues:
+            sampleDict = {
+                'Id': sample_Id,
+                'Type': 'SAMPLE', 
+                'Name': f'Sample every {self.step}', 
+                'Parameters': f'{self.step} ; {self.kind}',
+                'Comment': '',
+                'History': f'sample with parameters' + \
+                        '<ul>' + \
+                        f'<li>Step : {self.step}' + \
+                        f'<li>Kind of interpolation : {self.kind}' + \
+                        '</ul>'
+            }
+        else:
+            sampleDict = {
+                'Id': sample_Id,
+                'Type': 'SAMPLE', 
+                'Name': f'Sample using x values of {self.serieRef_Id}: {self.serieRef_XName} / {self.serieRef_YName}',
+                'Parameters': f'{self.kind}',
+                'Comment': '',
+                'History': f'sample with parameters' + \
+                        '<ul>' + \
+                        f'<li>Kind of interpolation : {self.kind}' + \
+                        '</ul>',
+                'XCoords': self.sample_index
+            }
         self.add_item_tree_widget(self.item.parent(), sampleDict)
 
         sampled_Id = generate_Id()
-        sampled_serieDict = self.serieDict | {'Id': sampled_Id, 
-            'Type': 'Serie sampled', 
-            'Name': f'Serie sampled every {self.step}', 
-            'Serie': self.sample(self.serie, self.step, self.kind),
-            'Color': generate_color(exclude_color=self.serieDict['Color']),
-            'History': append_to_htmlText(self.serieDict['History'], 
-                f'serie <i><b>{self.serieDict["Id"]}</i></b> sampled with SAMPLE <i><b>{sample_Id}</i></b><BR>every {self.step} using kind of interpolation {self.kind}<BR>---> serie <i><b>{sampled_Id}</b></i>'),
-            'Comment': '',
-        }
-        position = self.item.parent().indexOfChild(self.item)
-        self.add_item_tree_widget(self.item.parent(), sampled_serieDict, position+1)
+        if not self.sample_from_xvalues:
+            sampled_serieDict = self.serieDict | {'Id': sampled_Id, 
+                'Type': 'Serie sampled', 
+                'Name': f'Serie sampled every {self.step}', 
+                'Serie': self.sample(self.serie, self.sample_index, self.kind),
+                'Color': generate_color(exclude_color=self.serieDict['Color']),
+                'History': append_to_htmlText(self.serieDict['History'], 
+                    f'serie <i><b>{self.serieDict["Id"]}</i></b> sampled with SAMPLE <i><b>{sample_Id}</i></b><BR>---> serie <i><b>{sampled_Id}</b></i>'),
+                'Comment': '',
+            }
+        else:
+            sampled_serieDict = self.serieDict | {'Id': sampled_Id, 
+                'Type': 'Serie sampled', 
+                'Name': f'Sample using x values from {self.serieRef_YName}',
+                'Serie': self.sample(self.serie, self.sample_index, self.kind),
+                'Color': generate_color(exclude_color=self.serieDict['Color']),
+                'History': append_to_htmlText(self.serieDict['History'], 
+                    f'serie <i><b>{self.serieDict["Id"]}</i></b> sampled with SAMPLE <i><b>{sample_Id}</i></b><BR>---> serie <i><b>{sampled_Id}</b></i>'),
+                'Comment': '',
+            }
+
+        try:
+            position = self.item.parent().indexOfChild(self.item)
+            self.add_item_tree_widget(self.item.parent(), sampled_serieDict, position+1)
+        except:
+            pass 
 
     #---------------------------------------------------------------------------------------------
     def closeEvent(self, event):
@@ -249,7 +329,7 @@ if __name__ == "__main__":
     app = QApplication([])
 
     #---------------------------------
-    x1 = np.linspace(0, 10, 100)
+    x1 = np.arange(0, 10+0.1, 0.1)
     y1 = np.sin(x1)
     serie1 = pd.Series(y1, index=x1)
 
@@ -260,7 +340,9 @@ if __name__ == "__main__":
     item1.setData(0, Qt.UserRole, serie1Dict)
 
     #---------------------------------
-    x2 = np.linspace(0, 50, 2)
+    x2 = np.arange(-10, 20+1, 1)
+    random_values = np.random.uniform(-10, 20, 10)  # Générer n valeurs entre a et b
+    x2 = np.sort(random_values)
     y2 = np.cos(x2)
     serie2 = pd.Series(y2, index=x2)
 

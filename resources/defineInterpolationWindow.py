@@ -318,6 +318,7 @@ class defineInterpolationWindow(QWidget):
 
         self.updateConnections()
         self.interactive_plot.fig.canvas.draw()
+        self.interactive_plot.fig.canvas.setFocus()
 
     #---------------------------------------------------------------------------------------------
     def updatePointersPlot(self):
@@ -418,7 +419,7 @@ class defineInterpolationWindow(QWidget):
         self.axs[0].yaxis.set_inverted(self.serie1_Y_axisInverted)
 
         self.line1, = self.axs[0].plot(self.X1, self.Y1, color=self.serie1Color, linewidth=self.serieWidth, label='line1', picker=True, pickradius=20)
-        self.points1 = self.axs[0].scatter(self.X1, self.Y1, s=5, marker='o', color=self.serie1Color, visible=False, label='points1', picker=True, pickradius=20)
+        self.points1 = self.axs[0].scatter(self.X1, self.Y1, s=5, marker='o', color=self.serie1Color, visible=False, label='points1', picker=True, pickradius=5)
         self.axs[0].line_points_pairs.append((self.line1, self.points1))
 
         self.linecursor1 = self.axs[0].axvline(color='k', alpha=0.25, linewidth=1)
@@ -445,7 +446,7 @@ class defineInterpolationWindow(QWidget):
         self.axs[1].yaxis.set_inverted(self.serie2_Y_axisInverted)
 
         self.line2, = self.axs[1].plot(self.X2, self.Y2, color=self.serie2Color, linewidth=self.serieWidth, label='line2', picker=True, pickradius=20)
-        self.points2 = self.axs[1].scatter(self.X2, self.Y2, s=5, marker='o', color=self.serie2Color, visible=False, label='points2', picker=True, pickradius=20)
+        self.points2 = self.axs[1].scatter(self.X2, self.Y2, s=5, marker='o', color=self.serie2Color, visible=False, label='points2', picker=True, pickradius=5)
         self.axs[1].line_points_pairs.append((self.line2, self.points2))
 
         self.linecursor2 = self.axs[1].axvline(color='k', alpha=0.25, linewidth=1)
@@ -496,6 +497,7 @@ class defineInterpolationWindow(QWidget):
                     self.removeAddLastPointer_button.setEnabled(True)
 
         self.interactive_plot.fig.canvas.draw()
+        self.interactive_plot.fig.canvas.setFocus()
 
     #---------------------------------------------------------------------------------------------
     def updateConnections(self):
@@ -514,6 +516,7 @@ class defineInterpolationWindow(QWidget):
                     connect.set_visible(False)
 
         self.interactive_plot.fig.canvas.draw()
+        self.interactive_plot.fig.canvas.setFocus()
 
     #---------------------------------------------------------------------------------------------
     def deleteConnections(self):
@@ -571,6 +574,7 @@ class defineInterpolationWindow(QWidget):
                 self.updatePointers()
                 self.updateInterpPlot()
                 self.interactive_plot.fig.canvas.draw()
+                self.interactive_plot.fig.canvas.setFocus()
 
         #-------------------
         elif event.key == 'a':
@@ -600,6 +604,7 @@ class defineInterpolationWindow(QWidget):
                 self.updatePointers()
                 self.updateInterpPlot()
                 self.interactive_plot.fig.canvas.draw()
+                self.interactive_plot.fig.canvas.setFocus()
 
         #-------------------
         elif event.key == 'shift':
@@ -685,6 +690,7 @@ class defineInterpolationWindow(QWidget):
                     else:
                         self.vline2 = self.axs[1].axvline(coordPoint[0], color=self.pointerColor, alpha=0.5, linestyle='--', linewidth=1, label='vline2')
                 self.interactive_plot.fig.canvas.draw()
+                self.interactive_plot.fig.canvas.setFocus()
    
         #-----------------------------------------------
         elif artistLabel in ['points1', 'points2']:
@@ -703,6 +709,7 @@ class defineInterpolationWindow(QWidget):
                     else:
                         self.vline2 = self.axs[1].axvline(coordPoint[0], color=self.pointerColor, alpha=0.5, linestyle='--', linewidth=1, label='vline2')
                 self.interactive_plot.fig.canvas.draw()
+                self.interactive_plot.fig.canvas.setFocus()
 
     #------------------------------------------------------------------
     def on_mouse_motion(self, event):
@@ -719,6 +726,7 @@ class defineInterpolationWindow(QWidget):
                     connect.set_color(self.pointerColor)
         if found:
             self.interactive_plot.fig.canvas.draw()
+            self.interactive_plot.fig.canvas.setFocus()
             #self.interactive_plot.fig.canvas.draw_idle()
 
         #-----------------------------------------------
@@ -736,6 +744,7 @@ class defineInterpolationWindow(QWidget):
             self.points1.set_visible(False)
             self.points2.set_visible(False)
         self.interactive_plot.fig.canvas.draw()
+        self.interactive_plot.fig.canvas.setFocus()
 
         #-----------------------------------------------
         if self.mousepress == 'left':
@@ -810,8 +819,12 @@ class defineInterpolationWindow(QWidget):
                 f'serie <i><b>{self.serie2Dict["Id"]}</i></b> interpolated with INTERPOLATION <i><b>{interpolation_Id}</i></b> with mode {self.interpolationMode}<BR>---> serie <i><b>{interpolated_Id}</b></i>'),
             'Comment': ''
         }
-        position = self.itemDist.parent().indexOfChild(self.itemDist)
-        self.add_item_tree_widget(self.itemDist.parent(), interpolated_serieDict, position+1)
+
+        try:
+            position = self.itemDist.parent().indexOfChild(self.itemDist)
+            self.add_item_tree_widget(self.itemDist.parent(), interpolated_serieDict, position+1)
+        except:
+            pass
 
     #---------------------------------------------------------------------------------------------
     def sync_with_item(self, item):

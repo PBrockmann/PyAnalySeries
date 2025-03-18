@@ -60,14 +60,30 @@ class interactivePlot:
         self.fig.canvas.mpl_connect('pick_event', self.on_pick)
         self.fig.canvas.mpl_connect("resize_event", self.on_resize)
 
-        self.tooltip = plt.annotate(
-            "", xy=(0, 0), xytext=(20, 30),
-            xycoords="figure pixels",
-            textcoords="offset pixels",
-            arrowprops=dict(arrowstyle="->", color='black')
-        )
-        self.tooltip.set_visible(False)
+    #---------------------------------------------------------------------------------------------
+    def reset(self, num=0):
 
+        self.axs[num].line_points_pairs = []
+        self.axs[num].map_legend_to_line = {}
+   
+    #---------------------------------------------------------------------------------------------
+    def reset_tooltip(self):
+
+        if not hasattr(self, "tooltip") or self.tooltip.figure is None:
+            #print("Tooltip does not exist. Creating a new one.")
+            self.tooltip = plt.annotate(
+                "", xy=(0, 0), xytext=(20, 30),
+                xycoords="figure pixels",
+                textcoords="offset pixels",
+                arrowprops=dict(arrowstyle="->", color='black'),
+                zorder=10
+            )
+        
+        elif self.tooltip not in self.fig.texts:
+            #print("Tooltip exists but is no longer attached. Reattaching")
+            self.fig.texts.append(self.tooltip)
+       
+        self.tooltip.set_visible(False)
 
     #---------------------------------------------------------------------------------------------
     def plot(self, n, x, y, label=None):
@@ -190,20 +206,24 @@ class interactivePlot:
 
             #-------------------------
             for line, points in event.inaxes.line_points_pairs:
-                contains, info = points.contains(event)
-                if contains:
-                    ind = info['ind'][0]
-                    x_data, y_data = points.get_offsets().T
-                    color = points.get_facecolors()[0]
+                if line.get_visible():
+                    contains, info = points.contains(event)
+                    if contains:
+                        ind = info['ind'][0]
+                        x_data, y_data = points.get_offsets().T
+                        color = points.get_facecolors()[0]
 
-                    position_xy = event.inaxes.transData.transform((x_data[ind], y_data[ind]))
-                    self.tooltip.xy = (position_xy)
-                    self.tooltip.set_text(f"({x_data[ind]:.6f}, {y_data[ind]:.6f})")
-                    self.tooltip.set_bbox(dict(boxstyle="round,pad=0.3", fc=color, alpha=0.2))
-                    self.tooltip.set_visible(True)
+                        position_xy = event.inaxes.transData.transform((x_data[ind], y_data[ind]))
+   
+                        self.reset_tooltip()
+                        self.tooltip.xy = (position_xy)
+                        self.tooltip.set_text(f"({x_data[ind]:.6f}, {y_data[ind]:.6f})")
+                        self.tooltip.set_bbox(dict(boxstyle="round,pad=0.3", fc=color, alpha=0.2))
+                        self.tooltip.set_visible(True)
+                        #print('here', x_data[ind], y_data[ind], position_xy)
 
-                    event.inaxes.figure.canvas.draw_idle()
-                    return
+                        event.inaxes.figure.canvas.draw_idle()
+                        return
 
     #---------------------------------------------------------------------------------------------
     def on_release(self, event):
@@ -274,7 +294,8 @@ class interactivePlot:
 
         if event.key == 'control':
 
-            self.tooltip.set_visible(False)
+            if hasattr(self, "tooltip"):
+                self.tooltip.set_visible(False)
             for ax in self.axs:
                 for line, points in ax.line_points_pairs:
                     if line.get_visible():
@@ -324,8 +345,14 @@ if __name__ == "__main__":
     interactive_plot = interactivePlot(rows=2, cols=1)
 
     interactive_plot.plot(0, x1, y1, label='sin')
+
     interactive_plot.plot(0, x2, y2, label='cos')
 
     interactive_plot.plot(1, x2, y2, label='cos')
+   
+    # Test reset
+    #interactive_plot.axs[0].clear()
+    #interactive_plot.reset(0)
+    #interactive_plot.plot(0, x2, y2, label='cos')
 
     plt.show()

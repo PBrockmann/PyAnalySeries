@@ -31,7 +31,7 @@ class defineFilterWindow(QWidget):
         self.add_item_tree_widget = add_item_tree_widget
 
         self.serieWidth = 0.8
-        self.window_size = 5
+        self.window_size = 5 
 
         title = 'Define FILTER : ' + self.Id
         self.setWindowTitle(title)
@@ -102,11 +102,16 @@ class defineFilterWindow(QWidget):
     #---------------------------------------------------------------------------------------------
     def update_value(self):
         self.window_size = self.spin_box.value()
+
+        xlim = self.interactive_plot.axs[0].get_xlim()
+        ylim = self.interactive_plot.axs[0].get_ylim()
         self.interactive_plot.axs[0].clear()
-        self.myplot()
+        self.myplot(limits=[xlim,ylim])
 
     #---------------------------------------------------------------------------------------------
     def myplot(self, limits=None):
+
+        self.interactive_plot.reset()
 
         self.serieDict = self.item.data(0, Qt.UserRole)
         self.xName = self.serieDict['X']
@@ -196,8 +201,12 @@ class defineFilterWindow(QWidget):
                 f'serie <i><b>{self.serieDict["Id"]}</i></b> filtered with FILTER <i><b>{filter_Id}</i></b> with a moving average of size {self.window_size}<BR>---> serie <i><b>{filtered_Id}</b></i>'),
             'Comment': '',
         }
-        position = self.item.parent().indexOfChild(self.item)
-        self.add_item_tree_widget(self.item.parent(), filtered_serieDict, position+1)
+
+        try:
+            position = self.item.parent().indexOfChild(self.item)
+            self.add_item_tree_widget(self.item.parent(), filtered_serieDict, position+1)
+        except:
+            pass
 
     #---------------------------------------------------------------------------------------------
     def closeEvent(self, event):

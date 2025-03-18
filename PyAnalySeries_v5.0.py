@@ -137,6 +137,7 @@ def add_item_tree_widget(ws_item, itemDict, position=None, mark=True):
     item.setData(0, Qt.UserRole, itemDict)
 
     item.setText(0, itemDict['Name'])
+    item.setToolTip(0, itemDict['Name'])
     item.setText(1, itemDict['Id'])
     item.setText(2, itemDict['Type'])
 
@@ -329,6 +330,11 @@ def load_WorkSheet(fileName):
                         'Comment': df['Comment'][0],
                         'History': df['History'][0]
                 }
+
+                if 'XCoords' in df.columns:                 # for SAMPLE
+                    filterDict = filterDict | {
+                        'XCoords': cleanList(df['X2Coords'])
+                    }
 
                 itemDict_list.append(filterDict)
 
@@ -574,7 +580,7 @@ def create_tree_widget():
     tree_widget.setColumnWidth(4, 250)
     tree_widget.setColumnWidth(5, 50)
     tree_widget.setColumnWidth(6, 50)
-    tree_widget.setTextElideMode(Qt.ElideLeft)
+    tree_widget.setTextElideMode(Qt.ElideRight)
     tree_widget.setSelectionMode(QTreeWidget.ExtendedSelection)
     tree_widget.setIconSize(QSize(16, 16))
     tree_widget.setStyleSheet("""

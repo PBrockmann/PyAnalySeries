@@ -477,8 +477,9 @@ class defineInsolationAstroWindow(QWidget):
         self.values = values
 
         ax = self.interactive_plot.axs[0]
-
         ax.clear()
+        self.interactive_plot.reset()
+
         ax.grid(visible=True, which='major', color='lightgray', linestyle='dashed', linewidth=0.5)
 
         color = "darkorange"
