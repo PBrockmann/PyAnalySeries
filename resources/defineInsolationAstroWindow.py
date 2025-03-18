@@ -374,8 +374,8 @@ class defineInsolationAstroWindow(QWidget):
 
         lim1 = lim1 * self.t_convention * scaleFactor
         lim2 = lim2 * self.t_convention * scaleFactor
-        self.tstart_input.setRange(min(lim1, lim2), max(lim1, lim2))
-        self.tend_input.setRange(min(lim1, lim2), max(lim1, lim2))
+        self.tstart_input.setRange(int(min(lim1, lim2)), int(max(lim1, lim2)))
+        self.tend_input.setRange(int(min(lim1, lim2)), int(max(lim1, lim2)))
         self.tstart_input.setToolTip(f"Choose a value between {min(lim1, lim2)} and {max(lim1, lim2)}")
         self.tend_input.setToolTip(f"Choose a value between {min(lim1, lim2)} and {max(lim1, lim2)}")
     

@@ -83,6 +83,8 @@ class importDataWindow(QWidget):
         rows = text.split("\n")
         clean_rows = [row.strip() for row in rows if row.strip()]
 
+        print(clean_rows)
+
         if not clean_rows:
             QMessageBox.warning(self, "Invalid Data", "No valid data found in clipboard.")
             return

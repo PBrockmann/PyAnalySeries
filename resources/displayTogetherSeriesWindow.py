@@ -20,7 +20,7 @@ for key in plt.rcParams.keys():
         plt.rcParams[key] = []
 
 #=========================================================================================
-class displayOverlaidSeriesWindow(QWidget):
+class displayTogetherSeriesWindow(QWidget):
     #---------------------------------------------------------------------------------------------
     def __init__(self, Ids, open_displayWindows, items):
         super().__init__()
@@ -36,7 +36,7 @@ class displayOverlaidSeriesWindow(QWidget):
         self.yName = serieDict['Y']
         serie = serieDict['Serie']
 
-        title = 'Display overlaid series : ' + ', '.join(self.Ids)
+        title = 'Display together series : ' + ', '.join(self.Ids)
         self.setWindowTitle(title)
         self.setGeometry(200, 200, 1200, 800)
         self.setMinimumSize(800, 600)
@@ -176,7 +176,7 @@ if __name__ == "__main__":
 
     open_displayWindows = {}
     Id_displayWindow = tuple([serie1Dict['Id'], serie2Dict['Id']])
-    displayWindow = displayOverlaidSeriesWindow(Id_displayWindow, open_displayWindows, [item1, item2])
+    displayWindow = displayTogetherSeriesWindow(Id_displayWindow, open_displayWindows, [item1, item2])
     open_displayWindows[Id_displayWindow] = displayWindow
     displayWindow.show()
 

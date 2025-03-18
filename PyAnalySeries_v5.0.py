@@ -18,7 +18,7 @@ from resources.misc import *
 from resources.CustomQColorDialog import CustomQColorDialog 
 
 from resources.displaySingleSerieWindow import displaySingleSerieWindow
-from resources.displayOverlaidSeriesWindow import displayOverlaidSeriesWindow
+from resources.displayTogetherSeriesWindow import displayTogetherSeriesWindow
 from resources.displayStackedSeriesWindow import displayStackedSeriesWindow
 
 from resources.defineFilterWindow import defineFilterWindow
@@ -426,12 +426,10 @@ def save_WorkSheet(ws_item):
 
         ws.cell(row=1, column=1, value=f'Created with PyAnalyseries {version}')
 
-        text = '''
-        This file has been created with PyAnalySeries software.
-
-        Do not modify or accordingly with documentation 
-        '''
+        text = "This file has been created with PyAnalySeries software."
         ws.cell(row=3, column=1, value=text)
+        text = "Do not modify or accordingly with documentation."
+        ws.cell(row=4, column=1, value=text)
 
         #----------------------------------
         for n in range(ws_item.childCount()):
@@ -804,7 +802,7 @@ def displayMultipleSeries_selected_series(overlaid=True):
         displayWindow.activateWindow()
     else:
         if overlaid:
-            displayWindow = displayOverlaidSeriesWindow(Id_displayWindow, open_displayWindows, items_selected)
+            displayWindow = displayTogetherSeriesWindow(Id_displayWindow, open_displayWindows, items_selected)
         else:
             displayWindow = displayStackedSeriesWindow(Id_displayWindow, open_displayWindows, items_selected)
         open_displayWindows[Id_displayWindow] = displayWindow
@@ -1328,7 +1326,7 @@ def show_dialog(title, fileHTML, width, height):
     dialog.exec_()
 
 #========================================================================================
-def exit_confirm():
+def exit_confirm(event):
 
     reply = QMessageBox.question(
         main_window, 
@@ -1417,12 +1415,12 @@ display_action = QAction("Display Single", main_window)
 display_action.setShortcut('Ctrl+d')
 display_action.triggered.connect(displaySingleSerie_selected_series)
 
-displayOverlaidSeries_action = QAction("Display Overlaid", main_window)
-displayOverlaidSeries_action.setShortcut('Ctrl+t')
-displayOverlaidSeries_action.triggered.connect(lambda: displayMultipleSeries_selected_series(overlaid=True))
+displayTogetherSeries_action = QAction("Display Together", main_window)
+displayTogetherSeries_action.setShortcut('Ctrl+t')
+displayTogetherSeries_action.triggered.connect(lambda: displayMultipleSeries_selected_series(overlaid=True))
 
-displayStackedSeries_action = QAction("Display Stacked", main_window)
-displayStackedSeries_action.setShortcut('Ctrl+r')
+displayStackedSeries_action = QAction("Display stacKed", main_window)
+displayStackedSeries_action.setShortcut('Ctrl+k')
 displayStackedSeries_action.triggered.connect(lambda: displayMultipleSeries_selected_series(overlaid=False))
 
 close_all_action = QAction("Close all Display windows")
@@ -1433,7 +1431,7 @@ edit_menu.addAction(copy_action)
 edit_menu.addAction(paste_action)
 edit_menu.addSeparator()
 edit_menu.addAction(display_action)
-edit_menu.addAction(displayOverlaidSeries_action)
+edit_menu.addAction(displayTogetherSeries_action)
 edit_menu.addAction(displayStackedSeries_action)
 edit_menu.addAction(close_all_action)
 
@@ -1503,6 +1501,8 @@ if filesName:
 main_window.setStatusBar(QStatusBar())
 main_window.statusBar().showMessage('Application ready', 5000)
 main_window.show()
+
+main_window.closeEvent = exit_confirm
 
 #current_directory = os.getcwd()
 #print(current_directory)
