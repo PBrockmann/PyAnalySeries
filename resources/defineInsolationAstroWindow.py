@@ -56,7 +56,7 @@ class defineInsolationAstroWindow(QWidget):
             "Caloric summer insolation",
             "Caloric winter insolation"
         ])
-        self.plotType_dropdown.insertSeparator(4)
+        self.plotType_dropdown.insertSeparator(3)
         self.plotType_dropdown.setCurrentText("Daily insolation")
 
         #-------------------------------

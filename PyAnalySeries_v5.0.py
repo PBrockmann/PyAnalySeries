@@ -190,7 +190,11 @@ def on_item_changed(item, column):
                     QMessageBox.warning(main_window, "WS open in another application", f"The ws '{new_wsName}' is already in use. Please close the file.")
                     item.setText(0, old_wsName)
                 else:
-                    os.rename(old_wsName, new_wsName)
+                    file_path = os.path.dirname(new_wsName)
+                    if not os.path.exists(file_path):
+                        QMessageBox.warning(main_window, "Missing directory", f"Create first the target directory on the file system.")
+                    else:
+                        os.rename(old_wsName, new_wsName)
             #mark_ws(item)
     else: 
         itemDict = item.data(0, Qt.UserRole)
@@ -415,6 +419,13 @@ def save_WorkSheet(ws_item):
     try:
         wb = Workbook()
 
+        #----------------------------------
+        sheetName = f'Information'
+        ws = wb.create_sheet(title=sheetName)
+
+        ws.cell(row=1, column=1, value=f'Created with PyAnalyseries {version}')
+
+        #----------------------------------
         for n in range(ws_item.childCount()):
 
             item = ws_item.child(n)
@@ -1332,7 +1343,7 @@ icon = QIcon('resources/PyAnalySeries_icon.ico')
 app.setWindowIcon(icon)
 
 main_window = QMainWindow()
-main_window.setWindowTitle("PyAnalySeries " + version)
+main_window.setWindowTitle(f"PyAnalySeries {version}")
 main_window.setGeometry(100, 100, 1400, 600)
 
 main_widget = QWidget()
