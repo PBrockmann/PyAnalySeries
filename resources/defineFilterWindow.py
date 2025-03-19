@@ -31,7 +31,7 @@ class defineFilterWindow(QWidget):
         self.add_item_tree_widget = add_item_tree_widget
 
         self.serieWidth = 0.8
-        self.window_size = 5 
+        self.window_size = 9 
 
         title = 'Define FILTER : ' + self.Id
         self.setWindowTitle(title)
@@ -51,7 +51,7 @@ class defineFilterWindow(QWidget):
         self.spin_box = QSpinBox(self)
         self.spin_box.setRange(1, 33)
         self.spin_box.setSingleStep(2)
-        self.spin_box.setValue(5)
+        self.spin_box.setValue(self.window_size)
         self.spin_box.setFixedWidth(50)
         self.spin_box.valueChanged.connect(self.update_value)
         self.spin_box.lineEdit().setReadOnly(True)
@@ -185,7 +185,7 @@ class defineFilterWindow(QWidget):
             'Name': f'Moving average {self.window_size} pts', 
             'Parameters': f'{self.window_size}',
             'Comment': '',
-            'History': f'filter with parameters' + \
+            'History': f'<BR>Filter with parameters :' + \
                     '<ul>' + \
                     f'<li>Moving average size : {self.window_size}' + \
                     '</ul>'
@@ -195,11 +195,10 @@ class defineFilterWindow(QWidget):
         filtered_Id = generate_Id()
         filtered_serieDict = self.serieDict | {'Id': filtered_Id, 
             'Type': 'Serie filtered', 
-            'Name': f'Serie filtered with moving average {self.window_size} pts', 
             'Serie': self.moving_average(self.serie, self.window_size),
             'Color': generate_color(exclude_color=self.serieDict['Color']),
             'History': append_to_htmlText(self.serieDict['History'], 
-                f'serie <i><b>{self.serieDict["Id"]}</i></b> filtered with FILTER <i><b>{filter_Id}</i></b> with a moving average of size {self.window_size}<BR>---> serie <i><b>{filtered_Id}</b></i>'),
+                f'<BR>Serie <i><b>{self.serieDict["Id"]}</i></b> filtered with FILTER <i><b>{filter_Id}</i></b> with a moving average of size {self.window_size}<BR>---> serie <i><b>{filtered_Id}</b></i>'),
             'Comment': '',
         }
 

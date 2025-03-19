@@ -816,7 +816,7 @@ class defineInterpolationWindow(QWidget):
             'X2Coords': self.X2Coords,
             'Color': generate_color(exclude_color=self.serie2Dict['Color']),
             'History': append_to_htmlText(self.serie2Dict['History'], 
-                f'serie <i><b>{self.serie2Dict["Id"]}</i></b> interpolated with INTERPOLATION <i><b>{interpolation_Id}</i></b> with mode {self.interpolationMode}<BR>---> serie <i><b>{interpolated_Id}</b></i>'),
+                f'<BR>Serie <i><b>{self.serie2Dict["Id"]}</i></b> interpolated with INTERPOLATION <i><b>{interpolation_Id}</i></b> with mode {self.interpolationMode}<BR>---> serie <i><b>{interpolated_Id}</b></i>'),
             'Comment': ''
         }
 

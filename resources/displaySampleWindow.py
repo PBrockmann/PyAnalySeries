@@ -4,6 +4,8 @@ from PyQt5.QtGui import *
 
 import sys
 
+from .CustomQTableWidget import CustomQTableWidget
+
 #=========================================================================================
 class displaySampleWindow(QWidget):
     #---------------------------------------------------------------------------------------------
@@ -31,16 +33,31 @@ class displaySampleWindow(QWidget):
         layout_s1.addWidget(label_s1)
         layout_s1.addStretch()
 
-        print('-------------------------------------')
-        print(self.sampleDict['Parameters'])
-        print(self.sampleDict)
-        if 'XCoords' in self.sampleDict.keys():
-            print(self.sampleDict['XCoords'])
-
         parameters_layout.addLayout(layout_s1)
         parameters_layout.addStretch()
 
         parameters_tab.setLayout(parameters_layout)
+        self.tabs.addTab(parameters_tab, "Parameters")
+
+        #----------------------------------------------
+        if 'XCoords' in self.sampleDict.keys():
+
+            data_tab = QWidget()
+            data_layout = QVBoxLayout()
+            data_table = CustomQTableWidget()
+            data_table.setRowCount(len(self.sampleDict['XCoords']))
+            data_table.setColumnCount(1)
+            data_table.setHorizontalHeaderLabels(['X coordinates'])
+            for i in range(len(self.sampleDict['XCoords'])):
+                data_table.setItem(i, 0, QTableWidgetItem(str(f"{self.sampleDict['XCoords'][i]:.6f}")))
+                background_color = QColor('whitesmoke') if i % 2 == 0 else QColor('white')
+                data_table.item(i, 0).setBackground(background_color)
+            data_table.resizeColumnsToContents()
+
+            data_layout.addWidget(data_table)
+
+            data_tab.setLayout(data_layout)
+            self.tabs.addTab(data_tab, "X sampling coordinates")
 
         #----------------------------------------------
         info_tab = QWidget()
@@ -75,10 +92,9 @@ class displaySampleWindow(QWidget):
         info_layout.addStretch()
 
         info_tab.setLayout(info_layout)
+        self.tabs.addTab(info_tab, "Info")
 
         #----------------------------------------------
-        self.tabs.addTab(parameters_tab, "Parameters")
-        self.tabs.addTab(info_tab, "Info")
         self.tabs.setCurrentIndex(0)
 
         main_layout = QVBoxLayout()
@@ -114,7 +130,7 @@ if __name__ == "__main__":
 
     def handle_item(item):
         print('handle', item)
-
+ 
     app = QApplication([])
 
     itemDict = {
@@ -122,6 +138,7 @@ if __name__ == "__main__":
         'Name': 'A name',
         'Type': 'SAMPLE', 
         'Parameters': '5 ; linear',
+        'XCoords': [3, 7, 8.3, 9.4, 10],
         'Comment': 'A text',
         'History': 'command1 ; command2'
     }

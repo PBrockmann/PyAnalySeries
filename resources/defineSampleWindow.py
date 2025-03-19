@@ -264,7 +264,7 @@ class defineSampleWindow(QWidget):
                 'Name': f'Sample every {self.step}', 
                 'Parameters': f'{self.step} ; {self.kind}',
                 'Comment': '',
-                'History': f'sample with parameters' + \
+                'History': f'<BR>Sample with parameters :' + \
                         '<ul>' + \
                         f'<li>Step : {self.step}' + \
                         f'<li>Kind of interpolation : {self.kind}' + \
@@ -274,11 +274,12 @@ class defineSampleWindow(QWidget):
             sampleDict = {
                 'Id': sample_Id,
                 'Type': 'SAMPLE', 
-                'Name': f'Sample using x values of {self.serieRef_Id}: {self.serieRef_XName} / {self.serieRef_YName}',
+                'Name': f'Sample using x values of {self.serieRef_YName}',
                 'Parameters': f'{self.kind}',
                 'Comment': '',
-                'History': f'sample with parameters' + \
+                'History': f'<BR>Sample with parameters :' + \
                         '<ul>' + \
+                        f'<li>X values from {self.serieRef_Id} : {self.serieRef_XName} / {self.serieRef_YName}' + \
                         f'<li>Kind of interpolation : {self.kind}' + \
                         '</ul>',
                 'XCoords': self.sample_index
@@ -287,25 +288,18 @@ class defineSampleWindow(QWidget):
 
         sampled_Id = generate_Id()
         if not self.sample_from_xvalues:
-            sampled_serieDict = self.serieDict | {'Id': sampled_Id, 
-                'Type': 'Serie sampled', 
-                'Name': f'Serie sampled every {self.step}', 
-                'Serie': self.sample(self.serie, self.sample_index, self.kind),
-                'Color': generate_color(exclude_color=self.serieDict['Color']),
-                'History': append_to_htmlText(self.serieDict['History'], 
-                    f'serie <i><b>{self.serieDict["Id"]}</i></b> sampled with SAMPLE <i><b>{sample_Id}</i></b><BR>---> serie <i><b>{sampled_Id}</b></i>'),
-                'Comment': '',
-            }
+            textHistory = f'every {self.step} and {self.kind} interpolation'
         else:
-            sampled_serieDict = self.serieDict | {'Id': sampled_Id, 
-                'Type': 'Serie sampled', 
-                'Name': f'Sample using x values from {self.serieRef_YName}',
-                'Serie': self.sample(self.serie, self.sample_index, self.kind),
-                'Color': generate_color(exclude_color=self.serieDict['Color']),
-                'History': append_to_htmlText(self.serieDict['History'], 
-                    f'serie <i><b>{self.serieDict["Id"]}</i></b> sampled with SAMPLE <i><b>{sample_Id}</i></b><BR>---> serie <i><b>{sampled_Id}</b></i>'),
-                'Comment': '',
-            }
+            textHistory = f'using x values from {self.serieRef_YName} and {self.kind} interpolation'
+
+        sampled_serieDict = self.serieDict | {'Id': sampled_Id, 
+            'Type': 'Serie sampled', 
+            'Serie': self.sample(self.serie, self.sample_index, self.kind),
+            'Color': generate_color(exclude_color=self.serieDict['Color']),
+            'History': append_to_htmlText(self.serieDict['History'], 
+                f'<BR>Serie <i><b>{self.serieDict["Id"]}</i></b> sampled {textHistory} with SAMPLE <i><b>{sample_Id}</i></b><BR>---> serie <i><b>{sampled_Id}</b></i>'),
+            'Comment': '',
+        }
 
         try:
             position = self.item.parent().indexOfChild(self.item)

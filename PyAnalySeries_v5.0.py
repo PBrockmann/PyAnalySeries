@@ -653,7 +653,8 @@ class CustomTreeWidget(QTreeWidget):
             font-family: Courier New;
         """)
         self.custom_tooltip.setWindowFlags(Qt.ToolTip)
-        self.custom_tooltip.setFixedSize(600, 200)
+        self.custom_tooltip.setFixedWidth(500)
+        self.custom_tooltip.setWordWrap(True)
         self.custom_tooltip.setAlignment(Qt.AlignTop | Qt.AlignLeft)  # Align top-left
         self.custom_tooltip.hide()
 
@@ -701,6 +702,7 @@ class CustomTreeWidget(QTreeWidget):
                     global_pos = self.viewport().mapToGlobal(pos)
                     self.custom_tooltip.setText(tooltip_text)
                     self.custom_tooltip.move(global_pos + QPoint(10, 10))
+                    self.custom_tooltip.adjustSize()
                     self.custom_tooltip.show()
                     return True
 
@@ -902,7 +904,7 @@ def apply_filter():
             'Serie': defineFilterWindow.moving_average(serie, window_size=filter_window_size),
             'Color': generate_color(exclude_color=serieDict['Color']),
             'History': append_to_htmlText(serieDict['History'], 
-                f'serie <i><b>{serieDict["Id"]}</i></b> filtered with FILTER <i><b>{filterDict["Id"]}</i></b> with a moving average of size {filter_window_size}<BR>---> serie <i><b>{filtered_Id}</b></i>'),
+                f'<BR>Serie <i><b>{serieDict["Id"]}</i></b> filtered with FILTER <i><b>{filterDict["Id"]}</i></b> with a moving average of size {filter_window_size}<BR>---> serie <i><b>{filtered_Id}</b></i>'),
             'Comment': ''
         }
         ws_item = item.parent()
@@ -956,22 +958,34 @@ def apply_sample():
 
     #-------------------------------------------------------------
     sampleDict = itemFilter.data(0, Qt.UserRole)
-    param1_str, param2_str = sampleDict['Parameters'].split(';')
-    sample_step = float(param1_str.strip())
-    sample_kind = param2_str.strip()
 
     for item in itemSeries_selected:
         serieDict = item.data(0, Qt.UserRole)
         serie = serieDict['Serie']
         serie = serie.groupby(serie.index).mean()
 
+        if 'XCoords' in sampleDict.keys():
+            sample_kind = sampleDict['Parameters'].strip()
+            sample_index =  sampleDict['XCoords']
+            textHistory = f'using x values and {sample_kind} interpolation'
+        else:
+            param1_str, param2_str = sampleDict['Parameters'].split(';')
+            sample_step = float(param1_str.strip())
+            sample_kind = param2_str.strip()
+            index_min = serie.index.min()
+            index_max = serie.index.max()
+            index_min = np.ceil(index_min / sample_step) * sample_step
+            index_max = np.floor(index_max / sample_step) * sample_step
+            sample_index = np.arange(index_min, index_max + sample_step, sample_step)
+            textHistory = f'every {sample_step} and {sample_kind} interpolation'
+
         sampled_Id = generate_Id()
         sampled_serieDict = serieDict | {'Id': sampled_Id,
             'Type': 'Serie sampled',
-            'Serie': defineSampleWindow.sample(serie, sample_step, sample_kind),
+            'Serie': defineSampleWindow.sample(serie, sample_index, sample_kind),
             'Color': generate_color(exclude_color=serieDict['Color']),
             'History': append_to_htmlText(serieDict['History'], 
-                f'serie <i><b>{serieDict["Id"]}</i></b> sampled with SAMPLE <i><b>{sampleDict["Id"]}</i></b> every {sample_step}<BR>---> serie <i><b>{sampled_Id}</b></i>'),
+                f'<BR>Serie <i><b>{serieDict["Id"]}</i></b> sampled {textHistory} with SAMPLE <i><b>{sampleDict["Id"]}</i></b><BR>---> serie <i><b>{sampled_Id}</b></i>'),
             'Comment': ''
         }
         ws_item = item.parent()
@@ -1091,7 +1105,7 @@ def apply_interpolation(interpolationMode):
             'X2Coords': X2Coords, 
             'Color': generate_color(exclude_color=serieDict['Color']),
             'History': append_to_htmlText(serieDict['History'], 
-                f'serie <i><b>{serieDict["Id"]}</i></b> interpolated with INTERPOLATION <i><b>{interpolationDict["Id"]}</i></b> with mode {interpolationMode}<BR>---> serie <i><b>{interpolated_Id}</b></i>'),
+                f'<BR>Serie <i><b>{serieDict["Id"]}</i></b> interpolated with INTERPOLATION <i><b>{interpolationDict["Id"]}</i></b> with mode {interpolationMode}<BR>---> serie <i><b>{interpolated_Id}</b></i>'),
             'Comment': ''
         }
 
@@ -1330,6 +1344,8 @@ def show_dialog(title, fileHTML, width, height):
 
 #========================================================================================
 def exit_confirm():
+
+    tree_widget.custom_tooltip.hide()
 
     reply = QMessageBox.question(
         main_window, 

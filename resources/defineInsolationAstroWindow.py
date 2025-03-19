@@ -509,7 +509,7 @@ class defineInsolationAstroWindow(QWidget):
             shortName = f"{self.plotType} [degrees]"
             
         elif self.plotType == "Daily insolation":
-            history = f'Insolation serie "{self.plotType}" with parameters:' + \
+            history = f'Insolation serie "{self.plotType}" with parameters :' + \
                         '<ul>' + \
                         f'<li>Solar constant [W/m2]: {self.solar_constant_input.value()}' + \
                         f'<li>Latitude [°]: {self.latitude_input.value()}' + \
@@ -518,7 +518,7 @@ class defineInsolationAstroWindow(QWidget):
             shortName = "Daily insolation [W/m2]"
 
         elif self.plotType == "Integrated insolation between 2 true longitudes":
-            history = f'Insolation serie "{self.plotType}" with parameters:' + \
+            history = f'Insolation serie "{self.plotType}" with parameters :' + \
                         '<ul>' + \
                         f'<li>Solar constant [W/m2]: {self.solar_constant_input.value()}' + \
                         f'<li>Latitude [°]: {self.latitude_input.value()}' + \
@@ -529,7 +529,7 @@ class defineInsolationAstroWindow(QWidget):
 
         elif self.plotType == "Caloric summer insolation" or \
              self.plotType == "Caloric winter insolation":
-            history = f'Insolation serie "{self.plotType}" with parameters:' + \
+            history = f'Insolation serie "{self.plotType}" with parameters :' + \
                         '<ul>' + \
                         f'<li>Solar constant [W/m2]: {self.solar_constant_input.value()}' + \
                         f'<li>Latitude [°]: {self.latitude_input.value()}' + \
@@ -544,7 +544,7 @@ class defineInsolationAstroWindow(QWidget):
             'Y': shortName,
             'Y axis inverted': False,
             'Color': generate_color(),
-            'History': history,
+            'History': '<BR>' + history,
             'Comment': '',
             'Serie': pd.Series(self.values, index=self.index),
             }
