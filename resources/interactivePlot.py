@@ -320,7 +320,7 @@ class interactivePlot:
 
     #---------------------------------------------------------------------------------------------
     def on_resize(self, event):
-        width, height = self.fig.get_size_inches() * self.fig.dpi
+        width, height = self.fig.canvas.get_width_height()
 
         self.fig.subplots_adjust(
             left = self.left_margin / width,

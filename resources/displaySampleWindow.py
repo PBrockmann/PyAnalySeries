@@ -31,6 +31,12 @@ class displaySampleWindow(QWidget):
         layout_s1.addWidget(label_s1)
         layout_s1.addStretch()
 
+        print('-------------------------------------')
+        print(self.sampleDict['Parameters'])
+        print(self.sampleDict)
+        if 'XCoords' in self.sampleDict.keys():
+            print(self.sampleDict['XCoords'])
+
         parameters_layout.addLayout(layout_s1)
         parameters_layout.addStretch()
 
