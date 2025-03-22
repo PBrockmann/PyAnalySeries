@@ -322,6 +322,7 @@ def load_WorkSheet(fileName):
 
             except:
                 msg = f"The file '{fileName}' contains a serie that is wrongly formatted in {sheetName} sheet."
+                QMessageBox.critical(main_window, "Load file", msg)
                 main_window.statusBar().showMessage(msg, 5000)
                 QApplication.processEvents()
 
@@ -348,6 +349,7 @@ def load_WorkSheet(fileName):
 
             except:
                 msg = f"The file '{fileName}' contains a FILTER/SAMPLE that is wrongly formatted in {sheetName} sheet."
+                QMessageBox.critical(main_window, "Load file", msg)
                 main_window.statusBar().showMessage(msg, 5000)
                 QApplication.processEvents()
 
@@ -371,6 +373,7 @@ def load_WorkSheet(fileName):
 
             except:
                 msg = f"The file '{fileName}' contains an INTERPOLATION that is wrongly formatted in {sheetName} sheet."
+                QMessageBox.critical(main_window, "Load file", msg)
                 main_window.statusBar().showMessage(msg, 5000)
                 QApplication.processEvents()
 
