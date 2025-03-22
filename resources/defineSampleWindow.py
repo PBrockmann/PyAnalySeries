@@ -60,7 +60,7 @@ class defineSampleWindow(QWidget):
         self.step_spinbox = QDoubleSpinBox()
         self.step_spinbox.setRange(0.5, 100)
         self.step_spinbox.setSingleStep(.5)
-        self.step_spinbox.setValue(2)
+        self.step_spinbox.setValue(self.step)
         self.step_spinbox.setDecimals(2)
         self.step_spinbox.setFixedWidth(80)
         self.step_spinbox.valueChanged.connect(self.update_value)
@@ -242,7 +242,34 @@ class defineSampleWindow(QWidget):
     @staticmethod
     def sample(serie, sample_index, kind):
 
-        interpolator = interpolate.interp1d(serie.index, serie.values, kind=kind)
+        # mean duplicates
+        serie = serie.groupby(serie.index).mean()
+
+        # Restrict sampling to the range of the given series
+        x_min, x_max = serie.index.min(), serie.index.max()
+        valid_sample_index = sample_index[(sample_index >= x_min) & (sample_index <= x_max)]
+    
+        # Create a new series with valid indices, initially filled with NaN
+        result_serie = pd.Series(index=valid_sample_index, dtype=float)
+    
+        # Merge with the existing series and sort the index
+        result_serie = result_serie.combine_first(serie).sort_index()
+    
+        # Perform interpolation to fill missing values
+        result_serie = result_serie.interpolate(method=kind, limit_direction="both")
+    
+        # Keep only the requested sample indices
+        result_serie = result_serie.loc[valid_sample_index]
+    
+        return result_serie
+
+    #---------------------------------------------------------------------------------------------
+    @staticmethod
+    def sampleOld(serie, sample_index, kind):
+
+        serie = serie.interpolate(method="linear")
+
+        interpolator = interpolate.interp1d(serie.index, serie.values, kind=kind, fill_value='extrapolate')
 
         # To limit sample to the range of the serie to be sampled
         x_min, x_max = serie.index.min(), serie.index.max()

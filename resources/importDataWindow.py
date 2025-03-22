@@ -4,6 +4,7 @@ from PyQt5.QtGui import *
 
 import sys
 import pandas as pd
+import numpy as np
 
 from .misc import *
 from .CustomQTableWidget import CustomQTableWidget 
@@ -83,20 +84,20 @@ class importDataWindow(QWidget):
         rows = text.split("\n")
         clean_rows = [row.strip() for row in rows if row.strip()]
 
-        print(clean_rows)
-
         if not clean_rows:
             QMessageBox.warning(self, "Invalid Data", "No valid data found in clipboard.")
             return
 
-        data = []
+        expected_columns = len(clean_rows[0].split('\t'))
+        #print(expected_columns)
 
+        data = []
         for row in clean_rows:
             columns = row.split("\t")
-            non_empty_columns = [col for col in columns if col.strip()]
-
-            if len(non_empty_columns) >= 2:
-                data.append(non_empty_columns)
+            values = [""] * expected_columns
+            for i in range(len(columns)):
+                values[i] = columns[i] 
+            data.append(values)
 
         if not data:
             QMessageBox.warning(self, "Invalid Data", "At least 2 columns (X,Y), (X,Y1,Y2,...) or (X Reference, X Distorded)")
@@ -141,17 +142,21 @@ class importDataWindow(QWidget):
                 return False
 
     #---------------------------------------------------------------------------------------------
-    def data_table_values_check(self):
+    def data_table_values_check(self, allow_empty_cells=False):
 
         for col in range(self.data_table.columnCount()):
             for row in range(self.data_table.rowCount()):
                 item = self.data_table.item(row, col)
-                if item is None or not self.is_numeric(item.text()):
-                    return False
+                if allow_empty_cells:
+                    if item.text() != "" and not self.is_numeric(item.text()):
+                        return False
+                else:
+                    if not self.is_numeric(item.text()):
+                        return False
         return True
 
     #---------------------------------------------------------------------------------------------
-    def data_table_check(self):
+    def data_table_check(self, allow_empty_cells=False):
 
         if self.data_table.rowCount() == 0:
             msg = 'Error: No data to import'
@@ -163,7 +168,7 @@ class importDataWindow(QWidget):
             self.status_bar.showMessage(msg, 5000)
             return False
 
-        if not self.data_table_values_check():
+        if not self.data_table_values_check(allow_empty_cells):
             msg = 'Error: Values are not numeric'
             self.status_bar.showMessage(msg, 5000)
             return False
@@ -171,16 +176,32 @@ class importDataWindow(QWidget):
         return True
 
     #---------------------------------------------------------------------------------------------
+    def is_monotonic_increasing_or_unique(self, values):
+   
+        serie = pd.Series(values)
+        is_monotonic = serie.is_monotonic_increasing or serie.is_unique
+    
+        return is_monotonic
+
+    #---------------------------------------------------------------------------------------------
     def import_series(self):
 
-        if not self.data_table_check(): return
+        if not self.data_table_check(allow_empty_cells=True): return
 
         index = [float(self.data_table.item(row, 0).text()) for row in range(self.data_table.rowCount())] 
         X = self.data_table.horizontalHeaderItem(0).text()
 
         for col in range(1, self.data_table.columnCount()):
 
-            values = [float(self.data_table.item(row, col).text()) for row in range(self.data_table.rowCount())] 
+            values = []
+            for row in range(self.data_table.rowCount()) : 
+                valueText = self.data_table.item(row, col).text()
+                if valueText == '':
+                    value = np.nan
+                else:
+                    value = float(valueText)
+                values.append(value)
+
             Y = self.data_table.horizontalHeaderItem(col).text()
 
             serie_Id =  generate_Id()
@@ -214,7 +235,15 @@ class importDataWindow(QWidget):
         # Distorded (X2Coords), Reference (X1Coords) as columns
         X2Coords = [float(self.data_table.item(row, column_order[0]).text()) for row in range(self.data_table.rowCount())] 
         X1Coords = [float(self.data_table.item(row, column_order[1]).text()) for row in range(self.data_table.rowCount())] 
+        X2Name = self.data_table.horizontalHeaderItem(column_order[0]).text()
         X1Name = self.data_table.horizontalHeaderItem(column_order[1]).text()
+
+        if self.is_monotonic_increasing_or_unique(X2Coords):
+            QMessageBox.warning(self, "Import pointers", f"Import not possible : {X2Name} values are not monotonic or not unique")
+            return
+        if self.is_monotonic_increasing_or_unique(X1Coords):
+            QMessageBox.warning(self, "Import pointers", f"Import not possible : {X1Name} values are not monotonic or not unique")
+            return
 
         item_Id =  generate_Id()
         itemDict = {
