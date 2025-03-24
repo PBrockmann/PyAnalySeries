@@ -54,11 +54,14 @@ class displaySingleSerieWindow(QWidget):
         data_table.setColumnCount(2)
         data_table.setHorizontalHeaderLabels([self.xName, self.yName])
         duplicates = serie.index.duplicated()
+        missing_values = serie.isna().to_numpy()
         for i in range(len(serie)):
             data_table.setItem(i, 0, QTableWidgetItem(str(f'{serie.index[i]:.6f}')))
             data_table.setItem(i, 1, QTableWidgetItem(str(f'{serie.values[i]:.6f}')))
             if duplicates[i]:
                 background_color = QColor('lemonchiffon')
+            elif missing_values[i]:
+                background_color = QColor('peachpuff')
             else:
                 background_color = QColor('whitesmoke') if i % 2 == 0 else QColor('white')
             data_table.item(i, 0).setBackground(background_color)
