@@ -41,9 +41,9 @@ class importDataWindow(QWidget):
         button_layout = QHBoxLayout()
 
         self.importPointers_button = QPushButton("Import pointers", self)
-        self.importPointers_button.setToolTip("Order colums as Distorded, Reference")
+        self.importPointers_button.setToolTip("(Distorded, Reference)")
         self.importSeries_button = QPushButton("Import series", self)
-        self.importSeries_button.setToolTip("Order colums as X values, Y1 values, (Y2 values, ...)")
+        self.importSeries_button.setToolTip("(X,Y) or (X,Y1,Y2,...)")
         self.close_button = QPushButton("Close", self)
         button_layout.addStretch()
 
@@ -186,6 +186,10 @@ class importDataWindow(QWidget):
     #---------------------------------------------------------------------------------------------
     def import_series(self):
 
+        if self.data_table.columnCount() < 2:
+            QMessageBox.warning(self, "Import series", "Import not possible. Expected format is at least 2 columns (X,Y) or (X,Y1,Y2,...)")
+            return
+
         if not self.data_table_check(allow_empty_cells=True): return
 
         index = [float(self.data_table.item(row, 0).text()) for row in range(self.data_table.rowCount())] 
@@ -225,6 +229,10 @@ class importDataWindow(QWidget):
 
     #---------------------------------------------------------------------------------------------
     def import_pointers(self):
+
+        if self.data_table.columnCount() < 2:
+            QMessageBox.warning(self, "Import pointers", "Import not possible. Expected format is 2 columns (X Reference, X Distorded)")
+            return
 
         if not self.data_table_check(): return
 
