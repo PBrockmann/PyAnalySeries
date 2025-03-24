@@ -306,16 +306,16 @@ def load_WorkSheet(fileName):
                     'Color': Color,
                     'Comment': df['Comment'][0],
                     'History': df['History'][0],
-                    'Serie': pd.Series(cleanList(df.iloc[:,1]), index=cleanList(df.iloc[:,0]))
+                    'Serie': pd.Series(addNanList(df.iloc[:,1]), index=addNanList(df.iloc[:,0]))
                 }
 
                 if 'InterpolationMode' in df.columns:
                     serieDict = serieDict | {
                         'InterpolationMode': df['InterpolationMode'][0],
-                        'X1Coords': cleanList(df['X1Coords']),
-                        'X2Coords': cleanList(df['X2Coords']),
+                        'X1Coords': cleanSpaceList(df['X1Coords']),
+                        'X2Coords': cleanSpaceList(df['X2Coords']),
                         'XOriginal': df.columns[11],
-                        'XOriginalValues': cleanList(df.iloc[:,11])
+                        'XOriginalValues': addNanList(df.iloc[:,11])
                     }
 
                 itemDict_list.append(serieDict)
@@ -342,7 +342,7 @@ def load_WorkSheet(fileName):
 
                 if 'XCoords' in df.columns:                 # for SAMPLE
                     filterDict = filterDict | {
-                        'XCoords': cleanList(df['X2Coords'])
+                        'XCoords': addNanList(df['X2Coords'])
                     }
 
                 itemDict_list.append(filterDict)

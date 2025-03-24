@@ -26,9 +26,12 @@ def append_to_htmlText(text, new_value):
     return text 
 
 #========================================================================================
-def cleanList(aList):
-    #return [x for x in aList if x != '']
+def addNanList(aList):
     return [np.nan if x == '' else x for x in aList]        # Handle missing values
+
+#========================================================================================
+def cleanSpaceList(aList):
+    return [x for x in aList if x != '']
 
 #========================================================================================
 def is_open(file):
