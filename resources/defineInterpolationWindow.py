@@ -170,7 +170,7 @@ class defineInterpolationWindow(QWidget):
         self.showInterp.setToolTip("Type key 'z' as shortcut")
 
         self.removeAddLastPointer_button = QPushButton()
-        self.removeAddLastPointer_button.setFixedWidth(150)
+        self.removeAddLastPointer_button.setFixedWidth(180)
         self.removeAddLastPointer_button.setText("Remove last pointer")
         self.removeAddLastPointer_button.setShortcut("u")
         self.removeAddLastPointer_button.setEnabled(False)

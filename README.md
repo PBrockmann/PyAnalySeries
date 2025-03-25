@@ -33,3 +33,9 @@ Based on:
 
 
 ![ScreenShot2](capture_02.png) 
+
+#### Licence
+
+![CeCILL License](https://img.shields.io/badge/license-CeCILL-blue)
+This project is distributed under the **CeCILL v2.1** license.  
+
