@@ -39,8 +39,13 @@ class defineInsolationAstroWindow(QWidget):
         main_layout = QVBoxLayout()
 
         #----------------------------------------------
-        groupbox1 = QGroupBox('Parameters')
-        groupbox1.setFixedWidth(600)
+        col_layout = QHBoxLayout()
+
+        #----------------------------------------------
+        col1_layout = QVBoxLayout()
+
+        #----------------------------------------------
+        groupbox1 = QGroupBox('Parameters :')
 
         form_layout = QFormLayout()
 
@@ -144,24 +149,47 @@ class defineInsolationAstroWindow(QWidget):
         self.timeUnit = self.timeUnit_dropdown.currentText()
 
         #-------------------------------
-        form_layout.addRow("Type:", self.plotType_dropdown)
-        form_layout.addRow("Astronomical solution:", self.solutionAstro_dropdown)
-        form_layout.addRow("Solar constant [W/m2]:", self.solar_constant_input)
-        form_layout.addRow("Latitude [°]:", self.latitude_input)
-        form_layout.addRow("True longitude #1 [°]:", self.trueLongitude1_input)
-        form_layout.addRow("True longitude #2 [°]:", self.trueLongitude2_input)
-        form_layout.addRow("Time direction:", self.timeConvention_dropdown)
+        form_layout.addRow("Type :", self.plotType_dropdown)
+        form_layout.addRow("Astronomical solution :", self.solutionAstro_dropdown)
+        form_layout.addRow("Solar constant [W/m2] :", self.solar_constant_input)
+        form_layout.addRow("Latitude [°] :", self.latitude_input)
+        form_layout.addRow("True longitude #1 [°] :", self.trueLongitude1_input)
+        form_layout.addRow("True longitude #2 [°] :", self.trueLongitude2_input)
+        form_layout.addRow("Time direction :", self.timeConvention_dropdown)
         form_layout.addRow("Time unit:", self.timeUnit_dropdown)
-        self.label_tstart = QLabel(f"Start [{self.timeUnit}]:")
+        self.label_tstart = QLabel(f"Start [{self.timeUnit}] :")
         form_layout.addRow(self.label_tstart, self.tstart_input)
-        self.label_tend = QLabel(f"End [{self.timeUnit}]:")
+        self.label_tend = QLabel(f"End [{self.timeUnit}] :")
         form_layout.addRow(self.label_tend, self.tend_input)
-        self.label_tstep = QLabel(f"Step [{self.timeUnit}]:")
+        self.label_tstep = QLabel(f"Step [{self.timeUnit}] :")
         form_layout.addRow(self.label_tstep, self.tstep_input)
 
         #-------------------------------
         groupbox1.setLayout(form_layout)
-        main_layout.addWidget(groupbox1)
+        col1_layout.addWidget(groupbox1)
+
+        #----------------------------------------------
+        col2_layout = QVBoxLayout()
+
+        self.ref_Berger1978 = 'Berger, A. (1978) Long-term variations of daily insolation and Quaternary climatic changes. Journal of the Atmospheric Sciences, 35, 2362-2367. https://doi.org/10.1175/1520-0469(1978)035&lt;2362:LTVODI&gt;2.0.CO;2'
+        self.ref_Laskar1993 = 'Laskar, J., Joutel, F., & Boudin, F. (1993). Orbital, precessional, and insolation quantities for the Earth from -20 Myr to +10 Myr. Astronomy and Astrophysics, 270(1-2), 522-533. https://adsabs.harvard.edu/full/1993A%26A...270..522L/0000522.000.html'
+        self.ref_Laskar2004 = 'Laskar, J., Robutel, P., Joutel, F., Gastineau, M., Correia, A. C., & Levrard, B. (2004). A long-term numerical solution for the insolation quantities of the Earth. Astronomy & Astrophysics, 428(1), 261-285. https://doi.org/10.1051/0004-6361:20041335'
+        self.ref_Laskar2010 = 'Laskar, J., Fienga, A., Gastineau, M., Manche, H.: (2011). A new orbital solution for the long-term motion of the Earth. Astron. Astrophys., Volume 532, A89. https://doi.org/10.48550/arXiv.1103.1084'
+
+        self.ref = QLabel()
+        self.ref.setText(f"Reference : <br><br>{self.ref_Laskar2004}")
+        self.ref.setFixedWidth(400)
+        self.ref.setWordWrap(True)
+        self.ref.setTextInteractionFlags(Qt.TextSelectableByMouse)
+
+        col2_layout.addWidget(self.ref)
+        col2_layout.addStretch()
+
+        #----------------------------------------------
+        col_layout.addLayout(col1_layout)
+        col_layout.addLayout(col2_layout)
+        col_layout.addStretch()
+        main_layout.addLayout(col_layout)
 
         #----------------------------------------------
         self.update_timer = QTimer()
@@ -348,30 +376,33 @@ class defineInsolationAstroWindow(QWidget):
             scaleFactor = 1
 
         if self.solutionAstro.startswith("Laskar2010"):
-            for i in range(1, self.plotType_dropdown.count()):
-                self.plotType_dropdown.setItemData(i, Qt.NoItemFlags, Qt.UserRole - 1)
+            for i in range(self.plotType_dropdown.count()):
+                if self.plotType_dropdown.itemText(i) != "Eccentricity":
+                    self.plotType_dropdown.model().item(i).setFlags(Qt.NoItemFlags)
+                else:
+                    self.plotType_dropdown.model().item(i).setFlags(Qt.ItemIsEnabled)
             self.plotType_dropdown.setCurrentText("Eccentricity")
-
             lim1 = -249999
             lim2 = 0
+            refText = self.ref_Laskar2010
 
         elif self.solutionAstro.startswith("Laskar2004"):
             reinit_plotType_dropdow()
-
             lim1 = -101000
             lim2 = 21000 
+            refText = self.ref_Laskar2004
 
         elif self.solutionAstro.startswith("Laskar1993"):
             reinit_plotType_dropdow()
-
             lim1 = -20000
             lim2 = 10000 
+            refText = self.ref_Laskar1993
 
         else:
             reinit_plotType_dropdow()
-
             lim1 = -5E6
             lim2 = 5E6
+            refText = self.ref_Berger1978
 
         lim1 = lim1 * self.t_convention * scaleFactor
         lim2 = lim2 * self.t_convention * scaleFactor
@@ -379,6 +410,7 @@ class defineInsolationAstroWindow(QWidget):
         self.tend_input.setRange(int(min(lim1, lim2)), int(max(lim1, lim2)))
         self.tstart_input.setToolTip(f"Choose a value between {min(lim1, lim2)} and {max(lim1, lim2)}")
         self.tend_input.setToolTip(f"Choose a value between {min(lim1, lim2)} and {max(lim1, lim2)}")
+        self.ref.setText(f"Reference : <br><br>{refText}")
     
         self.delayed_update()
 
@@ -408,32 +440,35 @@ class defineInsolationAstroWindow(QWidget):
         deg_to_rad = np.pi/180.
        
         astro_params = eval(f"astro.Astro{self.solutionAstro}()")
-        ecc = astro_params.eccentricity(t)
-        obl = astro_params.obliquity(t)
-        pre = astro_params.precession_angle(t)
-        preParam = astro_params.precession_parameter(t)
 
         values = np.empty(len(t))
 
         piDeg = np.pi/180
 
         if self.plotType == "Eccentricity":
+            ecc = astro_params.eccentricity(t)
             values = ecc / piDeg
             ylabel = "Eccentricity [degrees]"
 
         elif self.plotType == "Obliquity":
+            obl = astro_params.obliquity(t)
             values = obl / piDeg
             ylabel = "Obliquity [degrees]"
 
         elif self.plotType == "Precession angle":
+            pre = astro_params.precession_angle(t)
             values = pre / piDeg
             ylabel = "Precession angle [degrees]"
 
         elif self.plotType == "Precession parameter":
+            preParam = astro_params.precession_parameter(t)
             values = preParam / piDeg
             ylabel = "Precession parameter [degrees]"
 
         elif self.plotType == "Daily insolation":
+            ecc = astro_params.eccentricity(t)
+            obl = astro_params.obliquity(t)
+            pre = astro_params.precession_angle(t)
             for i in range(len(t)): 
                 values[i] = solar_constant * \
                             inso.inso_dayly_radians(
@@ -445,6 +480,9 @@ class defineInsolationAstroWindow(QWidget):
             ylabel = "Insolation [W/m2]"
 
         elif self.plotType == "Integrated insolation between 2 true longitudes":
+            ecc = astro_params.eccentricity(t)
+            obl = astro_params.obliquity(t)
+            pre = astro_params.precession_angle(t)
             for i in range(len(t)): 
                 values[i] = solar_constant * \
                             inso.inso_mean_radians(
@@ -457,6 +495,9 @@ class defineInsolationAstroWindow(QWidget):
             ylabel = "Insolation [W/m2]"
 
         elif self.plotType == "Caloric summer insolation":
+            ecc = astro_params.eccentricity(t)
+            obl = astro_params.obliquity(t)
+            pre = astro_params.precession_angle(t)
             for i in range(len(t)): 
                 values[i] = solar_constant * \
                             inso.inso_caloric_summer_NH(
@@ -467,6 +508,9 @@ class defineInsolationAstroWindow(QWidget):
             ylabel = "Insolation [W/m2]"
 
         elif self.plotType == "Caloric winter insolation":
+            ecc = astro_params.eccentricity(t)
+            obl = astro_params.obliquity(t)
+            pre = astro_params.precession_angle(t)
             for i in range(len(t)): 
                 values[i] = solar_constant * \
                             inso.inso_caloric_winter_NH(
