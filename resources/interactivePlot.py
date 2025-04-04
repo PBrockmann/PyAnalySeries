@@ -145,20 +145,6 @@ class interactivePlot:
         return closest_axis, axis_type
 
     #---------------------------------------------------------------------------------------------
-    def detect_artist_orig(self, event):
-        for ax in self.axs:
-            # First check if the event occurred on the X or Y axis ticks
-            if ax.xaxis.contains(event)[0]:
-                return ax.xaxis  # Detected XAxis
-            if ax.yaxis.contains(event)[0]:
-                return ax.yaxis  # Detected YAxis
-
-            # Now check if the event occurred inside the Axes itself
-            if ax.contains(event)[0]:
-                return ax  # Detected Axes itself
-        return None
-
-    #---------------------------------------------------------------------------------------------
     def on_scroll(self, event):
         """Zoom in and out based on mouse scroll."""
         if event.button == 'up':
