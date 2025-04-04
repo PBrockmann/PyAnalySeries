@@ -49,6 +49,7 @@ class interactivePlot:
             ax.pan_start = None
             ax.line_points_pairs = []
             ax.map_legend_to_line = {}
+            ax.spine_left_position = 0
 
         # Connect events to methods
         self.fig.canvas.mpl_connect('scroll_event', self.on_scroll)
@@ -104,6 +105,47 @@ class interactivePlot:
 
     #---------------------------------------------------------------------------------------------
     def detect_artist(self, event):
+        """Detect which axis is closest to the mouse cursor."""
+        
+        #------------------------------------------------------------------
+        closest_axis = None
+        axis_type = None
+        distance_min = float("inf")
+    
+        #------------------------------------------------------------------
+        #print('-----------------')
+        #print(f"Mouse: {event.x}, {event.y}")
+    
+        for axcurrent in self.axs:
+    
+            #print('----', id(axcurrent))
+
+            if axcurrent.contains(event)[0]:  
+                return axcurrent, axcurrent  # If cursor is inside the main axis, return it
+    
+            # Detect "left" spines (shifted Y-axes)
+            spine_pos = axcurrent.spines["left"].get_position()[1]
+            spine_left_x = axcurrent.transAxes.transform((spine_pos, 0))[0]
+            # Detect "bottom" spine
+            spine_pos = axcurrent.spines["bottom"].get_position()[1]
+            spine_bottom_y = axcurrent.transAxes.transform((spine_pos, 0))[1]
+    
+            distance_x = abs(event.x - spine_left_x)
+            distance_y = abs(event.y - spine_bottom_y)
+            distance = distance_x + distance_y
+   
+            #print(f"Spine Left: {spine_left_x:.2f}px, Bottom: {spine_bottom_y:.2f}px")
+            #print(f"Distances -> Total: {distance:.2f}px, Left: {distance_x:.2f}px, Bottom: {distance_y:.2f}px")
+    
+            if distance < distance_min:
+                distance_min = distance
+                closest_axis = axcurrent
+                axis_type = axcurrent.yaxis if distance_x < distance_y else axcurrent.xaxis
+    
+        return closest_axis, axis_type
+
+    #---------------------------------------------------------------------------------------------
+    def detect_artist_orig(self, event):
         for ax in self.axs:
             # First check if the event occurred on the X or Y axis ticks
             if ax.xaxis.contains(event)[0]:
@@ -124,8 +166,7 @@ class interactivePlot:
         elif event.button == 'down':
             scale_factor = 1.1  # Zoom out
 
-        artist = self.detect_artist(event)  # Detect the Artist element under the mouse
-        #print('scroll', artist)
+        ax, artist = self.detect_artist(event)  # Detect the Artist element under the mouse
 
         if artist is None:
             #print("No artist detected under the scroll event.")
@@ -133,7 +174,6 @@ class interactivePlot:
         
         #------------------------------
         if isinstance(artist, XAxis):
-            ax = artist.axes
             # Zoom on the X axis
             cur_xlim = ax.get_xlim()
             xdata = event.xdata if event.xdata is not None else (cur_xlim[0] + cur_xlim[1]) / 2
@@ -144,7 +184,6 @@ class interactivePlot:
 
         #------------------------------
         elif isinstance(artist, YAxis):
-            ax = artist.axes
             # Zoom on the Y axis
             cur_ylim = ax.get_ylim()
             ydata = event.ydata if event.ydata is not None else (cur_ylim[0] + cur_ylim[1]) / 2
@@ -155,7 +194,6 @@ class interactivePlot:
 
         #------------------------------
         elif isinstance(artist, plt.Axes):
-            ax = artist
             # Zoom on both axes
             cur_xlim = ax.get_xlim()
             cur_ylim = ax.get_ylim()
@@ -190,7 +228,7 @@ class interactivePlot:
         if event.inaxes:
 
             #-------------------------
-            if event.inaxes.pan_start:
+            if hasattr(event.inaxes, "pan_start") and event.inaxes.pan_start:
                 xstart, ystart = event.inaxes.pan_start
 
                 dx = xstart - event.xdata
@@ -205,25 +243,26 @@ class interactivePlot:
                 event.inaxes.figure.canvas.draw()  # Redraw the canvas
 
             #-------------------------
-            for line, points in event.inaxes.line_points_pairs:
-                if line.get_visible():
-                    contains, info = points.contains(event)
-                    if contains:
-                        ind = info['ind'][0]
-                        x_data, y_data = points.get_offsets().T
-                        color = points.get_facecolors()[0]
+            for ax in self.axs:
+                for line, points in ax.line_points_pairs:
+                    if line.get_visible():
+                        contains, info = points.contains(event)
+                        if contains:
+                            ind = info['ind'][0]
+                            x_data, y_data = points.get_offsets().T
+                            color = points.get_facecolors()[0]
 
-                        position_xy = event.inaxes.transData.transform((x_data[ind], y_data[ind]))
+                            position_xy = ax.transData.transform((x_data[ind], y_data[ind]))
    
-                        self.reset_tooltip()
-                        self.tooltip.xy = (position_xy)
-                        self.tooltip.set_text(f"({x_data[ind]:.6f}, {y_data[ind]:.6f})")
-                        self.tooltip.set_bbox(dict(boxstyle="round,pad=0.3", fc=color, alpha=0.2))
-                        self.tooltip.set_visible(True)
-                        #print('here', x_data[ind], y_data[ind], position_xy)
+                            self.reset_tooltip()
+                            self.tooltip.xy = (position_xy)
+                            self.tooltip.set_text(f"({x_data[ind]:.6f}, {y_data[ind]:.6f})")
+                            self.tooltip.set_bbox(dict(boxstyle="round,pad=0.3", fc=color, alpha=0.2))
+                            self.tooltip.set_visible(True)
+                            #print('here', x_data[ind], y_data[ind], position_xy)
 
-                        event.inaxes.figure.canvas.draw_idle()
-                        return
+                            ax.figure.canvas.draw_idle()
+                            return
 
     #---------------------------------------------------------------------------------------------
     def on_release(self, event):
@@ -234,36 +273,35 @@ class interactivePlot:
     #---------------------------------------------------------------------------------------------
     def on_key_press(self, event):
 
-        artist = self.detect_artist(event)  # Detect the Artist element under the mouse
+        ax, artist = self.detect_artist(event)  # Detect the Artist element under the mouse
 
         #------------------------------
         if isinstance(artist, plt.Axes):
-            ax = artist
-
             if event.key == 'control':
-                for line, points in ax.line_points_pairs:
-                    if line.get_visible():
-                        points.set_visible(True)
-                ax.figure.canvas.draw()  # Redraw the canvas
+                for ax in self.axs:
+                    for line, points in ax.line_points_pairs:
+                        if line.get_visible():
+                            points.set_visible(True)
+                self.fig.canvas.draw()
 
             elif event.key == 'a':
-                visible_lines = [line for line in ax.lines if (line.get_visible() and not is_axvline(line))]
-                if visible_lines:
-                    x_min = min(line.get_xdata().min() for line in visible_lines)
-                    x_max = max(line.get_xdata().max() for line in visible_lines)
-                    y_min = min(line.get_ydata().min() for line in visible_lines)
-                    y_max = max(line.get_ydata().max() for line in visible_lines)
-                    x_margin = (x_max - x_min) * 0.05
-                    y_margin = (y_max - y_min) * 0.05
-                    is_inverted = ax.yaxis.get_inverted()             # keep inverted
-                    ax.set_xlim(x_min - x_margin, x_max + x_margin)
-                    ax.set_ylim(y_min - y_margin, y_max + y_margin)
-                    ax.yaxis.set_inverted(is_inverted)                # set back to state
-                    ax.figure.canvas.draw()  # Redraw the canvas
+                for ax in self.axs:
+                    visible_lines = [line for line in ax.lines if (line.get_visible() and not is_axvline(line))]
+                    if visible_lines:
+                        x_min = min(line.get_xdata().min() for line in visible_lines)
+                        x_max = max(line.get_xdata().max() for line in visible_lines)
+                        y_min = min(line.get_ydata().min() for line in visible_lines)
+                        y_max = max(line.get_ydata().max() for line in visible_lines)
+                        x_margin = (x_max - x_min) * 0.05
+                        y_margin = (y_max - y_min) * 0.05
+                        is_inverted = ax.yaxis.get_inverted()             # keep inverted
+                        ax.set_xlim(x_min - x_margin, x_max + x_margin)
+                        ax.set_ylim(y_min - y_margin, y_max + y_margin)
+                        ax.yaxis.set_inverted(is_inverted)                # set back to state
+                self.fig.canvas.draw()
 
         #------------------------------
         elif isinstance(artist, XAxis):
-            ax = artist.axes
             if event.key == 'a':
                 #print("key a on xaxis")
                 visible_lines = [line for line in ax.lines if (line.get_visible() and not is_axvline(line))]
@@ -276,7 +314,6 @@ class interactivePlot:
             
         #------------------------------
         elif isinstance(artist, YAxis):
-            ax = artist.axes
             if event.key == 'a':
                 #print("key a on yaxis")
                 visible_lines = [line for line in ax.lines if (line.get_visible() and not is_axvline(line))]
@@ -300,7 +337,7 @@ class interactivePlot:
                 for line, points in ax.line_points_pairs:
                     if line.get_visible():
                      points.set_visible(False)
-                ax.figure.canvas.draw()  # Redraw the canvas
+            self.fig.canvas.draw()
 
     #---------------------------------------------------------------------------------------------
     def on_pick(self, event):
@@ -320,16 +357,24 @@ class interactivePlot:
 
     #---------------------------------------------------------------------------------------------
     def on_resize(self, event):
-        width, height = self.fig.canvas.get_width_height()
+        fig_width, fig_height = self.fig.canvas.get_width_height()
 
         self.fig.subplots_adjust(
-            left = self.left_margin / width,
-            right = 1 - self.right_margin / width,
-            top = 1 - self.top_margin / height,
-            bottom = self.bottom_margin / height,
+            left = self.left_margin / fig_width,
+            right = 1 - self.right_margin / fig_width,
+            top = 1 - self.top_margin / fig_height,
+            bottom = self.bottom_margin / fig_height,
             wspace = None,
             hspace = 0.5
         )
+
+        for ax in self.axs:
+            if ax.spine_left_position != 0:
+                bbox = ax.get_position()
+                ax_width = bbox.width * fig_width
+                ax_height = bbox.height * fig_height
+                position = ax.spine_left_position / ax_width
+                ax.spines["left"].set_position(("axes", position))
 
         self.fig.canvas.draw()
 

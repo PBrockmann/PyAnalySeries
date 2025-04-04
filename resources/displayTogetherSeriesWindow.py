@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.lines import Line2D
 
 from .interactivePlot import interactivePlot
 
@@ -47,19 +48,23 @@ class displayTogetherSeriesWindow(QWidget):
         
         main_layout = QVBoxLayout()
 
-        canvas = FigureCanvas(self.interactive_plot.fig)
-        main_layout.addWidget(canvas)
+        self.canvas = FigureCanvas(self.interactive_plot.fig)
+        main_layout.addWidget(self.canvas)
 
         #----------------------------------------------
         button_layout = QHBoxLayout()
 
+        self.separatedAxis_checkbox = QCheckBox("Separated vertical axis")
         self.close_button = QPushButton("Close", self)
-        button_layout.addStretch()
 
+        button_layout.addStretch()
+        button_layout.addWidget(self.separatedAxis_checkbox)
+        button_layout.addSpacing(50)
         button_layout.addWidget(self.close_button)
         main_layout.addLayout(button_layout)
 
         self.close_button.clicked.connect(self.close)
+        self.separatedAxis_checkbox.stateChanged.connect(self.separatedAxis_change)
 
         self.setLayout(main_layout)
 
@@ -84,7 +89,23 @@ class displayTogetherSeriesWindow(QWidget):
             plt.savefig(fileName)
 
     #---------------------------------------------------------------------------------------------
-    def myplot(self, limits=None):
+    def separatedAxis_change(self):
+       
+        for ax in self.interactive_plot.axs[:]:
+            ax.clear()
+            if ax.spine_left_position != 0:
+                ax.remove()
+                self.interactive_plot.axs.remove(ax)
+
+        if self.separatedAxis_checkbox.isChecked():
+            self.myplot_separatedAxis()
+        else:
+            self.myplot()
+
+    #---------------------------------------------------------------------------------------------
+    def myplot(self):
+
+        self.interactive_plot.left_margin = 100 
 
         ax = self.interactive_plot.axs[0]
 
@@ -93,6 +114,7 @@ class displayTogetherSeriesWindow(QWidget):
         ax.set_ylabel('')
         ax.autoscale()
         Y_axisInverted_list = []
+
         for item in self.items:
             serieDict = item.data(0, Qt.UserRole)
             serie = serieDict['Serie']
@@ -109,12 +131,81 @@ class displayTogetherSeriesWindow(QWidget):
             legend_line.set_picker(5)
             ax.map_legend_to_line[legend_line] = ax_line
 
-        if limits:
-            ax.set_xlim(limits[0])
-            ax.set_ylim(limits[1])
         ax.yaxis.set_inverted(any(Y_axisInverted_list))
 
+        self.interactive_plot.on_resize(None)
         ax.figure.canvas.draw()
+        ax.figure.canvas.setFocus()
+
+    #---------------------------------------------------------------------------------------------
+    def myplot_separatedAxis(self):
+
+        fig_width, fig_height = self.interactive_plot.fig.canvas.get_width_height()
+
+        offset = 80
+        self.interactive_plot.left_margin = len(self.items) * offset 
+
+        legendHandles = []
+
+        #---------------------------------
+        item = self.items[0]
+        serieDict = item.data(0, Qt.UserRole)
+        serie = serieDict['Serie']
+        serie = serie.groupby(serie.index).mean()
+        serieColor = serieDict['Color']
+        Y_axisInverted = serieDict['Y axis inverted']
+
+        ax = self.interactive_plot.axs[0]
+        ax.grid(visible=True, which='major', color='lightgray', linestyle='dashed', linewidth=0.5)
+        ax.autoscale()
+        ax.patch.set_visible(False)
+
+        line, = ax.plot(serie.index, serie.values, color=serieColor, linewidth=self.serieWidth, label=serieDict['Y'])
+        points = ax.scatter(serie.index, serie.values, s=5, marker='o', color=serieColor, visible=False)
+        legendHandle = Line2D([0], [0], color=serieColor, label=serieDict['Y'])
+        legendHandles.append(legendHandle)
+        ax.line_points_pairs.append((line, points))
+        ax.set_xlabel(self.xName)
+        ax.set_ylabel(serieDict['Y'])
+        ax.yaxis.label.set_color(serieColor)
+        ax.yaxis.set_inverted(Y_axisInverted)
+
+        #---------------------------------
+        for n,item in enumerate(self.items[1:]):
+            serieDict = item.data(0, Qt.UserRole)
+            serie = serieDict['Serie']
+            serie = serie.groupby(serie.index).mean()
+            serieColor = serieDict['Color']
+            Y_axisInverted = serieDict['Y axis inverted']
+
+            twin = self.interactive_plot.axs[0].twinx()
+            twin.spine_left_position = -offset * (n+1)
+            twin.yaxis.set_label_position('left')
+            twin.yaxis.set_ticks_position('left')
+            twin.set_zorder(-10)
+
+            line, = twin.plot(serie.index, serie.values, color=serieColor, linewidth=self.serieWidth, label=serieDict['Y'])
+            points = twin.scatter(serie.index, serie.values, s=5, marker='o', color=serieColor, visible=False)
+            legendHandle = Line2D([0], [0], color=serieColor, label=serieDict['Y'])
+            legendHandles.append(legendHandle)
+            twin.set(ylabel=serieDict['Y'])
+            twin.yaxis.label.set_color(serieColor)
+            twin.yaxis.set_inverted(Y_axisInverted)
+            twin.line_points_pairs = []
+            twin.line_points_pairs.append((line, points))
+            self.interactive_plot.axs.append(twin)
+
+        #---------------------------------
+        legend = ax.legend(handles=legendHandles)
+
+        for n,axcurrent in enumerate(self.interactive_plot.axs):
+            legend_line = legend.get_lines()[n]
+            axcurrent_line = axcurrent.get_lines()[0]
+            legend_line.set_picker(5)
+            ax.map_legend_to_line[legend_line] = axcurrent_line
+
+        #---------------------------------
+        self.interactive_plot.on_resize(None)
         ax.figure.canvas.setFocus()
 
     #---------------------------------------------------------------------------------------------
@@ -122,11 +213,7 @@ class displayTogetherSeriesWindow(QWidget):
         if not item in self.items: return
 
         self.raise_()
-
-        xlim = self.interactive_plot.axs[0].get_xlim()
-        ylim = self.interactive_plot.axs[0].get_ylim()
-        self.interactive_plot.axs[0].clear()
-        self.myplot(limits=[xlim,ylim])
+        self.separatedAxis_change()
 
     #---------------------------------------------------------------------------------------------
     def closeEvent(self, event):
