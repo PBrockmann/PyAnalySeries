@@ -7,6 +7,8 @@ from matplotlib.lines import Line2D
 
 import numpy as np
 
+from shapely.geometry import LineString, Point
+
 #=========================================================================================
 plt.rcParams["toolbar"] = "None" 
 
@@ -42,14 +44,12 @@ class interactivePlot:
         # flat axes
         self.axs = list(np.ravel(self.axs))
 
-        # Set pickradius for XAxis and YAxis for easier selection
         for ax in self.axs:
-            ax.xaxis.set_pickradius(50)
-            ax.yaxis.set_pickradius(50)
             ax.pan_start = None
             ax.line_points_pairs = []
             ax.map_legend_to_line = {}
             ax.spine_left_position = 0
+            ax.spine_bottom_position = 0
 
         # Connect events to methods
         self.fig.canvas.mpl_connect('scroll_event', self.on_scroll)
@@ -105,6 +105,44 @@ class interactivePlot:
 
     #---------------------------------------------------------------------------------------------
     def detect_artist(self, event):
+    
+        #------------------------------------------------------------------
+        closest_axis = None
+        axis_type = None
+        distance_min = float('inf')
+
+        #------------------------------------------------------------------
+        #print('-----------------')
+        #print(f'Mouse: {event.x}, {event.y}')
+        
+        for axcurrent in self.axs:
+
+            if axcurrent.contains(event)[0]:  
+                return axcurrent, axcurrent  # If cursor is inside the main axis, return it
+    
+            mouse = Point((event.x, event.y))
+
+            spine = axcurrent.spines['left']
+            path = spine.get_path().transformed(spine.get_transform())
+            spine_left = LineString(path.vertices)
+
+            spine = axcurrent.spines['bottom']
+            path = spine.get_path().transformed(spine.get_transform())
+            spine_bottom = LineString(path.vertices)
+
+            distance_left = mouse.distance(spine_left)
+            distance_bottom = mouse.distance(spine_bottom)
+            #print(f"Distance : {distance_left}, {distance_bottom}")
+            
+            if min(distance_left, distance_bottom) < distance_min:
+                distance_min = min(distance_left, distance_bottom)
+                closest_axis = axcurrent
+                axis_type = axcurrent.yaxis if distance_left < distance_bottom else axcurrent.xaxis
+
+        return closest_axis, axis_type
+
+    #---------------------------------------------------------------------------------------------
+    def detect_artist2(self, event):
         """Detect which axis is closest to the mouse cursor."""
         
         #------------------------------------------------------------------
@@ -123,7 +161,7 @@ class interactivePlot:
             if axcurrent.contains(event)[0]:  
                 return axcurrent, axcurrent  # If cursor is inside the main axis, return it
     
-            # Detect "left" spines (shifted Y-axes)
+            # Detect "left" spines
             spine_pos = axcurrent.spines["left"].get_position()[1]
             spine_left_x = axcurrent.transAxes.transform((spine_pos, 0))[0]
             # Detect "bottom" spine
@@ -355,12 +393,15 @@ class interactivePlot:
         )
 
         for ax in self.axs:
-            if ax.spine_left_position != 0:
-                bbox = ax.get_position()
-                ax_width = bbox.width * fig_width
-                ax_height = bbox.height * fig_height
+            bbox = ax.get_position()
+            ax_width = bbox.width * fig_width
+            ax_height = bbox.height * fig_height
+            if hasattr(ax, "spine_left_position") and ax.spine_left_position != 0:
                 position = ax.spine_left_position / ax_width
                 ax.spines["left"].set_position(("axes", position))
+            if hasattr(ax, "spine_bottom_position") and ax.spine_bottom_position != 0:
+                position = ax.spine_bottom_position / ax_height
+                ax.spines["bottom"].set_position(("axes", position))
 
         self.fig.canvas.draw()
 

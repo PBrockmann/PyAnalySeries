@@ -7,6 +7,7 @@ Based on:
  * pandas
  * matplotlib
  * scipy
+ * shapely
  * openpyxl
  * PyQt
 

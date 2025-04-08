@@ -182,6 +182,9 @@ class displayTogetherSeriesWindow(QWidget):
             twin.spine_left_position = -offset * (n+1)
             twin.yaxis.set_label_position('left')
             twin.yaxis.set_ticks_position('left')
+            twin.spines['right'].set_visible(False)
+            twin.spines['top'].set_visible(False)
+            twin.spines['bottom'].set_visible(False)
             twin.set_zorder(-10)
 
             line, = twin.plot(serie.index, serie.values, color=serieColor, linewidth=self.serieWidth, label=serieDict['Y'])
