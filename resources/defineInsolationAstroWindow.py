@@ -182,7 +182,20 @@ class defineInsolationAstroWindow(QWidget):
         self.ref.setWordWrap(True)
         self.ref.setTextInteractionFlags(Qt.TextSelectableByMouse)
 
+        self.range_Laskar2010 = 'From -249999 to 0 kyears'
+        self.range_Laskar2004 = 'From -101000 to 21000 kyears'
+        self.range_Laskar1993 = 'From -20000 to 10000 kyears'
+        self.range_Berger1978 = 'Unbounded'
+
+        self.range = QLabel()
+        self.range.setText(f"Range : <br><br>{self.range_Laskar2004}")
+        self.range.setFixedWidth(400)
+        self.range.setWordWrap(True)
+        self.range.setTextInteractionFlags(Qt.TextSelectableByMouse)
+
         col2_layout.addWidget(self.ref)
+        col2_layout.addSpacing(50)
+        col2_layout.addWidget(self.range)
         col2_layout.addStretch()
 
         #----------------------------------------------
@@ -275,9 +288,9 @@ class defineInsolationAstroWindow(QWidget):
     def timeUnit_change(self):
 
         self.timeUnit = self.timeUnit_dropdown.currentText()
-        self.label_tstart.setText(f"Start [{self.timeUnit}]:")
-        self.label_tend.setText(f"End [{self.timeUnit}]:")
-        self.label_tstep.setText(f"Step [{self.timeUnit}]:")
+        self.label_tstart.setText(f"Start [{self.timeUnit}] :")
+        self.label_tend.setText(f"End [{self.timeUnit}] :")
+        self.label_tstep.setText(f"Step [{self.timeUnit}] :")
 
         lim1 = self.tstart_input.minimum()
         lim2 = self.tstart_input.maximum()
@@ -385,24 +398,28 @@ class defineInsolationAstroWindow(QWidget):
             lim1 = -249999
             lim2 = 0
             refText = self.ref_Laskar2010
+            rangeText = self.range_Laskar2010
 
         elif self.solutionAstro.startswith("Laskar2004"):
             reinit_plotType_dropdow()
             lim1 = -101000
             lim2 = 21000 
             refText = self.ref_Laskar2004
+            rangeText = self.range_Laskar2004
 
         elif self.solutionAstro.startswith("Laskar1993"):
             reinit_plotType_dropdow()
             lim1 = -20000
             lim2 = 10000 
             refText = self.ref_Laskar1993
+            rangeText = self.range_Laskar1993
 
         else:
             reinit_plotType_dropdow()
             lim1 = -5E6
             lim2 = 5E6
             refText = self.ref_Berger1978
+            rangeText = self.range_Berger1978
 
         lim1 = lim1 * self.t_convention * scaleFactor
         lim2 = lim2 * self.t_convention * scaleFactor
@@ -411,6 +428,7 @@ class defineInsolationAstroWindow(QWidget):
         self.tstart_input.setToolTip(f"Choose a value between {min(lim1, lim2)} and {max(lim1, lim2)}")
         self.tend_input.setToolTip(f"Choose a value between {min(lim1, lim2)} and {max(lim1, lim2)}")
         self.ref.setText(f"Reference : <br><br>{refText}")
+        self.range.setText(f"Range : <br><br>{rangeText}")
     
         self.delayed_update()
 

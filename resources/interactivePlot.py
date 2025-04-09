@@ -251,6 +251,8 @@ class interactivePlot:
         """Handle panning when the mouse is moved."""
         if event.inaxes:
 
+            self.fig.canvas.setFocus()
+
             #-------------------------
             if hasattr(event.inaxes, "pan_start") and event.inaxes.pan_start:
                 xstart, ystart = event.inaxes.pan_start

@@ -15,6 +15,7 @@ import numpy as np
 import pandas as pd
 
 from scipy import interpolate
+from scipy.integrate import fixed_quad
 
 #=========================================================================================
 for key in plt.rcParams.keys():
@@ -38,8 +39,9 @@ class defineSampleWindow(QWidget):
         else: 
             self.itemRef = None
         self.serieWidth = 0.8
-        self.step = 5
+        self.step = 25
         self.kind = 'linear' 
+        self.integrated = False
 
         title = 'Define SAMPLE : ' + self.Id
         self.setWindowTitle(title)
@@ -113,7 +115,16 @@ class defineSampleWindow(QWidget):
         kind_layout.addWidget(self.kind_dropdown)
         kind_layout.addStretch()
 
+        integrated_layout = QHBoxLayout()
+        label_s3 = QLabel('Integrated :')
+        self.integrated_checkbox = QCheckBox()
+        self.integrated_checkbox.setChecked(self.integrated)
+        integrated_layout.addWidget(label_s3)
+        integrated_layout.addWidget(self.integrated_checkbox)
+        integrated_layout.addStretch()
+
         groupbox1_layout.addLayout(kind_layout)
+        groupbox1_layout.addLayout(integrated_layout)
         groupbox1_layout.addStretch()
 
         # ===== 
@@ -124,6 +135,7 @@ class defineSampleWindow(QWidget):
         self.xvalues_radio.toggled.connect(self.update_value)
         self.step_spinbox.valueChanged.connect(self.update_value)
         self.kind_dropdown.currentIndexChanged.connect(self.update_value)
+        self.integrated_checkbox.stateChanged.connect(self.update_value)
 
         #----------------------------------------------
         self.interactive_plot = interactivePlot()
@@ -166,6 +178,7 @@ class defineSampleWindow(QWidget):
         self.step = self.step_spinbox.value()
         self.kind = self.kind_dropdown.currentText()
         self.sample_from_xvalues = self.xvalues_radio.isChecked()
+        self.integrated = self.integrated_checkbox.isChecked()
 
         xlim = self.interactive_plot.axs[0].get_xlim()
         ylim = self.interactive_plot.axs[0].get_ylim()
@@ -201,7 +214,7 @@ class defineSampleWindow(QWidget):
         ax.set_ylabel(self.yName)
         ax.autoscale()
 
-        serieSampled = self.sample(self.serie, self.sample_index, self.kind)
+        serieSampled = self.sample(self.serie, self.sample_index, self.kind, integrated=self.integrated, ax=ax)
         serieColor = self.serieDict['Color']
         Y_axisInverted = self.serieDict['Y axis inverted']
         ax.yaxis.set_inverted(Y_axisInverted)
@@ -214,8 +227,9 @@ class defineSampleWindow(QWidget):
         points2 = ax.scatter(serieSampled.index, serieSampled.values, s=5, marker='o', color='black', alpha=0.4, visible=False)
         ax.line_points_pairs.append((line2, points2))
 
+
         legend = ax.legend()
-        for legend_line, ax_line in zip(legend.get_lines(), ax.get_lines()):
+        for legend_line, ax_line in zip(legend.get_lines(), ax.get_lines()[-2:]):       # [-2:] to remove ax.axvline
             legend_line.set_picker(5)
             ax.map_legend_to_line[legend_line] = ax_line
 
@@ -238,48 +252,63 @@ class defineSampleWindow(QWidget):
         self.interactive_plot.axs[0].clear()
         self.myplot(limits=[xlim,ylim])
 
-    #---------------------------------------------------------------------------------------------
+    #----------------------------------------------------------------------------------
     @staticmethod
-    def sample(serie, sample_index, kind):
-
-        # mean duplicates
+    def sample(serie, sample_index, kind="linear", integrated=False, ax=None, quad_points=20):
+        """
+        Interpolates or integrates a time series on specified sample points.
+    
+        Parameters:
+            serie (pd.Series): Time series with index as x-values.
+            sample_index (np.ndarray): Points where values are interpolated or integrated.
+            kind (str): Interpolation type ('linear', 'cubic', etc.).
+            integrated (bool): If True, use integration-based sampling.
+            ax (matplotlib axis, optional): For visualizing integration intervals.
+            quad_points (int): Number of points for fixed quadrature if integrated=True.
+    
+        Returns:
+            pd.Series: Sampled values at specified indices.
+        """
+    
+        # Remove duplicate indices and keep the mean
         serie = serie.groupby(serie.index).mean()
-
-        # Restrict sampling to the range of the given series
+    
+        # Restrict to range of data
         x_min, x_max = serie.index.min(), serie.index.max()
         valid_sample_index = sample_index[(sample_index >= x_min) & (sample_index <= x_max)]
     
-        # Create a new series with valid indices, initially filled with NaN
-        result_serie = pd.Series(index=valid_sample_index, dtype=float)
+        if not integrated:
+            # Standard interpolation
+            result_serie = pd.Series(index=valid_sample_index, dtype=float)
+            result_serie = result_serie.combine_first(serie).sort_index()
+            result_serie = result_serie.interpolate(method=kind, limit_direction="both")
+            return result_serie.loc[valid_sample_index]
+        else:
+            # Integrated interpolation using fixed_quad
+            interpolator = interpolate.interp1d(serie.index, serie.values, kind=kind, fill_value="extrapolate")
     
-        # Merge with the existing series and sort the index
-        result_serie = result_serie.combine_first(serie).sort_index()
+            # Compute midpoints between sample points
+            mids = (valid_sample_index[1:] + valid_sample_index[:-1]) / 2
     
-        # Perform interpolation to fill missing values
-        result_serie = result_serie.interpolate(method=kind, limit_direction="both")
+            # Only keep full intervals (exclude edges)
+            result_index = valid_sample_index[1:-1]
+            integrated_values = []
     
-        # Keep only the requested sample indices
-        result_serie = result_serie.loc[valid_sample_index]
+            for i, xi in enumerate(result_index):
+                a = mids[i]
+                b = mids[i + 1]
     
-        return result_serie
-
-    #---------------------------------------------------------------------------------------------
-    @staticmethod
-    def sampleOld(serie, sample_index, kind):
-
-        serie = serie.interpolate(method="linear")
-
-        interpolator = interpolate.interp1d(serie.index, serie.values, kind=kind, fill_value='extrapolate')
-
-        # To limit sample to the range of the serie to be sampled
-        x_min, x_max = serie.index.min(), serie.index.max()
-        valid_sample_index = sample_index[(sample_index >= x_min) & (sample_index <= x_max)]
-
-        sampled_values = interpolator(valid_sample_index)
-
-        result_serie = pd.Series(sampled_values, index=valid_sample_index)
-
-        return result_serie
+                # Use fixed-point Gauss quadrature
+                integral_value, _ = fixed_quad(interpolator, a, b, n=quad_points)
+                mean_value = integral_value / (b - a)
+                integrated_values.append(mean_value)
+    
+                # Optional: visualize integration interval
+                if ax is not None:
+                    line1 = ax.axvline(a, color="blue", linestyle="--", alpha=0.4)
+                    line2 = ax.axvline(b, color="blue", linestyle="--", alpha=0.4)
+    
+            return pd.Series(data=integrated_values, index=result_index)
 
     #---------------------------------------------------------------------------------------------
     def save_serie(self):
@@ -302,7 +331,7 @@ class defineSampleWindow(QWidget):
                 'Id': sample_Id,
                 'Type': 'SAMPLE', 
                 'Name': f'Sample using x values of {self.serieRef_YName}',
-                'Parameters': f'{self.kind}',
+                'Parameters': f'{self.kind} ; {self.integrated}',
                 'Comment': '',
                 'History': f'<BR>Sample with parameters :' + \
                         '<ul>' + \
@@ -335,6 +364,20 @@ class defineSampleWindow(QWidget):
             pass 
 
     #---------------------------------------------------------------------------------------------
+    def contextMenuEvent(self, event):
+        context_menu = QMenu(self)
+        print_action = QAction("Save plot as PNG or PDF", self)
+        print_action.triggered.connect(self.savePlot)
+        context_menu.addAction(print_action)
+        context_menu.exec_(event.globalPos())
+
+    #---------------------------------------------------------------------------------------------
+    def savePlot(self):
+        fileName, _ = QFileDialog.getSaveFileName(self, 'Save Plots', '', 'PNG Files (*.png);;PDF Files (*.pdf)')
+        if fileName:
+            plt.savefig(fileName)
+
+    #---------------------------------------------------------------------------------------------
     def closeEvent(self, event):
         plt.close()
         self.open_sampleWindows.pop(self.Id, None)
@@ -352,6 +395,21 @@ if __name__ == "__main__":
     #---------------------------------
     x1 = np.arange(0, 10+0.1, 0.1)
     y1 = np.sin(x1)
+    x2 = np.arange(-10, 20+1, 1)
+    random_values = np.random.uniform(-10, 20, 10)  # Générer n valeurs entre a et b
+    x2 = np.sort(random_values)
+    y2 = np.cos(x2)
+
+    #---------------------------------
+    np.random.seed(42)
+    x1 = np.linspace(4, 10, 500)
+    y1 = np.sin(2 * np.pi * x1) + 0.5 * np.sin(10 * np.pi * x1)  # Signal HF
+    y1 += np.random.normal(scale=0.1, size=len(y1))  # Add noise
+
+    x2 = np.linspace(0, 10, 21)
+    y2 = np.cos(x2)
+
+    #---------------------------------
     serie1 = pd.Series(y1, index=x1)
 
     serie1Dict = {'Id': 'abcd', 'X': 'xName', 'Y': 'yName', 'Serie': serie1, 
@@ -361,10 +419,6 @@ if __name__ == "__main__":
     item1.setData(0, Qt.UserRole, serie1Dict)
 
     #---------------------------------
-    x2 = np.arange(-10, 20+1, 1)
-    random_values = np.random.uniform(-10, 20, 10)  # Générer n valeurs entre a et b
-    x2 = np.sort(random_values)
-    y2 = np.cos(x2)
     serie2 = pd.Series(y2, index=x2)
 
     serie2Dict = {'Id': 'abcd', 'X': 'xName', 'Y': 'yName', 'Serie': serie2, 
