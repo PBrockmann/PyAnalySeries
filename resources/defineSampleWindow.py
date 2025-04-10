@@ -65,7 +65,6 @@ class defineSampleWindow(QWidget):
         self.step_spinbox.setValue(self.step)
         self.step_spinbox.setDecimals(2)
         self.step_spinbox.setFixedWidth(80)
-        self.step_spinbox.valueChanged.connect(self.update_value)
 
         step_layout = QHBoxLayout()
         step_layout.addWidget(self.step_radio)
@@ -116,7 +115,7 @@ class defineSampleWindow(QWidget):
         kind_layout.addStretch()
 
         integrated_layout = QHBoxLayout()
-        label_s3 = QLabel('Integrated :')
+        label_s3 = QLabel('Integration :')
         self.integrated_checkbox = QCheckBox()
         self.integrated_checkbox.setChecked(self.integrated)
         integrated_layout.addWidget(label_s3)
@@ -131,11 +130,17 @@ class defineSampleWindow(QWidget):
         groupbox1.setLayout(groupbox1_layout)
         main_layout.addWidget(groupbox1)
 
-        self.step_radio.toggled.connect(self.update_value)
-        self.xvalues_radio.toggled.connect(self.update_value)
-        self.step_spinbox.valueChanged.connect(self.update_value)
-        self.kind_dropdown.currentIndexChanged.connect(self.update_value)
-        self.integrated_checkbox.stateChanged.connect(self.update_value)
+        #----------------------------------------------
+        self.update_timer = QTimer()
+        self.update_timer.setSingleShot(True)
+        self.update_timer.timeout.connect(self.update_value)
+
+        self.step_spinbox.valueChanged.connect(self.delayed_update)
+        self.step_radio.toggled.connect(self.delayed_update)
+        self.xvalues_radio.toggled.connect(self.delayed_update)
+        self.step_spinbox.valueChanged.connect(self.delayed_update)
+        self.kind_dropdown.currentIndexChanged.connect(self.delayed_update)
+        self.integrated_checkbox.stateChanged.connect(self.delayed_update)
 
         #----------------------------------------------
         self.interactive_plot = interactivePlot()
@@ -171,6 +176,11 @@ class defineSampleWindow(QWidget):
         self.interactive_plot.fig.canvas.setFocus()
 
         self.status_bar.showMessage('Ready', 5000)
+
+    #---------------------------------------------------------------------------------------------
+    def delayed_update(self):
+        self.status_bar.showMessage('Waiting', 2000)
+        self.update_timer.start(2000)
 
     #---------------------------------------------------------------------------------------------
     def update_value(self):
@@ -286,27 +296,34 @@ class defineSampleWindow(QWidget):
         else:
             # Integrated interpolation using fixed_quad
             interpolator = interpolate.interp1d(serie.index, serie.values, kind=kind, fill_value="extrapolate")
-    
-            # Compute midpoints between sample points
+  
+            # Compute midpoints between valid sample points
             mids = (valid_sample_index[1:] + valid_sample_index[:-1]) / 2
-    
-            # Only keep full intervals (exclude edges)
-            result_index = valid_sample_index[1:-1]
-            integrated_values = []
-    
-            for i, xi in enumerate(result_index):
+            
+            # Build intervals between midpoints: [mids[i], mids[i+1]]
+            intervals = []
+            result_index = valid_sample_index[1:-1]  # Points associés aux intervalles
+            
+            for i in range(len(result_index)):
                 a = mids[i]
                 b = mids[i + 1]
-    
+            
+                if a >= x_min and b <= x_max:
+                    intervals.append((a, b))
+                else:
+                    continue
+   
+            integrated_values = []
+            for (a, b) in intervals:
                 # Use fixed-point Gauss quadrature
                 integral_value, _ = fixed_quad(interpolator, a, b, n=quad_points)
                 mean_value = integral_value / (b - a)
                 integrated_values.append(mean_value)
-    
+
                 # Optional: visualize integration interval
                 if ax is not None:
-                    line1 = ax.axvline(a, color="blue", linestyle="--", alpha=0.4)
-                    line2 = ax.axvline(b, color="blue", linestyle="--", alpha=0.4)
+                    line1 = ax.axvline(a, color="blue", linestyle="--", alpha=0.4, lw=0.5)
+                    line2 = ax.axvline(b, color="blue", linestyle="--", alpha=0.4, lw=0.5)
     
             return pd.Series(data=integrated_values, index=result_index)
 
@@ -318,12 +335,13 @@ class defineSampleWindow(QWidget):
                 'Id': sample_Id,
                 'Type': 'SAMPLE', 
                 'Name': f'Sample every {self.step}', 
-                'Parameters': f'{self.step} ; {self.kind}',
+                'Parameters': f'{self.step} ; {self.kind}; {self.integrated}',
                 'Comment': '',
                 'History': f'<BR>Sample with parameters :' + \
                         '<ul>' + \
                         f'<li>Step : {self.step}' + \
                         f'<li>Kind of interpolation : {self.kind}' + \
+                        f'<li>Integrated : {self.integrated}' + \
                         '</ul>'
             }
         else:
@@ -337,6 +355,7 @@ class defineSampleWindow(QWidget):
                         '<ul>' + \
                         f'<li>X values from {self.serieRef_Id} : {self.serieRef_XName} / {self.serieRef_YName}' + \
                         f'<li>Kind of interpolation : {self.kind}' + \
+                        f'<li>Integrated : {self.integrated}' + \
                         '</ul>',
                 'XCoords': self.sample_index
             }
@@ -344,13 +363,13 @@ class defineSampleWindow(QWidget):
 
         sampled_Id = generate_Id()
         if not self.sample_from_xvalues:
-            textHistory = f'every {self.step} and {self.kind} interpolation'
+            textHistory = f'every {self.step} and {self.kind} interpolation with integration at {self.integrated}'
         else:
-            textHistory = f'using x values from {self.serieRef_YName} and {self.kind} interpolation'
+            textHistory = f'using x values from {self.serieRef_YName} and {self.kind} interpolation with integration at {self.integrated}'
 
         sampled_serieDict = self.serieDict | {'Id': sampled_Id, 
             'Type': 'Serie sampled', 
-            'Serie': self.sample(self.serie, self.sample_index, self.kind),
+            'Serie': self.sample(self.serie, self.sample_index, kind=self.kind, integrated=self.integrated),
             'Color': generate_color(exclude_color=self.serieDict['Color']),
             'History': append_to_htmlText(self.serieDict['History'], 
                 f'<BR>Serie <i><b>{self.serieDict["Id"]}</i></b> sampled {textHistory} with SAMPLE <i><b>{sample_Id}</i></b><BR>---> serie <i><b>{sampled_Id}</b></i>'),

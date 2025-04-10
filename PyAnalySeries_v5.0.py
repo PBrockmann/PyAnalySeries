@@ -968,24 +968,27 @@ def apply_sample():
         serie = serie.groupby(serie.index).mean()
 
         if 'XCoords' in sampleDict.keys():
-            sample_kind = sampleDict['Parameters'].strip()
-            sample_index =  sampleDict['XCoords']
-            textHistory = f'using x values and {sample_kind} interpolation'
-        else:
             param1_str, param2_str = sampleDict['Parameters'].split(';')
+            sample_kind = param2_str.strip()
+            sample_integrated = bool(param3_str.strip())
+            sample_index =  sampleDict['XCoords']
+            textHistory = f'using x values and {sample_kind} interpolation with integration at {sample_integrated}'
+        else:
+            param1_str, param2_str, param3_str = sampleDict['Parameters'].split(';')
             sample_step = float(param1_str.strip())
             sample_kind = param2_str.strip()
+            sample_integrated = bool(param3_str.strip())
             index_min = serie.index.min()
             index_max = serie.index.max()
             index_min = np.ceil(index_min / sample_step) * sample_step
             index_max = np.floor(index_max / sample_step) * sample_step
             sample_index = np.arange(index_min, index_max + sample_step, sample_step)
-            textHistory = f'every {sample_step} and {sample_kind} interpolation'
+            textHistory = f'every {sample_step} and {sample_kind} interpolation with integration at {sample_integrated}'
 
         sampled_Id = generate_Id()
         sampled_serieDict = serieDict | {'Id': sampled_Id,
             'Type': 'Serie sampled',
-            'Serie': defineSampleWindow.sample(serie, sample_index, sample_kind),
+            'Serie': defineSampleWindow.sample(serie, sample_index, kind=sample_kind, integrated=sample_integrated),
             'Color': generate_color(exclude_color=serieDict['Color']),
             'History': append_to_htmlText(serieDict['History'], 
                 f'<BR>Serie <i><b>{serieDict["Id"]}</i></b> sampled {textHistory} with SAMPLE <i><b>{sampleDict["Id"]}</i></b><BR>---> serie <i><b>{sampled_Id}</b></i>'),
