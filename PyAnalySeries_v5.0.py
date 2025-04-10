@@ -793,6 +793,10 @@ def displayMultipleSeries_selected_series(overlaid=True):
         displaySingleSerie_selected_series()
         return
 
+    if len(items) > 8: 
+        main_window.statusBar().showMessage('Please select 8 series maximum', 3000)
+        return
+
     items_selected = []                             # select only series
     serieDicts = []
     for item in items:
@@ -800,6 +804,7 @@ def displayMultipleSeries_selected_series(overlaid=True):
         if  itemDict['Type'].startswith('Serie'): 
             items_selected.append(item)
             serieDicts.append(itemDict)
+
 
     #-------------------------------------------------------------
     Id_displayWindow = tuple(serieDict['Id'] for serieDict in serieDicts)

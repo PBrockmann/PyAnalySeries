@@ -421,11 +421,12 @@ if __name__ == "__main__":
 
     #---------------------------------
     np.random.seed(42)
-    x1 = np.linspace(4, 10, 500)
+    x1 = np.linspace(0, 10, 500)
     y1 = np.sin(2 * np.pi * x1) + 0.5 * np.sin(10 * np.pi * x1)  # Signal HF
     y1 += np.random.normal(scale=0.1, size=len(y1))  # Add noise
 
-    x2 = np.linspace(0, 10, 21)
+    #x2 = np.linspace(0, 10, 21)
+    x2 = [ 1, 1.5, 2, 2.2, 5, 6, 8.5, 9]
     y2 = np.cos(x2)
 
     #---------------------------------
