@@ -50,6 +50,8 @@ class interactivePlot:
             ax.map_legend_to_line = {}
             ax.spine_left_position = 0
             ax.spine_bottom_position = 0
+            ax.twins = []
+            ax.twins_orientation = None
 
         # Connect events to methods
         self.fig.canvas.mpl_connect('scroll_event', self.on_scroll)
@@ -139,47 +141,6 @@ class interactivePlot:
                 closest_axis = axcurrent
                 axis_type = axcurrent.yaxis if distance_left < distance_bottom else axcurrent.xaxis
 
-        return closest_axis, axis_type
-
-    #---------------------------------------------------------------------------------------------
-    def detect_artist2(self, event):
-        """Detect which axis is closest to the mouse cursor."""
-        
-        #------------------------------------------------------------------
-        closest_axis = None
-        axis_type = None
-        distance_min = float("inf")
-    
-        #------------------------------------------------------------------
-        #print('-----------------')
-        #print(f"Mouse: {event.x}, {event.y}")
-    
-        for axcurrent in self.axs:
-    
-            #print('----', id(axcurrent))
-
-            if axcurrent.contains(event)[0]:  
-                return axcurrent, axcurrent  # If cursor is inside the main axis, return it
-    
-            # Detect "left" spines
-            spine_pos = axcurrent.spines["left"].get_position()[1]
-            spine_left_x = axcurrent.transAxes.transform((spine_pos, 0))[0]
-            # Detect "bottom" spine
-            spine_pos = axcurrent.spines["bottom"].get_position()[1]
-            spine_bottom_y = axcurrent.transAxes.transform((spine_pos, 0))[1]
-    
-            distance_x = abs(event.x - spine_left_x)
-            distance_y = abs(event.y - spine_bottom_y)
-            distance = distance_x + distance_y
-   
-            #print(f"Spine Left: {spine_left_x:.2f}px, Bottom: {spine_bottom_y:.2f}px")
-            #print(f"Distances -> Total: {distance:.2f}px, Left: {distance_x:.2f}px, Bottom: {distance_y:.2f}px")
-    
-            if distance < distance_min:
-                distance_min = distance
-                closest_axis = axcurrent
-                axis_type = axcurrent.yaxis if distance_x < distance_y else axcurrent.xaxis
-    
         return closest_axis, axis_type
 
     #---------------------------------------------------------------------------------------------
@@ -311,19 +272,71 @@ class interactivePlot:
                 self.fig.canvas.draw()
 
             elif event.key == 'a':
-                visible_lines = [line for line in ax.lines if (line.get_visible() and not is_axvline(line))]
-                print(id(ax), visible_lines)
-                if visible_lines:
-                    x_min = min(line.get_xdata().min() for line in visible_lines)
-                    x_max = max(line.get_xdata().max() for line in visible_lines)
-                    y_min = min(line.get_ydata().min() for line in visible_lines)
-                    y_max = max(line.get_ydata().max() for line in visible_lines)
-                    x_margin = (x_max - x_min) * 0.05
-                    y_margin = (y_max - y_min) * 0.05
-                    is_inverted = ax.yaxis.get_inverted()             # keep inverted
-                    ax.set_xlim(x_min - x_margin, x_max + x_margin)
-                    ax.set_ylim(y_min - y_margin, y_max + y_margin)
-                    ax.yaxis.set_inverted(is_inverted)                # set back to state
+                #print("key a on Axe")
+
+                #---------------------------------------
+                # No twin axis
+                if len(ax.twins) == 0:
+                    visible_lines = [line for line in ax.lines if (line.get_visible() and not is_axvline(line))]
+                    if visible_lines:
+                        x_min = min(line.get_xdata().min() for line in visible_lines)
+                        x_max = max(line.get_xdata().max() for line in visible_lines)
+                        y_min = min(line.get_ydata().min() for line in visible_lines)
+                        y_max = max(line.get_ydata().max() for line in visible_lines)
+                        x_margin = (x_max - x_min) * 0.05
+                        y_margin = (y_max - y_min) * 0.05
+                        is_inverted = ax.yaxis.get_inverted()             # keep inverted
+                        ax.set_xlim(x_min - x_margin, x_max + x_margin)
+                        ax.set_ylim(y_min - y_margin, y_max + y_margin)
+                        ax.yaxis.set_inverted(is_inverted)                # set back to state
+
+                #---------------------------------------
+                else:
+
+                    #---------------------------------------
+                    if ax.twins_orientation == 'vertical':
+                        # Set vertical range
+                        all_visible_lines = []
+                        for ax_current in ax.twins + [ax]:
+                            visible_lines = [line for line in ax_current.lines if (line.get_visible() and not is_axvline(line))]
+                            if visible_lines:
+                                y_min = min(line.get_ydata().min() for line in visible_lines)
+                                y_max = max(line.get_ydata().max() for line in visible_lines)
+                                y_margin = (y_max - y_min) * 0.05
+                                is_inverted = ax_current.yaxis.get_inverted()             # keep inverted
+                                ax_current.set_ylim(y_min - y_margin, y_max + y_margin)
+                                ax_current.yaxis.set_inverted(is_inverted)                # set back to state
+                                all_visible_lines += visible_lines
+
+                        # Set horizontal range
+                        if all_visible_lines:
+                            x_min = min(line.get_xdata().min() for line in all_visible_lines)
+                            x_max = max(line.get_xdata().max() for line in all_visible_lines)
+                            x_margin = (x_max - x_min) * 0.05
+                            ax.set_xlim(x_min - x_margin, x_max + x_margin)
+
+                    #---------------------------------------
+                    elif ax.twins_orientation == 'horizontal':
+                        # Set horizontal range
+                        all_visible_lines = []
+                        for ax_current in ax.twins + [ax]:
+                            visible_lines = [line for line in ax_current.lines if (line.get_visible() and not is_axvline(line))]
+                            if visible_lines:
+                                x_min = min(line.get_xdata().min() for line in visible_lines)
+                                x_max = max(line.get_xdata().max() for line in visible_lines)
+                                x_margin = (x_max - x_min) * 0.05
+                                ax_current.set_xlim(x_min - x_margin, x_max + x_margin)
+                                all_visible_lines += visible_lines
+
+                        # Set vertical range
+                        if all_visible_lines:
+                            y_min = min(line.get_ydata().min() for line in all_visible_lines)
+                            y_max = max(line.get_ydata().max() for line in all_visible_lines)
+                            y_margin = (y_max - y_min) * 0.05
+                            is_inverted = ax.yaxis.get_inverted()             # keep inverted
+                            ax.set_ylim(y_min - y_margin, y_max + y_margin)
+                            ax.yaxis.set_inverted(is_inverted)                # set back to state
+
                 self.fig.canvas.draw()
 
         #------------------------------

@@ -170,6 +170,8 @@ class displayTogetherSeriesWindow(QWidget):
         ax.grid(visible=True, which='major', color='lightgray', linestyle='dashed', linewidth=0.5)
         ax.autoscale()
         ax.patch.set_visible(False)
+        ax.twins = []
+        ax.twins_orientation = 'vertical'
 
         line, = ax.plot(serie.index, serie.values, color=serieColor, linewidth=self.serieWidth, label=serieDict['Y'])
         points = ax.scatter(serie.index, serie.values, s=5, marker='o', color=serieColor, visible=False)
@@ -209,6 +211,8 @@ class displayTogetherSeriesWindow(QWidget):
             twin.line_points_pairs.append((line, points))
             self.interactive_plot.axs.append(twin)
 
+            ax.twins.append(twin)
+
         #---------------------------------
         legend = ax.legend(handles=legendHandles)
 
@@ -246,6 +250,8 @@ class displayTogetherSeriesWindow(QWidget):
         ax.autoscale()
         Y_axisInverted_list = []
         ax.patch.set_visible(False)
+        ax.twins = []
+        ax.twins_orientation = 'horizontal'
 
         line, = ax.plot(serie.index, serie.values, color=serieColor, linewidth=self.serieWidth, label=serieDict['Y'])
         points = ax.scatter(serie.index, serie.values, s=5, marker='o', color=serieColor, visible=False)
@@ -285,6 +291,8 @@ class displayTogetherSeriesWindow(QWidget):
             twin.line_points_pairs.append((line, points))
             self.interactive_plot.axs.append(twin)
 
+            ax.twins.append(twin)
+
         #---------------------------------
         legend = ax.legend(handles=legendHandles)
 
@@ -305,7 +313,7 @@ class displayTogetherSeriesWindow(QWidget):
         if not item in self.items: return
 
         self.raise_()
-        self.separatedAxis_change()
+        self.combo_axis_change()
 
     #---------------------------------------------------------------------------------------------
     def closeEvent(self, event):
