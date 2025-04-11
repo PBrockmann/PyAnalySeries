@@ -29,6 +29,7 @@ class displayStackedSeriesWindow(QWidget):
         self.items = items 
 
         self.serieWidth = 0.8
+        self.sharex = True
 
         title = 'Display stacked series : ' + ', '.join(self.Ids)
         self.setWindowTitle(title)
@@ -47,12 +48,21 @@ class displayStackedSeriesWindow(QWidget):
         #----------------------------------------------
         button_layout = QHBoxLayout()
 
-        self.close_button = QPushButton("Close", self)
-        button_layout.addStretch()
+        sharex_label = QLabel('Shared horizontal axis :')
+        self.sharex_cb = QCheckBox()
+        self.sharex_cb.setChecked(self.sharex)
 
+        self.close_button = QPushButton("Close", self)
+
+        button_layout.addStretch()
+        button_layout.addWidget(sharex_label)
+        button_layout.addWidget(self.sharex_cb)
+        button_layout.addSpacing(50)
         button_layout.addWidget(self.close_button)
+
         main_layout.addLayout(button_layout)
 
+        self.sharex_cb.stateChanged.connect(self.update)
         self.close_button.clicked.connect(self.close)
 
         self.setLayout(main_layout)
@@ -62,6 +72,15 @@ class displayStackedSeriesWindow(QWidget):
         exit_shortcut.activated.connect(self.close)
 
         self.interactive_plot.fig.canvas.setFocus()
+
+    #---------------------------------------------------------------------------------------------
+    def update(self):
+
+        self.sharex = self.sharex_cb.isChecked()
+
+        for ax in self.interactive_plot.axs:
+            ax.clear()
+        self.myplot()
 
     #---------------------------------------------------------------------------------------------
     def contextMenuEvent(self, event):
@@ -79,6 +98,14 @@ class displayStackedSeriesWindow(QWidget):
 
     #---------------------------------------------------------------------------------------------
     def myplot(self):
+
+        #-----------------------------------
+        # a way to remove sharex (unsharex does not exist)
+        for n,ax in enumerate(self.interactive_plot.axs[:]):
+            pos = ax.get_position()
+            self.interactive_plot.fig.delaxes(ax)
+            new_ax = self.interactive_plot.fig.add_axes(pos)
+            self.interactive_plot.axs[n] = new_ax
 
         #-----------------------------------
         for n, item in enumerate(self.items):
@@ -105,20 +132,21 @@ class displayStackedSeriesWindow(QWidget):
             ax.yaxis.set_inverted(Y_axisInverted)
 
         #-----------------------------------
-        XDict = {}
-        for n, item in enumerate(self.items):
-            serieDict = item.data(0, Qt.UserRole)
-            if serieDict['X'] not in XDict:
-                XDict[serieDict['X']] = []
-            XDict[serieDict['X']].append(n)
+        if self.sharex:
+            XDict = {}
+            for n, item in enumerate(self.items):
+                serieDict = item.data(0, Qt.UserRole)
+                if serieDict['X'] not in XDict:
+                    XDict[serieDict['X']] = []
+                XDict[serieDict['X']].append(n)
 
-        sharexLists = [n for n in XDict.values() if len(n) > 1]
-        #print(sharexLists)
-        for sharexList in sharexLists:
-            base_ax = self.interactive_plot.axs[sharexList[0]]
-            for n in sharexList[1:]:
-                #print("sharex", sharexList[0], n)
-                self.interactive_plot.axs[n].sharex(base_ax) 
+            sharexLists = [n for n in XDict.values() if len(n) > 1]
+            #print(sharexLists)
+            for sharexList in sharexLists:
+                base_ax = self.interactive_plot.axs[sharexList[0]]
+                for n in sharexList[1:]:
+                    #print("sharex", sharexList[0], n)
+                    self.interactive_plot.axs[n].sharex(base_ax) 
 
         #-----------------------------------
         self.interactive_plot.fig.canvas.draw()

@@ -311,19 +311,19 @@ class interactivePlot:
                 self.fig.canvas.draw()
 
             elif event.key == 'a':
-                for ax in self.axs:
-                    visible_lines = [line for line in ax.lines if (line.get_visible() and not is_axvline(line))]
-                    if visible_lines:
-                        x_min = min(line.get_xdata().min() for line in visible_lines)
-                        x_max = max(line.get_xdata().max() for line in visible_lines)
-                        y_min = min(line.get_ydata().min() for line in visible_lines)
-                        y_max = max(line.get_ydata().max() for line in visible_lines)
-                        x_margin = (x_max - x_min) * 0.05
-                        y_margin = (y_max - y_min) * 0.05
-                        is_inverted = ax.yaxis.get_inverted()             # keep inverted
-                        ax.set_xlim(x_min - x_margin, x_max + x_margin)
-                        ax.set_ylim(y_min - y_margin, y_max + y_margin)
-                        ax.yaxis.set_inverted(is_inverted)                # set back to state
+                visible_lines = [line for line in ax.lines if (line.get_visible() and not is_axvline(line))]
+                print(id(ax), visible_lines)
+                if visible_lines:
+                    x_min = min(line.get_xdata().min() for line in visible_lines)
+                    x_max = max(line.get_xdata().max() for line in visible_lines)
+                    y_min = min(line.get_ydata().min() for line in visible_lines)
+                    y_max = max(line.get_ydata().max() for line in visible_lines)
+                    x_margin = (x_max - x_min) * 0.05
+                    y_margin = (y_max - y_min) * 0.05
+                    is_inverted = ax.yaxis.get_inverted()             # keep inverted
+                    ax.set_xlim(x_min - x_margin, x_max + x_margin)
+                    ax.set_ylim(y_min - y_margin, y_max + y_margin)
+                    ax.yaxis.set_inverted(is_inverted)                # set back to state
                 self.fig.canvas.draw()
 
         #------------------------------
