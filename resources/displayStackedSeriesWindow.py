@@ -78,8 +78,6 @@ class displayStackedSeriesWindow(QWidget):
 
         self.sharex = self.sharex_cb.isChecked()
 
-        for ax in self.interactive_plot.axs:
-            ax.clear()
         self.myplot()
 
     #---------------------------------------------------------------------------------------------
@@ -100,12 +98,10 @@ class displayStackedSeriesWindow(QWidget):
     def myplot(self):
 
         #-----------------------------------
-        # a way to remove sharex (unsharex does not exist)
-        for n,ax in enumerate(self.interactive_plot.axs[:]):
-            pos = ax.get_position()
-            self.interactive_plot.fig.delaxes(ax)
-            new_ax = self.interactive_plot.fig.add_axes(pos)
-            self.interactive_plot.axs[n] = new_ax
+        for ax in self.interactive_plot.axs:
+            ax.remove()
+        self.interactive_plot.axs = list(self.interactive_plot.fig.subplots(len(self.items), sharex=False))
+        self.interactive_plot.fig.subplots_adjust(hspace=0.5)
 
         #-----------------------------------
         for n, item in enumerate(self.items):
@@ -158,8 +154,6 @@ class displayStackedSeriesWindow(QWidget):
 
         self.raise_()
 
-        for ax in self.interactive_plot.axs:
-            ax.clear()
         self.myplot()
 
     #---------------------------------------------------------------------------------------------

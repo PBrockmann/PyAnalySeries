@@ -634,11 +634,13 @@ class defineInterpolationWindow(QWidget):
     #------------------------------------------------------------------
     def on_mouse_press(self, event):
 
-        if event.inaxes not in self.axs: return
+        #if event.inaxes not in self.axs: return
 
         self.mousepress = None
         if event.button == 1:
             self.mousepress = 'left'
+
+        self.updateConnections()
 
     #------------------------------------------------------------------
     def on_mouse_release(self, event):

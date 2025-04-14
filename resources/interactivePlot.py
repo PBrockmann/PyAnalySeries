@@ -201,55 +201,76 @@ class interactivePlot:
 
     #---------------------------------------------------------------------------------------------
     def on_press(self, event):
+        """Store the starting point for panning."""
+
         if event.button != 1: return            # Only left button
 
-        """Store the starting point for panning."""
-        if event.inaxes:
-            event.inaxes.pan_start = event.xdata, event.ydata  # Store the starting point for panning
+        ax, artist = self.detect_artist(event)  # Detect the Artist element under the mouse
+        #print("press", ax, artist, type(artist))
+
+        if artist is None: return
+
+        display_coord = (event.x, event.y)
+        coordx, coordy = ax.transData.inverted().transform(display_coord)
+
+        ax.pan_start = coordx, coordy   # Store the starting point for panning
 
     #---------------------------------------------------------------------------------------------
     def on_motion(self, event):
         """Handle panning when the mouse is moved."""
-        if event.inaxes:
 
-            self.fig.canvas.setFocus()
+        self.fig.canvas.setFocus()
 
-            #-------------------------
-            if hasattr(event.inaxes, "pan_start") and event.inaxes.pan_start:
-                xstart, ystart = event.inaxes.pan_start
+        ax, artist = self.detect_artist(event)  # Detect the Artist element under the mouse
+        #print("motion", ax, artist, event.inaxes)
 
-                dx = xstart - event.xdata
-                dy = ystart - event.ydata
+        if artist is None: return
 
-                cur_xlim = event.inaxes.get_xlim()
-                cur_ylim = event.inaxes.get_ylim()
+        #-------------------------
+        if hasattr(ax, "pan_start") and ax.pan_start:
+            xstart, ystart = ax.pan_start
 
-                event.inaxes.set_xlim(cur_xlim[0] + dx, cur_xlim[1] + dx)  # Update limits for panning
-                event.inaxes.set_ylim(cur_ylim[0] + dy, cur_ylim[1] + dy)
+            display_coord = (event.x, event.y)
+            coordx, coordy = ax.transData.inverted().transform(display_coord)
 
-                event.inaxes.figure.canvas.draw()  # Redraw the canvas
+            dx = xstart - coordx
+            dy = ystart - coordy
 
-            #-------------------------
-            for ax in self.axs:
-                for line, points in ax.line_points_pairs:
-                    if line.get_visible():
-                        contains, info = points.contains(event)
-                        if contains:
-                            ind = info['ind'][0]
-                            x_data, y_data = points.get_offsets().T
-                            color = points.get_facecolors()[0]
+            cur_xlim = ax.get_xlim()
+            cur_ylim = ax.get_ylim()
 
-                            position_xy = ax.transData.transform((x_data[ind], y_data[ind]))
+            # Update limits for panning
+            if isinstance(artist, XAxis):
+                ax.set_xlim(cur_xlim[0] + dx, cur_xlim[1] + dx)
+            elif isinstance(artist, YAxis):
+                ax.set_ylim(cur_ylim[0] + dy, cur_ylim[1] + dy)
+            else:
+                ax.set_xlim(cur_xlim[0] + dx, cur_xlim[1] + dx)
+                ax.set_ylim(cur_ylim[0] + dy, cur_ylim[1] + dy)
+
+            ax.figure.canvas.draw()  # Redraw the canvas
+
+        #-------------------------
+        for ax in self.axs:
+            for line, points in ax.line_points_pairs:
+                if line.get_visible():
+                    contains, info = points.contains(event)
+                    if contains:
+                        ind = info['ind'][0]
+                        x_data, y_data = points.get_offsets().T
+                        color = points.get_facecolors()[0]
+
+                        position_xy = ax.transData.transform((x_data[ind], y_data[ind]))
    
-                            self.reset_tooltip()
-                            self.tooltip.xy = (position_xy)
-                            self.tooltip.set_text(f"({x_data[ind]:.6f}, {y_data[ind]:.6f})")
-                            self.tooltip.set_bbox(dict(boxstyle="round,pad=0.3", fc=color, alpha=0.2))
-                            self.tooltip.set_visible(True)
-                            #print('here', x_data[ind], y_data[ind], position_xy)
+                        self.reset_tooltip()
+                        self.tooltip.xy = (position_xy)
+                        self.tooltip.set_text(f"({x_data[ind]:.6f}, {y_data[ind]:.6f})")
+                        self.tooltip.set_bbox(dict(boxstyle="round,pad=0.3", fc=color, alpha=0.2))
+                        self.tooltip.set_visible(True)
+                        #print('here', x_data[ind], y_data[ind], position_xy)
 
-                            ax.figure.canvas.draw_idle()
-                            return
+                        ax.figure.canvas.draw_idle()
+                        return
 
     #---------------------------------------------------------------------------------------------
     def on_release(self, event):
