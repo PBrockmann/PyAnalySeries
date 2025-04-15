@@ -1,6 +1,8 @@
 ## PyAnalySeries
 
-Python version for Analyseries
+PyAnalySeries Reimagined: A Legacy Tool Reborn
+
+[![DOI](https://zenodo.org/badge/855161808.svg)](https://doi.org/10.5281/zenodo.15225020)
 
 Based on:
  * numpy
