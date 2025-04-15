@@ -1,7 +1,8 @@
 [Desktop Entry]
 Name=PyAnalySeries
 Exec=bash -c "~/PyAnalySeries/PyAnalySeries.sh"
-Icon=~/PyAnalySeries/PyAnalySeries_icon.png
+Icon=~/bitmap.png
+Path=~/Desktop
 Terminal=false
 Type=Application
 Categories=Development
