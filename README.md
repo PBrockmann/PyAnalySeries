@@ -34,7 +34,7 @@ Based on:
 
 ##### Icon and shortcut 
 
- * Icon : <img src="resources/PyAnalySeries_icon.png" alt="shortcut icon" width="150" />
+ * Icon : <img src="resources/PyAnalySeries_icon.png" alt="shortcut icon" width="80" />
  * Adapt the PyAnalySeries.desktop to your environment and set a shortcut icon to launch the application directly from your desktop.
 
 #### Captures
