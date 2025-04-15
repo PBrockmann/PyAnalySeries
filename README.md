@@ -14,7 +14,7 @@ Based on:
 #### Installation
 
 ##### Get the application
- * `git clone https://github.com/PBrockmann/PyAnalySeries`
+ * `git clone https://github.com/PaleoIPSL/PyAnalySeries`
  * `cd PyAnalySeries`
 
 ##### Create a python environment to use PyAnalySeries 
