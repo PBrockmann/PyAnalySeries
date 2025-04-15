@@ -28,6 +28,10 @@ Based on:
  * `python PyAnalySeries_v5.0.py test/ws_ex_5.0.xlsx`
  * `python PyAnalySeries_v5.0.py test/MD95-2042.xlsx test/GeoB3938.xlsx`
 
+##### Shortcut 
+ * Adapt the PyAnalySeries.desktop to your environment and set a [shortcut icon](resources/PyAnalySeries_icon.png) to launch the application directly from your desktop.
+![ScreenShot1](capture_01.png) 
+
 #### Captures
 
 ![ScreenShot1](capture_01.png) 
