@@ -4,7 +4,13 @@ PyAnalySeries Reimagined: A Legacy Tool Reborn
 
 [![DOI](https://zenodo.org/badge/855161808.svg)](https://doi.org/10.5281/zenodo.15225020)
 
-PyAnalySeries is a Python application built on matplotlib, with a PyQt-based graphical interface, making it easily portable across platforms including Linux, macOS, and Windows. Special attention has been given to ergonomics, emphasizing simplicity and clarity, while offering intuitive interactivity such as zooming, panning, and scrolling, with linked or independent axes. The core design follows a "Define then Apply" workflow for data processing operations such as filtering, sampling, and interpolation. Data is stored in an open format, using a spreadsheet-style file with multiple tabs for organization. The application leverages robust, well-tested modules for interpolation, notably SciPy, and features an interactive interface for defining interpolation pointers (formerly known as Linage and Splinage), allowing for precise placement and manipulation—either directly on data points or independently. Exports are available in both PDF and PNG formats, enabling easy sharing and high-quality output.
+**PyAnalySeries** is a Python application built on **matplotlib**, with a **PyQt-based graphical interface**, making it easily portable across platforms including **Linux**, **macOS**, and **Windows**.
+Special attention has been given to **ergonomics**, emphasizing **simplicity** and **clarity**, while offering intuitive interactivity such as **zooming**, **panning**, and **scrolling**, with **linked or independent axes**.
+The core design follows a **"Define then Apply"** workflow for data processing operations such as **filtering**, **sampling**, and **interpolation**.
+Data is stored in an **open format**, using a **spreadsheet-style file** with multiple tabs for organization.
+The application leverages **robust, well-tested modules** for interpolation, notably **SciPy**, and features an interactive interface for defining **interpolation pointers** (formerly known as *Linage* and *Splinage*), allowing for precise placement and manipulation—either directly on data points or independently.
+**Exports are available in both PDF and PNG formats**, enabling easy sharing and high-quality output.
+
 
 Based on:
  * numpy
