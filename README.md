@@ -6,7 +6,7 @@ PyAnalySeries Reimagined: A Legacy Tool Reborn
 
 **PyAnalySeries** is a Python application built on **matplotlib**, with a **PyQt-based graphical interface**, making it easily portable across platforms including **Linux**, **macOS**, and **Windows**.
 
-It is designed as a modern continuation of the **AnalySeries (Legacy)** tool, aiming to reproduce and extend its core functionalities within a more robust and portable Python environment.
+It is designed as a modern continuation of the **AnalySeries**, the original application on MacOS, aiming to reproduce its core functionalities within a more robust and portable Python environment.
 
 Special attention has been given to **ergonomics**, emphasizing **simplicity** and **clarity**, while offering intuitive interactivity such as **zooming**, **panning**, and **scrolling**, with **linked or independent axes**.
 
@@ -29,6 +29,7 @@ Based on:
 This project is distributed under the **CeCILL v2.1** license.  
 
 <hr style="border:2px solid gray">
+
 #### Installation
 
 ##### Get the application
@@ -54,6 +55,7 @@ This project is distributed under the **CeCILL v2.1** license.
  * Adapt the PyAnalySeries.desktop to your environment and set a shortcut icon to launch the application directly from your desktop.
 
 <hr style="border:2px solid gray">
+
 #### Captures
 
 ![ScreenShot1](capture_01.png) 
