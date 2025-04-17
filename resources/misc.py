@@ -36,8 +36,8 @@ def cleanSpaceList(aList):
 #========================================================================================
 def is_open(file):
     try:
+        # Try to open the file in read/write mode.
         with open(file, "r+") as f:
-            return False
+            return False  # File was opened successfully → not locked
     except IOError:
-        return True
-
+        return True  # File is likely in use or inaccessible

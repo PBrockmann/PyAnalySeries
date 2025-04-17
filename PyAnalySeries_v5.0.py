@@ -172,31 +172,49 @@ def add_item_tree_widget(ws_item, itemDict, position=None, mark=True):
 def on_item_changed(item, column):
     global open_ws
 
+    #----------------------------------
     if not item.parent():
+
+        #--------
         if column !=0: return
+
+        #--------
         new_wsName = item.text(0).replace(' *', '')
         old_wsName = open_ws[id(item)]
+        #print(f"Want to change name ws: {old_wsName} --> {new_wsName}")
+
+        #--------
         if new_wsName == old_wsName: 
             remark_ws(item)
             return
+
+        #--------
         if new_wsName in open_ws.values():
             QMessageBox.warning(main_window, "Duplicate WS name", f"The ws '{new_wsName}' is already in use. Please choose a unique name.")
             item.setText(0, old_wsName)
-        else:
-            open_ws[id(item)] = new_wsName
-            if os.path.exists(old_wsName):
-                #print(f"Change name ws: {old_wsName} --> {new_wsName}")
-                if is_open(old_wsName):
-                    QMessageBox.warning(main_window, "WS open in another application", f"The ws '{new_wsName}' is already in use. Please close the file.")
-                    item.setText(0, old_wsName)
-                else:
-                    file_path = os.path.dirname(new_wsName)
-                    if not os.path.exists(file_path):
-                        QMessageBox.warning(main_window, "Missing directory", f"Create first the target directory on the file system.")
-                        item.setText(0, old_wsName)
-                    else:
-                        os.rename(old_wsName, new_wsName)
-            #mark_ws(item)
+            return
+
+        #--------
+        if os.path.exists(old_wsName) and is_open(old_wsName):
+            QMessageBox.warning(main_window, "WS open in another application", f"The ws '{new_wsName}' is already in use. Please close the file.")
+            item.setText(0, old_wsName)
+            return
+
+        #--------
+        file_path = os.path.dirname(new_wsName)
+        if file_path and not os.path.exists(file_path):
+            QMessageBox.warning(main_window, "Missing directory", f"Create first the target directory on the file system.")
+            item.setText(0, old_wsName)
+            return
+
+        #--------
+        if os.path.exists(old_wsName):
+            os.rename(old_wsName, new_wsName)
+        remark_ws(item)
+
+        open_ws[id(item)] = new_wsName
+
+    #----------------------------------
     else: 
         itemDict = item.data(0, Qt.UserRole)
         itemDict['Name'] = item.text(0)
@@ -388,12 +406,13 @@ def load_WorkSheet(fileName):
 #========================================================================================
 def new_WorkSheet():
 
-    fileNameTemplate = 'new_{}.xlsx'
+    fileNameTemplate = 'new_{:02d}.xlsx'
     counterFilename = 1
-    while fileNameTemplate.format("%02d" %counterFilename) in open_ws.values():
+    while (os.path.exists(fileNameTemplate.format(counterFilename))) or \
+          (fileNameTemplate.format(counterFilename) in open_ws.values()):
         counterFilename += 1
-    fileName = fileNameTemplate.format("%02d" %counterFilename)
-    
+    fileName = fileNameTemplate.format(counterFilename)
+
     ws_item = populate_tree_widget(fileName, [])
     mark_ws(ws_item)
     tree_widget.setCurrentItem(ws_item)
