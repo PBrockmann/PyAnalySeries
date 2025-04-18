@@ -49,7 +49,15 @@ This project is distributed under the **CeCILL v2.1** license.
 ##### Icon and shortcut 
 
  * Icon : <img src="resources/PyAnalySeries_icon.png" alt="shortcut icon" width="80" />
- * Adapt the PyAnalySeries.desktop to your environment and set a shortcut icon to launch the application directly from your desktop.
+ * Shortcut on Linux :
+ 	* Copy the PyAnalySeries.desktop file to your Desktop, and make change to specify YOURLOGIN
+ 	* Make change in the PyAnalySeries.sh file to specify the anaconda installtion directory
+	* Set an icon on the shorcut by choosing the PyAnalySeries_icon.pngi file as icon
+
+ * Shortcut on MacOS :
+ 	* Use Automator tool to set a shortcut (choose new and execute shell)
+	* Set in the shell the PyAnalySeries.sh file content with correct anaconda path
+	* Set an icon by pressing **⌘ + I** on the shorcut and drag the PyAnalySeries_icon.icnsi file as icon 
 
 <hr style="border:2px solid gray">
 
