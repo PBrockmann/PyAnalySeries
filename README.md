@@ -52,12 +52,12 @@ This project is distributed under the **CeCILL v2.1** license.
  * Shortcut on Linux :
  	* Copy the PyAnalySeries.desktop file to your Desktop, and make change to specify YOURLOGIN
  	* Make change in the PyAnalySeries.sh file to specify the anaconda installtion directory
-	* Set an icon on the shorcut by choosing the PyAnalySeries_icon.pngi file as icon
+	* Set an icon on the shorcut by choosing the PyAnalySeries_icon.png file as icon
 
  * Shortcut on MacOS :
  	* Use Automator tool to set a shortcut (choose new and execute shell)
 	* Set in the shell the PyAnalySeries.sh file content with correct anaconda path
-	* Set an icon by pressing **⌘ + I** on the shorcut and drag the PyAnalySeries_icon.icnsi file as icon 
+	* Set an icon by pressing **⌘ + I** on the shorcut and drag the PyAnalySeries_icon.icns file as icon 
 
 <hr style="border:2px solid gray">
 
