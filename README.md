@@ -1,6 +1,6 @@
 ## PyAnalySeries
 
-PyAnalySeries Reimagined: A Legacy Tool Reborn
+PyAnalySeries Reimagined: A Multi-Platform Revival of a Legacy Tool for Paleoclimate Time Series Analysis
 
 [![DOI](https://zenodo.org/badge/855161808.svg)](https://doi.org/10.5281/zenodo.15225020)
 

@@ -117,18 +117,18 @@ class interactivePlot:
         #print('-----------------')
         #print(f'Mouse: {event.x}, {event.y}')
         
-        for axcurrent in self.axs:
+        for ax_current in self.axs:
 
-            if axcurrent.contains(event)[0]:  
-                return axcurrent, axcurrent  # If cursor is inside the main axis, return it
+            if ax_current.contains(event)[0]:  
+                return ax_current, ax_current  # If cursor is inside the main axis, return it
     
             mouse = Point((event.x, event.y))
 
-            spine = axcurrent.spines['left']
+            spine = ax_current.spines['left']
             path = spine.get_path().transformed(spine.get_transform())
             spine_left = LineString(path.vertices)
 
-            spine = axcurrent.spines['bottom']
+            spine = ax_current.spines['bottom']
             path = spine.get_path().transformed(spine.get_transform())
             spine_bottom = LineString(path.vertices)
 
@@ -138,8 +138,8 @@ class interactivePlot:
             
             if min(distance_left, distance_bottom) < distance_min:
                 distance_min = min(distance_left, distance_bottom)
-                closest_axis = axcurrent
-                axis_type = axcurrent.yaxis if distance_left < distance_bottom else axcurrent.xaxis
+                closest_axis = ax_current
+                axis_type = ax_current.yaxis if distance_left < distance_bottom else ax_current.xaxis
 
         return closest_axis, axis_type
 
