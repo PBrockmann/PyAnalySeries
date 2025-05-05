@@ -6,6 +6,7 @@
 
 import sys
 import os
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -71,7 +72,7 @@ def populate_tree_widget(fileName, itemDict_list):
 
     tree_widget.blockSignals(True)
 
-    ws_icon = QIcon("resources/icon_folder.png")
+    ws_icon = QIcon(str(app_dir / 'resources' / 'icon_folder.png'))
 
     ws_item = QTreeWidgetItem(tree_widget)
     ws_item.setIcon(0, ws_icon)
@@ -93,11 +94,11 @@ def populate_tree_widget(fileName, itemDict_list):
 #========================================================================================
 def add_item_tree_widget(ws_item, itemDict, position=None, mark=True):
 
-    icon_serie = QIcon("resources/icon_document.png")
-    icon_serieDuplicated = QIcon("resources/icon_copy.png")
-    icon_filter = QIcon("resources/icon_filter.png")
-    icon_sample = QIcon("resources/icon_sample.png")
-    icon_interpolate = QIcon("resources/icon_interpolate.png")
+    icon_serie = QIcon(str(app_dir / 'resources' / 'icon_document.png'))
+    icon_serieDuplicated = QIcon(str(app_dir / 'resources' / 'icon_copy.png'))
+    icon_filter = QIcon(str(app_dir / 'resources' / 'icon_filter.png'))
+    icon_sample = QIcon(str(app_dir / 'resources' / 'icon_sample.png'))
+    icon_interpolate = QIcon(str(app_dir / 'resources' / 'icon_interpolate.png'))
 
     item = QTreeWidgetItem()
     item.setFlags(item.flags() & ~Qt.ItemIsDropEnabled)
@@ -1398,10 +1399,12 @@ def close_event(event):
 #========================================================================================
 app = QApplication(sys.argv)
 
+app_dir = Path(__file__).resolve().parent
+
 fontArial = QFont('Arial', 12)
 app.setFont(fontArial)
 
-icon = QIcon('resources/PyAnalySeries_icon.png')
+icon = QIcon(str(app_dir / 'resources' / 'PyAnalySeries_icon.png'))
 app.setWindowIcon(icon)
 
 main_window = QMainWindow()
@@ -1537,14 +1540,14 @@ basicSeries_menu.addAction(insolationAstro_action)
 help_menu = menu_bar.addMenu('Help')
 
 help_action = QAction('Help', main_window)
-help_action.triggered.connect(lambda: show_dialog('Help', 'resources/help.html', 1000, 800))
+help_action.triggered.connect(lambda: show_dialog('Help', app_dir / 'resources' / 'help.html', 1000, 800))
 help_menu.addAction(help_action)
 
 #----------------------------------------------
 about_menu = menu_bar.addMenu('About')
 
 about_action = QAction('About', main_window)
-about_action.triggered.connect(lambda: show_dialog('About', 'resources/about.html', 1000, 600))
+about_action.triggered.connect(lambda: show_dialog('About', app_dir / 'resources' / 'about.html', 1000, 600))
 about_menu.addAction(about_action)
 
 #----------------------------------------------
@@ -1559,9 +1562,6 @@ main_window.statusBar().showMessage('Application ready', 5000)
 main_window.show()
 
 main_window.closeEvent = close_event
-
-#current_directory = os.getcwd()
-#print(current_directory)
 
 sys.exit(app.exec_())
 
