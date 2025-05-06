@@ -94,8 +94,8 @@ def populate_tree_widget(fileName, itemDict_list):
 #========================================================================================
 def add_item_tree_widget(ws_item, itemDict, position=None, mark=True):
 
-    icon_serie = QIcon(str(app_dir / 'resources' / 'icon_document.png'))
-    icon_serieDuplicated = QIcon(str(app_dir / 'resources' / 'icon_copy.png'))
+    icon_serie = QIcon(str(app_dir / 'resources' / 'icon_serie.png'))
+    icon_serieDuplicated = QIcon(str(app_dir / 'resources' / 'icon_serieDuplicated.png'))
     icon_filter = QIcon(str(app_dir / 'resources' / 'icon_filter.png'))
     icon_sample = QIcon(str(app_dir / 'resources' / 'icon_sample.png'))
     icon_interpolate = QIcon(str(app_dir / 'resources' / 'icon_interpolate.png'))
