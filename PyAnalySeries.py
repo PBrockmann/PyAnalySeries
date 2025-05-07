@@ -35,7 +35,8 @@ from resources.CustomQTableWidget import CustomQTableWidget
 
 from resources.importDataWindow import importDataWindow
 
-from resources.defineInsolationAstroWindow import defineInsolationAstroWindow
+from resources.defineRandomSerieWindow import defineRandomSerieWindow
+from resources.defineInsolationAstroSerieWindow import defineInsolationAstroSerieWindow
 
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
@@ -47,7 +48,7 @@ else:
     filesName = None
 
 #========================================================================================
-version = 'v5.0'
+version = 'v5.1'
 
 open_ws = {}
 open_displayWindows = {} 
@@ -55,7 +56,8 @@ open_filterWindows = {}
 open_sampleWindows = {} 
 open_interpolationWindows = {} 
 open_importWindow = {}
-open_insolationAstroWindow= {}
+open_randomSerieWindow= {}
+open_insolationAstroSerieWindow= {}
 
 #========================================================================================
 def colorize_item(item, color_name):
@@ -590,23 +592,42 @@ def import_Data():
         importWindow.show()
 
 #========================================================================================
-def define_insolationAstroSerie():
-    global open_insolationAstroWindow
+def define_randomSerie():
+    global open_randomSerieWindow
 
     current_index = tree_widget.currentItem()
     if not current_index:
         new_WorkSheet()
     
-    Id_insolationAstroWindow = '123456'
+    Id_randomSerieWindow = '123456'
 
-    if open_insolationAstroWindow:
-        insolationAstroWindow = open_insolationAstroWindow[Id_insolationAstroWindow]
-        insolationAstroWindow.raise_()
-        insolationAstroWindow.activateWindow()
+    if open_randomSerieWindow:
+        randomSerieWindow = open_randomSerieWindow[Id_randomSerieWindow]
+        randomSerieWindow.raise_()
+        randomSerieWindow.activateWindow()
     else:
-        insolationAstroWindow = defineInsolationAstroWindow(open_insolationAstroWindow, add_item_tree_widget)
-        open_insolationAstroWindow[Id_insolationAstroWindow] = insolationAstroWindow
-        insolationAstroWindow.show()
+        randomSerieWindow = defineRandomSerieWindow(open_randomSerieWindow, add_item_tree_widget)
+        open_randomSerieWindow[Id_randomSerieWindow] = randomSerieWindow
+        randomSerieWindow.show()
+
+#========================================================================================
+def define_insolationAstroSerie():
+    global open_insolationAstroSerieWindow
+
+    current_index = tree_widget.currentItem()
+    if not current_index:
+        new_WorkSheet()
+    
+    Id_insolationAstroSerieWindow = '123456'
+
+    if open_insolationAstroSerieWindow:
+        insolationAstroSerieWindow = open_insolationAstroSerieWindow[Id_insolationAstroSerieWindow]
+        insolationAstroSerieWindow.raise_()
+        insolationAstroSerieWindow.activateWindow()
+    else:
+        insolationAstroSerieWindow = defineInsolationAstroSerieWindow(open_insolationAstroSerieWindow, add_item_tree_widget)
+        open_insolationAstroSerieWindow[Id_insolationAstroSerieWindow] = insolationAstroSerieWindow
+        insolationAstroSerieWindow.show()
 
 #========================================================================================
 def create_tree_widget():
@@ -1439,9 +1460,6 @@ openWS_action.triggered.connect(open_WorkSheet)
 saveWSs_action = QAction("Save worksheets", main_window)
 saveWSs_action.setShortcut('Ctrl+s')
 saveWSs_action.triggered.connect(save_WorkSheets)
-import_action = QAction("Import data", main_window)
-import_action.setShortcut('Ctrl+m')
-import_action.triggered.connect(import_Data)
 exit_action = QAction('Exit', main_window)
 exit_action.setShortcut('q')
 exit_action.triggered.connect(exit_confirm)
@@ -1449,8 +1467,6 @@ exit_action.triggered.connect(exit_confirm)
 file_menu.addAction(newWS_action)
 file_menu.addAction(openWS_action)
 file_menu.addAction(saveWSs_action)
-file_menu.addSeparator()
-file_menu.addAction(import_action)
 file_menu.addSeparator()
 file_menu.addAction(exit_action)
 
@@ -1529,12 +1545,22 @@ processing_menu.addAction(applyInterpolationLinear_action)
 processing_menu.addAction(applyInterpolationPCHIP_action)
 
 #----------------------------------------------
-basicSeries_menu = menu_bar.addMenu("Basic series")
+basicSeries_menu = menu_bar.addMenu("Generate series")
 
-insolationAstro_action = QAction("Insolation / Astronomical parameters", main_window)
-insolationAstro_action.triggered.connect(define_insolationAstroSerie)
+import_action = QAction("Import data as serie", main_window)
+import_action.setShortcut('Ctrl+m')
+import_action.triggered.connect(import_Data)
 
-basicSeries_menu.addAction(insolationAstro_action)
+randomSerie_action = QAction("Random serie", main_window)
+randomSerie_action.triggered.connect(define_randomSerie)
+insolationAstroSerie_action = QAction("Insolation / Astronomical serie", main_window)
+insolationAstroSerie_action.triggered.connect(define_insolationAstroSerie)
+
+basicSeries_menu.addAction(import_action)
+basicSeries_menu.addSeparator()
+basicSeries_menu.addAction(randomSerie_action)
+basicSeries_menu.addSeparator()
+basicSeries_menu.addAction(insolationAstroSerie_action)
 
 #----------------------------------------------
 help_menu = menu_bar.addMenu('Help')
