@@ -37,7 +37,7 @@ class defineRandomSerieWindow(QWidget):
 
         #----------------------------------------------
         groupbox1 = QGroupBox('Parameters :')
-        groupbox1.setFixedHeight(150)
+        groupbox1.setFixedHeight(200)
 
         groupbox1_layout = QVBoxLayout()
 
@@ -178,8 +178,11 @@ class defineRandomSerieWindow(QWidget):
 
         history = f'Random serie with parameters :' + \
                    '<ul>' + \
-                   f'<li>' + \
-                   f'<li>' + \
+                   f'<li>Start point : {self.xstart}' + \
+                   f'<li>End point : {self.xend}' + \
+                   f'<li>Nb of points : {self.nbPts}' + \
+                   f'<li>Min value : {self.maxVal}' + \
+                   f'<li>Max value : {self.minVal}' + \
                    '</ul>'
 
         serieDict = {
