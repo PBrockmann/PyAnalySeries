@@ -206,6 +206,7 @@ class displaySingleSerieWindow(QWidget):
         serieDict = self.item.data(0, Qt.UserRole)
         serie = serieDict['Serie']
         serie = serie.groupby(serie.index).mean()
+        print(serie)
         serieColor = serieDict['Color']
         Y_axisInverted = serieDict['Y axis inverted']
 

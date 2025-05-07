@@ -47,14 +47,14 @@ class importDataWindow(QWidget):
         self.close_button = QPushButton("Close", self)
         button_layout.addStretch()
 
-        button_layout.addWidget(self.importPointers_button)
         button_layout.addWidget(self.importSeries_button)
+        button_layout.addWidget(self.importPointers_button)
         button_layout.addSpacing(50)
         button_layout.addWidget(self.close_button)
         main_layout.addLayout(button_layout)
 
-        self.importPointers_button.clicked.connect(self.import_pointers)
         self.importSeries_button.clicked.connect(self.import_series)
+        self.importPointers_button.clicked.connect(self.import_pointers)
         self.close_button.clicked.connect(self.close)
 
         self.status_bar = QStatusBar()

@@ -42,9 +42,9 @@ This project is distributed under the **CeCILL v2.1** license.
 
 ##### Test
 
- * `python PyAnalySeries_v5.0.py`
- * `python PyAnalySeries_v5.0.py test/ws_ex_5.0.xlsx`
- * `python PyAnalySeries_v5.0.py test/MD95-2042.xlsx test/GeoB3938.xlsx`
+ * `python PyAnalySeries.py`
+ * `python PyAnalySeries.py test/ws_ex_5.xlsx`
+ * `python PyAnalySeries.py test/MD95-2042.xlsx test/GeoB3938.xlsx`
 
 ##### Icon and shortcut 
 

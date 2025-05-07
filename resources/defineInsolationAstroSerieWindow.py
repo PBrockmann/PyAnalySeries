@@ -23,15 +23,15 @@ for key in plt.rcParams.keys():
         plt.rcParams[key] = []
 
 #=========================================================================================
-class defineInsolationAstroWindow(QWidget):
+class defineInsolationAstroSerieWindow(QWidget):
     #---------------------------------------------------------------------------------------------
-    def __init__(self, open_insolationAstroWindow, add_item_tree_widget):
+    def __init__(self, open_insolationAstroSerieWindow, add_item_tree_widget):
         super().__init__()
 
-        self.open_insolationAstroWindow = open_insolationAstroWindow
+        self.open_insolationAstroSerieWindow = open_insolationAstroSerieWindow
         self.add_item_tree_widget = add_item_tree_widget
 
-        title = 'Define insolation serie'
+        title = 'Define insolation / astromical serie'
         self.setWindowTitle(title)
         self.setGeometry(200, 200, 1200, 800)
         self.setMinimumSize(800, 600)
@@ -615,7 +615,7 @@ class defineInsolationAstroWindow(QWidget):
 
     #---------------------------------------------------------------------------------------------
     def closeEvent(self, event):
-        self.open_insolationAstroWindow.pop('123456', None)
+        self.open_insolationAstroSerieWindow.pop('123456', None)
         event.accept()
 
 #=========================================================================================
@@ -627,12 +627,12 @@ if __name__ == "__main__":
 
     app = QApplication([])
 
-    Id_insolationAstroWindow = '1234'
-    open_insolationAstroWindow = {}
+    Id_insolationAstroSerieWindow = '1234'
+    open_insolationAstroSerieWindow = {}
 
-    insolationAstroWindow = defineInsolationAstroWindow(open_insolationAstroWindow, handle_item)
-    open_insolationAstroWindow[Id_insolationAstroWindow] = defineInsolationAstroWindow
-    insolationAstroWindow.show()
+    insolationAstroSerieWindow = defineInsolationAstroSerieWindow(open_insolationAstroSerieWindow, handle_item)
+    open_insolationAstroSerieWindow[Id_insolationAstroSerieWindow] = defineInsolationAstroSerieWindow
+    insolationAstroSerieWindow.show()
 
     sys.exit(app.exec_())
 
