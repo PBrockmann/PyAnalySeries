@@ -42,25 +42,25 @@ class defineFilterWindow(QWidget):
 
         #----------------------------------------------
         groupbox1 = QGroupBox('Parameters')
-        groupbox1_layout = QVBoxLayout()
         groupbox1.setFixedHeight(150)
 
-        layout_s1 = QHBoxLayout()
+        groupbox1_layout = QVBoxLayout()
 
-        label_s1 = QLabel('Moving average window size :')
-        self.spin_box = QSpinBox(self)
-        self.spin_box.setRange(1, 33)
-        self.spin_box.setSingleStep(2)
-        self.spin_box.setValue(self.window_size)
-        self.spin_box.setFixedWidth(50)
-        self.spin_box.valueChanged.connect(self.update_value)
-        self.spin_box.lineEdit().setReadOnly(True)
-        layout_s1.addWidget(label_s1)
-        layout_s1.addWidget(self.spin_box)
-        layout_s1.addStretch()
+        #-------------------------------
+        form_layout = QFormLayout()
+        
+        self.window_size_sb = QSpinBox(self)
+        self.window_size_sb.setRange(1, 33)
+        self.window_size_sb.setSingleStep(2)
+        self.window_size_sb.setValue(self.window_size)
+        self.window_size_sb.setFixedWidth(50)
+        self.window_size_sb.valueChanged.connect(self.update_value)
+        self.window_size_sb.lineEdit().setReadOnly(True)
 
-        groupbox1_layout.addLayout(layout_s1)
-        groupbox1_layout.addStretch()
+        form_layout.addRow("Moving average window size :", self.window_size_sb)
+
+        #-------------------------------
+        groupbox1_layout.addLayout(form_layout)
 
         groupbox1.setLayout(groupbox1_layout)
         main_layout.addWidget(groupbox1)
@@ -102,7 +102,7 @@ class defineFilterWindow(QWidget):
 
     #---------------------------------------------------------------------------------------------
     def update_value(self):
-        self.window_size = self.spin_box.value()
+        self.window_size = self.window_size_sb.value()
 
         xlim = self.interactive_plot.axs[0].get_xlim()
         ylim = self.interactive_plot.axs[0].get_ylim()

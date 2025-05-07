@@ -36,24 +36,63 @@ class defineRandomSerieWindow(QWidget):
         main_layout = QVBoxLayout()
 
         #----------------------------------------------
-        col_layout = QHBoxLayout()
-
-        #----------------------------------------------
-        col1_layout = QVBoxLayout()
-
-        #----------------------------------------------
         groupbox1 = QGroupBox('Parameters :')
+        groupbox1.setFixedHeight(150)
 
-        form_layout = QFormLayout()
+        groupbox1_layout = QVBoxLayout()
 
         #-------------------------------
-        groupbox1.setLayout(form_layout)
-        col1_layout.addWidget(groupbox1)
+        form_layout = QFormLayout()
+        
+        self.xstart_sb = QSpinBox(self)
+        self.xstart_sb.setRange(-100000, 10000)
+        self.xstart_sb.setSingleStep(100)
+        self.xstart_sb.setValue(0)
+        self.xstart_sb.setFixedWidth(100)
+        self.xstart_sb.valueChanged.connect(self.delayed_update)
 
-        #----------------------------------------------
-        col_layout.addLayout(col1_layout)
-        col_layout.addStretch()
-        main_layout.addLayout(col_layout)
+        self.xend_sb = QSpinBox(self)
+        self.xend_sb.setRange(-100000, 10000)
+        self.xend_sb.setSingleStep(100)
+        self.xend_sb.setValue(100)
+        self.xend_sb.setFixedWidth(100)
+        self.xend_sb.valueChanged.connect(self.delayed_update)
+
+        self.nbPts_sb = QSpinBox(self)
+        self.nbPts_sb.setRange(10, 1000)
+        self.nbPts_sb.setSingleStep(100)
+        self.nbPts_sb.setValue(100)
+        self.nbPts_sb.setFixedWidth(100)
+        self.nbPts_sb.valueChanged.connect(self.delayed_update)
+
+        validator = QDoubleValidator()
+        validator.setDecimals(2) 
+        validator.setNotation(QDoubleValidator.StandardNotation)
+        validator.setLocale(QLocale("en_US"))
+
+        self.minVal_input = QLineEdit()
+        self.minVal_input.setValidator(validator)
+        self.minVal_input.setFixedWidth(100)
+        self.minVal_input.setText('0')
+        self.minVal_input.editingFinished.connect(self.delayed_update)
+
+        self.maxVal_input = QLineEdit()
+        self.maxVal_input.setValidator(validator)
+        self.maxVal_input.setFixedWidth(100)
+        self.maxVal_input.setText('10')
+        self.maxVal_input.editingFinished.connect(self.delayed_update)
+
+        form_layout.addRow("Start point :", self.xstart_sb)
+        form_layout.addRow("End point :", self.xend_sb)
+        form_layout.addRow("Nb of points :", self.nbPts_sb)
+        form_layout.addRow("Min value:", self.minVal_input)
+        form_layout.addRow("Max value:", self.maxVal_input)
+
+        #-------------------------------
+        groupbox1_layout.addLayout(form_layout)
+
+        groupbox1.setLayout(groupbox1_layout)
+        main_layout.addWidget(groupbox1)
 
         #----------------------------------------------
         self.update_timer = QTimer()
@@ -101,12 +140,16 @@ class defineRandomSerieWindow(QWidget):
     #---------------------------------------------------------------------------------------------
     def myplot(self):
 
-        #x = np.random.uniform(0, 100, 1000)
-        x = np.linspace(0, 1000, 101)
-        y = np.random.normal(0, 10, 101)
+        self.xstart =  self.xstart_sb.value()
+        self.xend =  self.xend_sb.value()
+        self.nbPts =  self.nbPts_sb.value()
+        self.minVal =  float(self.minVal_input.text())
+        self.maxVal =  float(self.maxVal_input.text())
+
+        x = np.linspace(self.xstart, self.xend, self.nbPts)
+        y = np.random.uniform(self.minVal,self.maxVal, self.nbPts)
 
         serie = pd.Series(y, index=x)
-        #serie_sorted = serie.sort_index()
 
         self.index = serie.index
         self.values = serie.values
