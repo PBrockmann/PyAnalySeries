@@ -267,7 +267,7 @@ class interactivePlot:
                         self.tooltip.set_text(f"({x_data[ind]:.6f}, {y_data[ind]:.6f})")
                         self.tooltip.set_bbox(dict(boxstyle="round,pad=0.3", fc=color, alpha=0.2))
                         self.tooltip.set_visible(True)
-                        #print('here', x_data[ind], y_data[ind], position_xy)
+                        #print('here', x_data[ind], y_data[ind], position_xy, color)
 
                         ax.figure.canvas.draw_idle()
                         return

@@ -194,10 +194,10 @@ class displaySingleSerieWindow(QWidget):
 
     #---------------------------------------------------------------------------------------------
     def myplot(self, limits=None):
-        
-        ax = self.interactive_plot.axs[0]
+       
+        self.interactive_plot.reset()
 
-        self.interactive_plot.left_margin = 100
+        ax = self.interactive_plot.axs[0]
 
         ax.grid(visible=True, which='major', color='lightgray', linestyle='dashed', linewidth=0.5)
         ax.set_xlabel(self.xName)

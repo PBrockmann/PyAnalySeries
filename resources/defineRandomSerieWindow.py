@@ -61,7 +61,7 @@ class defineRandomSerieWindow(QWidget):
         self.nbPts_sb = QSpinBox(self)
         self.nbPts_sb.setRange(10, 1000)
         self.nbPts_sb.setSingleStep(100)
-        self.nbPts_sb.setValue(100)
+        self.nbPts_sb.setValue(101)
         self.nbPts_sb.setFixedWidth(100)
         self.nbPts_sb.valueChanged.connect(self.delayed_update)
 
