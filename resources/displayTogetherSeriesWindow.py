@@ -114,6 +114,7 @@ class displayTogetherSeriesWindow(QWidget):
     #---------------------------------------------------------------------------------------------
     def myplot(self):
 
+        self.interactive_plot.reset()
         self.interactive_plot.left_margin = 100 
         self.interactive_plot.bottom_margin = 50 
 
@@ -152,6 +153,7 @@ class displayTogetherSeriesWindow(QWidget):
 
         fig_width, fig_height = self.interactive_plot.fig.canvas.get_width_height()
 
+        self.interactive_plot.reset()
         offset = 80
         self.interactive_plot.left_margin = len(self.items) * offset 
         self.interactive_plot.bottom_margin = 50
@@ -231,6 +233,7 @@ class displayTogetherSeriesWindow(QWidget):
 
         fig_width, fig_height = self.interactive_plot.fig.canvas.get_width_height()
 
+        self.interactive_plot.reset()
         offset = 80
         self.interactive_plot.left_margin = 100
         self.interactive_plot.bottom_margin = len(self.items) * offset 
