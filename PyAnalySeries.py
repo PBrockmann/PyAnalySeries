@@ -1511,7 +1511,25 @@ edit_menu.addAction(displayStackedSeries_action)
 edit_menu.addAction(close_all_action)
 
 #----------------------------------------------
-processing_menu = menu_bar.addMenu("Processing")
+create_menu = menu_bar.addMenu("Create")
+
+importData_action = QAction("Import data", main_window)
+importData_action.setShortcut('Ctrl+m')
+importData_action.triggered.connect(import_Data)
+
+randomSerie_action = QAction("Random serie", main_window)
+randomSerie_action.triggered.connect(define_randomSerie)
+insolationAstroSerie_action = QAction("Insolation / Astronomical serie", main_window)
+insolationAstroSerie_action.triggered.connect(define_insolationAstroSerie)
+
+create_menu.addAction(importData_action)
+create_menu.addSeparator()
+create_menu.addAction(randomSerie_action)
+create_menu.addSeparator()
+create_menu.addAction(insolationAstroSerie_action)
+
+#----------------------------------------------
+process_menu = menu_bar.addMenu("Process")
 
 defineFilter_action = QAction("Define Filter smoothing average", main_window)
 defineFilter_action.setShortcut('Ctrl+f')
@@ -1534,33 +1552,15 @@ applyInterpolationPCHIP_action = QAction("Apply Interpolation PCHIP", main_windo
 applyInterpolationPCHIP_action.setToolTip("This action applies PCHIP interpolation to the selected data.")
 applyInterpolationPCHIP_action.triggered.connect(lambda: apply_interpolation('PCHIP'))
 
-processing_menu.addAction(defineFilter_action)
-processing_menu.addAction(applyFilter_action)
-processing_menu.addSeparator()
-processing_menu.addAction(defineSample_action)
-processing_menu.addAction(applySample_action)
-processing_menu.addSeparator()
-processing_menu.addAction(defineInterpolation_action)
-processing_menu.addAction(applyInterpolationLinear_action)
-processing_menu.addAction(applyInterpolationPCHIP_action)
-
-#----------------------------------------------
-basicSeries_menu = menu_bar.addMenu("Generate series")
-
-import_action = QAction("Import data as serie", main_window)
-import_action.setShortcut('Ctrl+m')
-import_action.triggered.connect(import_Data)
-
-randomSerie_action = QAction("Random serie", main_window)
-randomSerie_action.triggered.connect(define_randomSerie)
-insolationAstroSerie_action = QAction("Insolation / Astronomical serie", main_window)
-insolationAstroSerie_action.triggered.connect(define_insolationAstroSerie)
-
-basicSeries_menu.addAction(import_action)
-basicSeries_menu.addSeparator()
-basicSeries_menu.addAction(randomSerie_action)
-basicSeries_menu.addSeparator()
-basicSeries_menu.addAction(insolationAstroSerie_action)
+process_menu.addAction(defineFilter_action)
+process_menu.addAction(applyFilter_action)
+process_menu.addSeparator()
+process_menu.addAction(defineSample_action)
+process_menu.addAction(applySample_action)
+process_menu.addSeparator()
+process_menu.addAction(defineInterpolation_action)
+process_menu.addAction(applyInterpolationLinear_action)
+process_menu.addAction(applyInterpolationPCHIP_action)
 
 #----------------------------------------------
 help_menu = menu_bar.addMenu('Help')
