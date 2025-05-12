@@ -2,7 +2,7 @@
 
 PyAnalySeries Reimagined: A Legacy Tool Reborn
 
-[![DOI](https://zenodo.org/badge/855161808.svg)](https://doi.org/10.5281/zenodo.15225020)
+[![DOI](https://zenodo.org/badge/zenodo.15238092.svg](https://doi.org/10.5281/zenodo.15238092)
 
 **PyAnalySeries** is a Python application built on **matplotlib**, with a **PyQt-based graphical interface**, making it easily portable across platforms including **Linux**, **macOS**, and **Windows**.  
 It is designed as a modern continuation of the <a href="https://github.com/PaleoIPSL/AnalySeries" target="_blank">**AnalySeries**</a>, the original application on MacOS, aiming to reproduce its core functionalities within a more robust and portable Python environment.  
