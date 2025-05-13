@@ -299,33 +299,40 @@ class defineSampleWindow(QWidget):
   
             # Compute midpoints between valid sample points
             mids = (valid_sample_index[1:] + valid_sample_index[:-1]) / 2
+
+            # Compute extended edges for first and last interval
+            first_edge = valid_sample_index[0] - (mids[0] - valid_sample_index[0])
+            last_edge = valid_sample_index[-1] + (valid_sample_index[-1] - mids[-1])
             
-            # Build intervals between midpoints: [mids[i], mids[i+1]]
+            # Combine all edges
+            edges = [first_edge] + list(mids) + [last_edge]
+            result_index = valid_sample_index  # Each interval is associated with a sample point
+ 
+            # Create full list of intervals and associated result index
             intervals = []
-            result_index = valid_sample_index[1:-1]  # Points associés aux intervalles
+            filtered_index = []
             
             for i in range(len(result_index)):
-                a = mids[i]
-                b = mids[i + 1]
+                a = edges[i]
+                b = edges[i + 1]
             
                 if a >= x_min and b <= x_max:
                     intervals.append((a, b))
-                else:
-                    continue
-   
+                    filtered_index.append(result_index[i])
+
+            # Perform integration
             integrated_values = []
             for (a, b) in intervals:
-                # Use fixed-point Gauss quadrature
                 integral_value, _ = fixed_quad(interpolator, a, b, n=quad_points)
                 mean_value = integral_value / (b - a)
                 integrated_values.append(mean_value)
-
+            
                 # Optional: visualize integration interval
                 if ax is not None:
                     line1 = ax.axvline(a, color="blue", linestyle="--", alpha=0.4, lw=0.5)
                     line2 = ax.axvline(b, color="blue", linestyle="--", alpha=0.4, lw=0.5)
     
-            return pd.Series(data=integrated_values, index=result_index)
+            return pd.Series(data=integrated_values, index=filtered_index)
 
     #---------------------------------------------------------------------------------------------
     def save_serie(self):
