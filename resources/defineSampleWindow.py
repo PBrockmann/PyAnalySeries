@@ -60,8 +60,8 @@ class defineSampleWindow(QWidget):
 
         self.step_radio = QRadioButton("Sampling with step :")
         self.step_spinbox = QDoubleSpinBox()
-        self.step_spinbox.setRange(0, 100)
-        self.step_spinbox.setSingleStep(.5)
+        self.step_spinbox.setRange(0, 1000)
+        self.step_spinbox.setSingleStep(5)
         self.step_spinbox.setValue(self.step)
         self.step_spinbox.setDecimals(2)
         self.step_spinbox.setFixedWidth(80)
@@ -181,7 +181,7 @@ class defineSampleWindow(QWidget):
     def check_value_step(self):
         if self.step_spinbox.value() == 0.0:
             QMessageBox.warning(self, "Invalid Value", "Zero is not allowed.")
-            self.step_spinbox.setValue(0.5)  # Set to a default non-zero value
+            self.step_spinbox.setValue(5)  # Set to a default non-zero value
         self.delayed_update()
 
     #---------------------------------------------------------------------------------------------
