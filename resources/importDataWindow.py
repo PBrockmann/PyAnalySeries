@@ -41,8 +41,10 @@ class importDataWindow(QWidget):
         button_layout = QHBoxLayout()
 
         self.importPointers_button = QPushButton("Import pointers", self)
+        self.importPointers_button.setStyleSheet("padding: 4px 12px;")
         self.importPointers_button.setToolTip("(Distorded, Reference)")
         self.importSeries_button = QPushButton("Import series", self)
+        self.importSeries_button.setStyleSheet("padding: 4px 12px;")
         self.importSeries_button.setToolTip("(X,Y) or (X,Y1,Y2,...)")
         self.close_button = QPushButton("Close", self)
         button_layout.addStretch()

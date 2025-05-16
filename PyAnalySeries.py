@@ -48,7 +48,7 @@ else:
     filesName = None
 
 #========================================================================================
-version = 'v5.1'
+version = 'v5.11'
 
 open_ws = {}
 open_displayWindows = {} 
@@ -968,6 +968,38 @@ def apply_filter():
         item.setSelected(True)
 
 #========================================================================================
+def define_sample():
+    global open_sampleWindows
+
+    items = get_unique_selected_items(tree_widget)
+    items_selected = []                             # select only series
+    for item in items:
+        serieDict = item.data(0, Qt.UserRole)
+        if  serieDict['Type'].startswith('Serie'): 
+            items_selected.append(item)
+
+    if len(items_selected) == 0 or len(items_selected) > 2 : 
+        main_window.statusBar().showMessage('Please select at least 1 serie (2nd possible for sampling reference)', 5000)
+        return
+
+    #-------------------------------------------------------------
+    Id_sampleWindow = generate_Id()
+
+    if Id_sampleWindow in open_sampleWindows:
+        sampleWindow = open_sampleWindows[Id_sampleWindow]
+        sampleWindow.raise_()
+        sampleWindow.activateWindow()
+    else:
+        sampleWindow = defineSampleWindow(Id_sampleWindow, open_sampleWindows, items_selected, add_item_tree_widget)
+        open_sampleWindows[Id_sampleWindow] = sampleWindow
+        sampleWindow.show()
+
+    #-------------------------------------------------------------
+    main_window.setFocus()                  # replace selection
+    tree_widget.clearSelection()
+    item.setSelected(True)
+
+#========================================================================================
 def apply_sample():
 
     items = get_unique_selected_items(tree_widget)
@@ -1171,38 +1203,6 @@ def apply_interpolation(interpolationMode):
     for item in itemSeries_selected + itemInterpolations_selected:
         colorize_item(item, 'white')
         item.setSelected(True)
-
-#========================================================================================
-def define_sample():
-    global open_sampleWindows
-
-    items = get_unique_selected_items(tree_widget)
-    items_selected = []                             # select only series
-    for item in items:
-        serieDict = item.data(0, Qt.UserRole)
-        if  serieDict['Type'].startswith('Serie'): 
-            items_selected.append(item)
-
-    if len(items_selected) > 2 : 
-        main_window.statusBar().showMessage('Please select at least 1 serie (2nd possible for sampling reference)', 5000)
-        return
-
-    #-------------------------------------------------------------
-    Id_sampleWindow = generate_Id()
-
-    if Id_sampleWindow in open_sampleWindows:
-        sampleWindow = open_sampleWindows[Id_sampleWindow]
-        sampleWindow.raise_()
-        sampleWindow.activateWindow()
-    else:
-        sampleWindow = defineSampleWindow(Id_sampleWindow, open_sampleWindows, items_selected, add_item_tree_widget)
-        open_sampleWindows[Id_sampleWindow] = sampleWindow
-        sampleWindow.show()
-
-    #-------------------------------------------------------------
-    main_window.setFocus()                  # replace selection
-    tree_widget.clearSelection()
-    item.setSelected(True)
 
 #========================================================================================
 def close_all_windows():

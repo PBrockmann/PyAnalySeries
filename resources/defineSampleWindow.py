@@ -60,7 +60,7 @@ class defineSampleWindow(QWidget):
 
         self.step_radio = QRadioButton("Sampling with step :")
         self.step_spinbox = QDoubleSpinBox()
-        self.step_spinbox.setRange(0.5, 100)
+        self.step_spinbox.setRange(0, 100)
         self.step_spinbox.setSingleStep(.5)
         self.step_spinbox.setValue(self.step)
         self.step_spinbox.setDecimals(2)
@@ -135,10 +135,9 @@ class defineSampleWindow(QWidget):
         self.update_timer.setSingleShot(True)
         self.update_timer.timeout.connect(self.update_value)
 
-        self.step_spinbox.valueChanged.connect(self.delayed_update)
+        self.step_spinbox.editingFinished.connect(self.check_value_step)
         self.step_radio.toggled.connect(self.delayed_update)
         self.xvalues_radio.toggled.connect(self.delayed_update)
-        self.step_spinbox.valueChanged.connect(self.delayed_update)
         self.kind_dropdown.currentIndexChanged.connect(self.delayed_update)
         self.integrated_checkbox.stateChanged.connect(self.delayed_update)
 
@@ -153,6 +152,7 @@ class defineSampleWindow(QWidget):
         button_layout = QHBoxLayout()
 
         self.save_button = QPushButton("Save sample and serie sampled", self)
+        self.save_button.setStyleSheet("padding: 4px 12px;")
         self.close_button = QPushButton("Close", self)
         button_layout.addStretch()
 
@@ -178,9 +178,16 @@ class defineSampleWindow(QWidget):
         self.status_bar.showMessage('Ready', 5000)
 
     #---------------------------------------------------------------------------------------------
+    def check_value_step(self):
+        if self.step_spinbox.value() == 0.0:
+            QMessageBox.warning(self, "Invalid Value", "Zero is not allowed.")
+            self.step_spinbox.setValue(0.5)  # Set to a default non-zero value
+        self.delayed_update()
+
+    #---------------------------------------------------------------------------------------------
     def delayed_update(self):
-        self.status_bar.showMessage('Waiting', 2000)
-        self.update_timer.start(2000)
+        self.status_bar.showMessage('Waiting', 1000)
+        self.update_timer.start(1000)
 
     #---------------------------------------------------------------------------------------------
     def update_value(self):

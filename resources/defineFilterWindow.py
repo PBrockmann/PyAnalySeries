@@ -76,6 +76,7 @@ class defineFilterWindow(QWidget):
         button_layout = QHBoxLayout()
 
         self.save_button = QPushButton("Save filter and serie filtered", self)
+        self.save_button.setStyleSheet("padding: 4px 12px;")
         self.close_button = QPushButton("Close", self)
         button_layout.addStretch()
 

@@ -233,6 +233,7 @@ class defineInsolationAstroSerieWindow(QWidget):
         button_layout = QHBoxLayout()
 
         self.import_button = QPushButton("Import serie", self)
+        self.import_button.setStyleSheet("padding: 4px 12px;")
         self.close_button = QPushButton("Close", self)
         button_layout.addStretch()
 
