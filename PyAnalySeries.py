@@ -1373,7 +1373,7 @@ def on_item_double_clicked(item, column):
 
 #========================================================================================
 def show_dialog(title, fileHTML, width, height):
-    with open(fileHTML, 'r') as file:
+    with open(fileHTML, 'r', encoding='utf-8') as file:
         html_text = file.read()
     
     dialog = QDialog()
