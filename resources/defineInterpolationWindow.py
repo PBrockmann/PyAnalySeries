@@ -182,6 +182,7 @@ class defineInterpolationWindow(QWidget):
         self.interp_combo.addItem("PCHIP")
 
         self.save_button = QPushButton("Save interpolation and serie interpolated", self)
+        self.save_button.setStyleSheet("padding: 4px 12px;")
         self.close_button = QPushButton("Close", self)
 
         control_layout3.addWidget(self.interp_combo_label)
