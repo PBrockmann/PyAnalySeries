@@ -753,6 +753,9 @@ class CustomTreeWidget(QTreeWidget):
             else:
                 self.custom_tooltip.hide()
 
+        elif event.type() in [QEvent.Leave, QEvent.FocusOut]:
+            self.custom_tooltip.hide()
+
         return super().eventFilter(obj, event)
 
     #-----------------------------------
@@ -1396,8 +1399,6 @@ def show_dialog(title, fileHTML, width, height):
 
 #========================================================================================
 def exit_confirm():
-
-    tree_widget.custom_tooltip.hide()
 
     reply = QMessageBox.question(
         main_window, 
