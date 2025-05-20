@@ -1384,6 +1384,7 @@ def show_dialog(title, fileHTML, width, height):
     dialog.setLayout(main_layout)
     text_browser = QTextBrowser()
     text_browser.setHtml(html_text)
+    text_browser.setOpenExternalLinks(True)
     main_layout.addWidget(text_browser)
     
     button_layout = QHBoxLayout()
