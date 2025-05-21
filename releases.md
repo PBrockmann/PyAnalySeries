@@ -1,6 +1,8 @@
  * 5.13
    * Add last recent dir when open worksheets
    * Fix when xlsx file has no item detected
+   * Fix html files
+   * Add href links in references for insolation
  * 5.12
    * Fix hide of tooltip when not focus.
    * Add encoding utf-8 for reading html files

@@ -171,16 +171,17 @@ class defineInsolationAstroSerieWindow(QWidget):
         #----------------------------------------------
         col2_layout = QVBoxLayout()
 
-        self.ref_Berger1978 = 'Berger, A. (1978) Long-term variations of daily insolation and Quaternary climatic changes. Journal of the Atmospheric Sciences, 35, 2362-2367. https://doi.org/10.1175/1520-0469(1978)035&lt;2362:LTVODI&gt;2.0.CO;2'
-        self.ref_Laskar1993 = 'Laskar, J., Joutel, F., & Boudin, F. (1993). Orbital, precessional, and insolation quantities for the Earth from -20 Myr to +10 Myr. Astronomy and Astrophysics, 270(1-2), 522-533. https://adsabs.harvard.edu/full/1993A%26A...270..522L/0000522.000.html'
-        self.ref_Laskar2004 = 'Laskar, J., Robutel, P., Joutel, F., Gastineau, M., Correia, A. C., & Levrard, B. (2004). A long-term numerical solution for the insolation quantities of the Earth. Astronomy & Astrophysics, 428(1), 261-285. https://doi.org/10.1051/0004-6361:20041335'
-        self.ref_Laskar2010 = 'Laskar, J., Fienga, A., Gastineau, M., Manche, H.: (2011). A new orbital solution for the long-term motion of the Earth. Astron. Astrophys., Volume 532, A89. https://doi.org/10.48550/arXiv.1103.1084'
+        self.ref_Berger1978 = 'Berger, A. (1978) Long-term variations of daily insolation and Quaternary climatic changes. Journal of the Atmospheric Sciences, 35, 2362-2367. <a href="https://doi.org/10.1175/1520-0469(1978)035&lt;2362:LTVODI&gt;2.0.CO;2">https://doi.org/10.1175/1520-0469(1978)035&lt;2362:LTVODI&gt;2.0.CO;2</a>'
+        self.ref_Laskar1993 = 'Laskar, J., Joutel, F., & Boudin, F. (1993). Orbital, precessional, and insolation quantities for the Earth from -20 Myr to +10 Myr. Astronomy and Astrophysics, 270(1-2), 522-533. <a href="https://adsabs.harvard.edu/full/1993A%26A...270..522L/0000522.000.html">https://adsabs.harvard.edu/full/1993A%26A...270..522L/0000522.000.html</a>'
+        self.ref_Laskar2004 = 'Laskar, J., Robutel, P., Joutel, F., Gastineau, M., Correia, A. C., & Levrard, B. (2004). A long-term numerical solution for the insolation quantities of the Earth. Astronomy & Astrophysics, 428(1), 261-285. <a href="https://doi.org/10.1051/0004-6361:20041335">https://doi.org/10.1051/0004-6361:20041335</a>'
+        self.ref_Laskar2010 = 'Laskar, J., Fienga, A., Gastineau, M., Manche, H.: (2011). A new orbital solution for the long-term motion of the Earth. Astron. Astrophys., Volume 532, A89. <a href="https://doi.org/10.48550/arXiv.1103.1084">https://doi.org/10.48550/arXiv.1103.1084</a>'
 
         self.ref = QLabel()
         self.ref.setText(f"Reference : <br><br>{self.ref_Laskar2004}")
         self.ref.setFixedWidth(400)
         self.ref.setWordWrap(True)
-        self.ref.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        self.ref.setOpenExternalLinks(True)
+        self.ref.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextBrowserInteraction)
 
         self.range_Laskar2010 = 'From -249999 to 0 kyears'
         self.range_Laskar2004 = 'From -101000 to 21000 kyears'
