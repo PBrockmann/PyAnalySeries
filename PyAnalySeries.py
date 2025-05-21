@@ -48,7 +48,7 @@ else:
     filesName = None
 
 #========================================================================================
-version = 'v5.12'
+version = 'v5.13'
 
 open_ws = {}
 open_displayWindows = {} 
@@ -398,6 +398,13 @@ def load_WorkSheet(fileName):
                 main_window.statusBar().showMessage(msg, 5000)
                 QApplication.processEvents()
 
+
+    #--------------------------------------------------------------------
+    if len(itemDict_list) == 0:
+        msg = f"The file '{fileName}' has not been recognized as a valid PyAnalySeries worksheet."
+        QMessageBox.critical(main_window, "Load file", msg)
+        return
+
     #--------------------------------------------------------------------
     base_dir = os.getcwd()
     fileName = os.path.relpath(fileName, base_dir)          # get relative path
@@ -422,12 +429,33 @@ def new_WorkSheet():
     tree_widget.clearSelection()
 
 #========================================================================================
+def add_recent_dir(fileName):
+
+    settings = QSettings("MyPythonApps", "PyAnalySeries")
+
+    last_used_dir = QFileInfo(fileName).absolutePath()
+    dirs = settings.value("recentDirs", [], type=list)
+    if last_used_dir in dirs:
+        dirs.remove(last_used_dir)
+    dirs.insert(0, last_used_dir)
+    settings.setValue("recentDirs", dirs[:5])           # Keep 5 last recentDirs
+
+#========================================================================================
 def open_WorkSheet():
 
-    filesName, _ = QFileDialog.getOpenFileNames(main_window, "Open Excel File", "", "Excel Files (*.xlsx)")
+    settings = QSettings("MyPythonApps", "PyAnalySeries")
+
+    dirs = settings.value("recentDirs", [], type=list)
+    last_dir = dirs[0] if dirs else ""
+
+    filesName, _ = QFileDialog.getOpenFileNames(
+        main_window, "Open Excel File", last_dir, "Excel Files (*.xlsx)"
+    )
+
     for fileName in filesName: 
         print('Loading...', fileName)
         load_WorkSheet(fileName)
+        add_recent_dir(fileName)
 
 #========================================================================================
 def autofit_columns(worksheet):

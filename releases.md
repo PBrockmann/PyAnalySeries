@@ -1,3 +1,6 @@
+ * 5.13
+   * Add last recent dirs when open worksheets
+   * Fix when xlsx file has no item detected
  * 5.12
    * Fix hide of tooltip when not focus.
    * Add encoding utf-8 for reading html files
