@@ -429,33 +429,22 @@ def new_WorkSheet():
     tree_widget.clearSelection()
 
 #========================================================================================
-def add_recent_dir(fileName):
-
-    settings = QSettings("MyPythonApps", "PyAnalySeries")
-
-    last_used_dir = QFileInfo(fileName).absolutePath()
-    dirs = settings.value("recentDirs", [], type=list)
-    if last_used_dir in dirs:
-        dirs.remove(last_used_dir)
-    dirs.insert(0, last_used_dir)
-    settings.setValue("recentDirs", dirs[:5])           # Keep 5 last recentDirs
-
-#========================================================================================
 def open_WorkSheet():
-
     settings = QSettings("MyPythonApps", "PyAnalySeries")
 
-    dirs = settings.value("recentDirs", [], type=list)
-    last_dir = dirs[0] if dirs else ""
+    last_dir = settings.value("lastDir", "", type=str)
 
     filesName, _ = QFileDialog.getOpenFileNames(
         main_window, "Open Excel File", last_dir, "Excel Files (*.xlsx)"
     )
 
-    for fileName in filesName: 
-        print('Loading...', fileName)
-        load_WorkSheet(fileName)
-        add_recent_dir(fileName)
+    if filesName:
+        last_used_dir = QFileInfo(filesName[0]).absolutePath()
+        settings.setValue("lastDir", last_used_dir)
+
+        for fileName in filesName: 
+            print('Loading...', fileName)
+            load_WorkSheet(fileName)
 
 #========================================================================================
 def autofit_columns(worksheet):
