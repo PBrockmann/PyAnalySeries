@@ -11,6 +11,7 @@ matplotlib.use("Qt5Agg")
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
+from .misc import *
 from .CustomQTableWidget import CustomQTableWidget 
 from .interactivePlot import interactivePlot
 from .defineInterpolationWindow import defineInterpolationWindow
@@ -51,10 +52,11 @@ class displayInterpolationWindow(QWidget):
         for i in range(len(self.X1Coords)):
             pointers_table.setItem(i, 0, QTableWidgetItem(str(f'{self.X2Coords[i]:.6f}')))
             pointers_table.setItem(i, 1, QTableWidgetItem(str(f'{self.X1Coords[i]:.6f}')))
-            background_color = QColor('whitesmoke') if i % 2 == 0 else QColor('white')
+            background_color = QColor('white') if i % 2 == 0 else QColor('whitesmoke')
             pointers_table.item(i, 0).setBackground(background_color)
             pointers_table.item(i, 1).setBackground(background_color)
         pointers_table.resizeColumnsToContents()
+        pointers_table.set_italic_headers()
 
         pointers_layout.addWidget(pointers_table)
         pointers_tab.setLayout(pointers_layout)

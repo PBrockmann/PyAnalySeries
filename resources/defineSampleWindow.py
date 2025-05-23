@@ -151,9 +151,11 @@ class defineSampleWindow(QWidget):
         #----------------------------------------------
         button_layout = QHBoxLayout()
 
+        style = "padding: 4px 12px;"
         self.save_button = QPushButton("Save sample and serie sampled", self)
-        self.save_button.setStyleSheet("padding: 4px 12px;")
+        self.save_button.setStyleSheet(style)
         self.close_button = QPushButton("Close", self)
+        self.close_button.setStyleSheet(style)
         button_layout.addStretch()
 
         button_layout.addWidget(self.save_button)

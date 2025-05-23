@@ -203,17 +203,23 @@ class interactivePlot:
     def on_press(self, event):
         """Store the starting point for panning."""
 
-        if event.button != 1: return            # Only left button
+        #-------------------------
+        if event.button == 1:
 
-        ax, artist = self.detect_artist(event)  # Detect the Artist element under the mouse
-        #print("press", ax, artist, type(artist))
+            ax, artist = self.detect_artist(event)  # Detect the Artist element under the mouse
+            #print("press", ax, artist, type(artist))
 
-        if artist is None: return
+            if artist is None: return
 
-        display_coord = (event.x, event.y)
-        coordx, coordy = ax.transData.inverted().transform(display_coord)
+            display_coord = (event.x, event.y)
+            coordx, coordy = ax.transData.inverted().transform(display_coord)
 
-        ax.pan_start = coordx, coordy   # Store the starting point for panning
+            ax.pan_start = coordx, coordy   # Store the starting point for panning
+
+        #-------------------------
+        else:                           # when context menu (right click)
+
+            self.on_key_release(event)
 
     #---------------------------------------------------------------------------------------------
     def on_motion(self, event):

@@ -181,9 +181,11 @@ class defineInterpolationWindow(QWidget):
         self.interp_combo.addItem("Linear")
         self.interp_combo.addItem("PCHIP")
 
+        style = "padding: 4px 12px;"
         self.save_button = QPushButton("Save interpolation and serie interpolated", self)
-        self.save_button.setStyleSheet("padding: 4px 12px;")
+        self.save_button.setStyleSheet(style)
         self.close_button = QPushButton("Close", self)
+        self.close_button.setStyleSheet(style)
 
         control_layout3.addWidget(self.interp_combo_label)
         control_layout3.addWidget(self.interp_combo)
@@ -384,10 +386,11 @@ class defineInterpolationWindow(QWidget):
         for i in range(len(self.X1Coords)):
             self.pointers_table.setItem(i, 0, QTableWidgetItem(str(f'{self.X2Coords[i]:.6f}')))
             self.pointers_table.setItem(i, 1, QTableWidgetItem(str(f'{self.X1Coords[i]:.6f}')))
-            background_color = QColor('whitesmoke') if i % 2 == 0 else QColor('white')
+            background_color = QColor('white') if i % 2 == 0 else QColor('whitesmoke')
             self.pointers_table.item(i, 0).setBackground(background_color)
             self.pointers_table.item(i, 1).setBackground(background_color)
         self.pointers_table.resizeColumnsToContents()
+        self.pointers_table.set_italic_headers()
 
         self.updatePointersPlot()
 

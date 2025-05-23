@@ -19,6 +19,13 @@ def generate_color(exclude_color=None):
     return random.choice(tab20_colors)
 
 #========================================================================================
+def blend_colors(color1, color2, ratio=0.5):
+    r = round(color1.red() * (1 - ratio) + color2.red() * ratio)
+    g = round(color1.green() * (1 - ratio) + color2.green() * ratio)
+    b = round(color1.blue() * (1 - ratio) + color2.blue() * ratio)
+    return QColor(r, g, b)
+
+#========================================================================================
 def append_to_htmlText(text, new_value):
     if text:
         text += "<br>"

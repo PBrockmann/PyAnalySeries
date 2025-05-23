@@ -11,6 +11,7 @@ matplotlib.use("Qt5Agg")
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
+from .misc import *
 from .CustomQTableWidget import CustomQTableWidget 
 from .interactivePlot import interactivePlot
 from .defineInterpolationWindow import defineInterpolationWindow
@@ -59,14 +60,19 @@ class displaySingleSerieWindow(QWidget):
             data_table.setItem(i, 0, QTableWidgetItem(str(f'{serie.index[i]:.6f}')))
             data_table.setItem(i, 1, QTableWidgetItem(str(f'{serie.values[i]:.6f}')))
             if duplicates[i]:
-                background_color = QColor('lemonchiffon')
+                base = QColor('lemonchiffon')
+                alt = QColor('white') if i % 2 == 0 else QColor('whitesmoke')
+                background_color = blend_colors(base, alt, ratio=0.6)
             elif missing_values[i]:
-                background_color = QColor('peachpuff')
+                base = QColor('peachpuff')
+                alt = QColor('white') if i % 2 == 0 else QColor('whitesmoke')
+                background_color = blend_colors(base, alt, ratio=0.6)
             else:
-                background_color = QColor('whitesmoke') if i % 2 == 0 else QColor('white')
+                background_color = QColor('white') if i % 2 == 0 else QColor('whitesmoke')
             data_table.item(i, 0).setBackground(background_color)
             data_table.item(i, 1).setBackground(background_color)
         data_table.resizeColumnsToContents()
+        data_table.set_italic_headers()
 
         data_layout.addWidget(data_table)
         data_tab.setLayout(data_layout)

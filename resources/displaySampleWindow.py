@@ -4,6 +4,7 @@ from PyQt5.QtGui import *
 
 import sys
 
+from .misc import *
 from .CustomQTableWidget import CustomQTableWidget
 
 #=========================================================================================
@@ -50,9 +51,10 @@ class displaySampleWindow(QWidget):
             data_table.setHorizontalHeaderLabels(['X coordinates'])
             for i in range(len(self.sampleDict['XCoords'])):
                 data_table.setItem(i, 0, QTableWidgetItem(str(f"{self.sampleDict['XCoords'][i]:.6f}")))
-                background_color = QColor('whitesmoke') if i % 2 == 0 else QColor('white')
+                background_color = QColor('white') if i % 2 == 0 else QColor('whitesmoke')
                 data_table.item(i, 0).setBackground(background_color)
             data_table.resizeColumnsToContents()
+            data_table.set_italic_headers()
 
             data_layout.addWidget(data_table)
 

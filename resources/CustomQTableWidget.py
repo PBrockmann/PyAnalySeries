@@ -10,6 +10,27 @@ class CustomQTableWidget(QTableWidget):
     def __init__(self):
         super().__init__()
 
+    def set_italic_headers(self):
+        # Horizontal header
+        for col in range(self.columnCount()):
+            item = self.horizontalHeaderItem(col)
+            if item:
+                font = item.font()
+                font.setItalic(True)
+                item.setFont(font)
+
+        # Vertical header
+        for row in range(self.rowCount()):
+            item = self.verticalHeaderItem(row)
+            if item is None:
+                item = QTableWidgetItem(f'  {row + 1}  ')  # index 1-based
+                self.setVerticalHeaderItem(row, item)
+            else:
+                item.setText(f'  {row + 1}  ')  # overwrite if already present
+            font = item.font()
+            font.setItalic(True)
+            item.setFont(font)
+
     def keyPressEvent(self, event):
         """
         Handle key press events, particularly CTRL+c for copying.

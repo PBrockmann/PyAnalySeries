@@ -58,6 +58,7 @@ This project is distributed under the **CeCILL v2.1** license.
  * Shortcut on MacOS :
  	* Use Automator tool to set a shortcut (choose new application and execute shell)
 	* Copy in the shell the PyAnalySeries.sh file content with correct anaconda path
+	* Save as an application in your Desktop directory
 	* Set an icon by pressing **⌘ + I** on the shorcut created and drag the `resources/PyAnalySeries_icon.icns` file on the top icon 
 
 <hr style="border:2px solid gray">

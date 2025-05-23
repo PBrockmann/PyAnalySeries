@@ -84,7 +84,8 @@ class importDataWindow(QWidget):
             return
 
         rows = text.split("\n")
-        clean_rows = [row.strip() for row in rows if row.strip()]
+        #clean_rows = [row.strip() for row in rows if row.strip()]
+        clean_rows = [row for row in rows if row.strip('\n')]
 
         if not clean_rows:
             QMessageBox.warning(self, "Invalid Data", "No valid data found in clipboard.")
@@ -94,8 +95,9 @@ class importDataWindow(QWidget):
         #print(expected_columns)
 
         data = []
-        for row in clean_rows:
+        for n, row in enumerate(clean_rows):
             columns = row.split("\t")
+            #print('----', n, columns)
             values = [""] * expected_columns
             for i in range(len(columns)):
                 values[i] = columns[i] 
@@ -119,11 +121,17 @@ class importDataWindow(QWidget):
         for row_index, row_data in enumerate(data):
             for col_index, cell in enumerate(row_data):
                 self.data_table.setItem(row_index, col_index, QTableWidgetItem(cell))
-                background_color = QColor('whitesmoke') if row_index % 2 == 0 else QColor('white')
+                if cell == '':
+                    base = QColor('peachpuff')
+                    alt = QColor('white') if row_index % 2 else QColor('whitesmoke')
+                    background_color = blend_colors(base, alt, ratio=0.6)
+                else:
+                    background_color = QColor('whitesmoke') if row_index % 2 == 0 else QColor('white')
                 self.data_table.item(row_index, col_index).setBackground(background_color)
 
         self.data_table.resizeColumnsToContents()
         self.data_table.horizontalHeader().setSectionsMovable(True)
+        self.data_table.set_italic_headers()
 
     #---------------------------------------------------------------------------------------------
     def is_numeric(self, value):
@@ -187,34 +195,56 @@ class importDataWindow(QWidget):
 
     #---------------------------------------------------------------------------------------------
     def import_series(self):
-
+    
         if self.data_table.columnCount() < 2:
             QMessageBox.warning(self, "Import series", "Import not possible. Expected format is at least 2 columns (X,Y) or (X,Y1,Y2,...)")
             return
-
-        if not self.data_table_check(allow_empty_cells=True): return
-
-        index = [float(self.data_table.item(row, 0).text()) for row in range(self.data_table.rowCount())] 
+    
+        if not self.data_table_check(allow_empty_cells=True): 
+            return
+    
+        valid_rows = []
+        index = []
+        for row in range(self.data_table.rowCount()):
+            item = self.data_table.item(row, 0)
+            if item is not None:
+                text = item.text().strip()
+                if text != '':
+                    try:
+                        val = float(text)
+                        index.append(val)
+                        valid_rows.append(row)
+                    except ValueError:
+                        pass
+    
+        if not index:
+            QMessageBox.warning(self, "Import series", "No valid index values found in the first column.")
+            return
+    
         X = self.data_table.horizontalHeaderItem(0).text()
-
+    
         for col in range(1, self.data_table.columnCount()):
-
+    
             values = []
-            for row in range(self.data_table.rowCount()) : 
-                valueText = self.data_table.item(row, col).text()
+            for row in valid_rows:
+                item = self.data_table.item(row, col)
+                valueText = item.text().strip() if item is not None else ''
                 if valueText == '':
                     value = np.nan
                 else:
-                    value = float(valueText)
+                    try:
+                        value = float(valueText)
+                    except ValueError:
+                        value = np.nan
                 values.append(value)
-
+    
             Y = self.data_table.horizontalHeaderItem(col).text()
-
-            serie_Id =  generate_Id()
+    
+            serie_Id = generate_Id()
             serieDict = {
-                'Id': serie_Id, 
-                'Type': 'Serie', 
-                'Name': '', 
+                'Id': serie_Id,
+                'Type': 'Serie',
+                'Name': '',
                 'X': X,
                 'Y': Y,
                 'Y axis inverted': False,
@@ -222,10 +252,9 @@ class importDataWindow(QWidget):
                 'History': 'Imported serie',
                 'Comment': '',
                 'Serie': pd.Series(values, index=index),
-                }
-            self.add_item_tree_widget(None, serieDict)          # will be added on parent from current index
-            #print(f"{X} / {Y}")
-
+            }
+            self.add_item_tree_widget(None, serieDict)
+    
             msg = f'{X} / {Y} imported as serie {serie_Id}'
             self.status_bar.showMessage(msg, 2000)
 
