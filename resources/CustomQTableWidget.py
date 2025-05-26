@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QBrush, QColor
 
 #===================================================================================
 class CustomQTableWidget(QTableWidget):
@@ -30,6 +31,8 @@ class CustomQTableWidget(QTableWidget):
             font = item.font()
             font.setItalic(True)
             item.setFont(font)
+            gray_brush = QBrush(QColor('gray'))
+            item.setForeground(gray_brush)
 
     def keyPressEvent(self, event):
         """

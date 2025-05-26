@@ -1,6 +1,6 @@
  * 5.14
    * Fix style for buttons
-   * Change Import to allow empty cells in 1st column when importing series
+   * Allow empty cells in 1st column when importing series
    * Set headers of QTableWidget
    * Blend colors in QTableWidget
  * 5.13
