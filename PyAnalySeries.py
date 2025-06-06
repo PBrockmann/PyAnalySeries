@@ -1353,6 +1353,10 @@ def cut_items():
 #========================================================================================
 def paste_items():
     target_item = tree_widget.currentItem()
+
+    if not target_item:             # no ws present
+        return
+
     ws_item = target_item.parent() if target_item.parent() else target_item
     position = ws_item.indexOfChild(target_item)
 
