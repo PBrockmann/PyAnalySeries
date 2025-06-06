@@ -1,5 +1,5 @@
  * 5.15
-   * Fix reading of multiple INTERPOLATIONs
+   * Fix Display Together and Display Stacked to disallow INTERPOLATION
    * Fix test on monotonic and unique when import pointers
    * Fix colors order (missing, duplicates) with displaySingleSerieWindow
  * 5.14

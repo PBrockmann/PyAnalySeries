@@ -866,8 +866,8 @@ def displayMultipleSeries_selected_series(overlaid=True):
             items_selected.append(item)
             serieDicts.append(itemDict)
 
-    if len(items_selected) == 0:
-        main_window.statusBar().showMessage('Please select at least 1 serie', 5000)
+    if len(items_selected) < 2:
+        main_window.statusBar().showMessage('Please select at least 2 series', 5000)
         return
 
     #-------------------------------------------------------------
