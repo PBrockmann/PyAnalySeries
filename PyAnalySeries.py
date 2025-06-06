@@ -48,7 +48,7 @@ else:
     filesName = None
 
 #========================================================================================
-version = 'v5.14'
+version = 'v5.15'
 
 open_ws = {}
 open_displayWindows = {} 
@@ -862,10 +862,13 @@ def displayMultipleSeries_selected_series(overlaid=True):
     serieDicts = []
     for item in items:
         itemDict = item.data(0, Qt.UserRole)
-        if  itemDict['Type'].startswith('Serie'): 
+        if  itemDict['Type'].startswith('Serie'):
             items_selected.append(item)
             serieDicts.append(itemDict)
 
+    if len(items_selected) == 0:
+        main_window.statusBar().showMessage('Please select at least 1 serie', 5000)
+        return
 
     #-------------------------------------------------------------
     Id_displayWindow = tuple(serieDict['Id'] for serieDict in serieDicts)

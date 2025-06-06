@@ -59,12 +59,12 @@ class displaySingleSerieWindow(QWidget):
         for i in range(len(serie)):
             data_table.setItem(i, 0, QTableWidgetItem(str(f'{serie.index[i]:.6f}')))
             data_table.setItem(i, 1, QTableWidgetItem(str(f'{serie.values[i]:.6f}')))
-            if duplicates[i]:
-                base = QColor('lemonchiffon')
+            if missing_values[i]:
+                base = QColor('peachpuff')
                 alt = QColor('white') if i % 2 == 0 else QColor('whitesmoke')
                 background_color = blend_colors(base, alt, ratio=0.6)
-            elif missing_values[i]:
-                base = QColor('peachpuff')
+            elif duplicates[i]:
+                base = QColor('lemonchiffon')
                 alt = QColor('white') if i % 2 == 0 else QColor('whitesmoke')
                 background_color = blend_colors(base, alt, ratio=0.6)
             else:

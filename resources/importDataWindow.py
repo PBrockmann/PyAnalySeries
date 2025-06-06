@@ -186,10 +186,11 @@ class importDataWindow(QWidget):
         return True
 
     #---------------------------------------------------------------------------------------------
-    def is_monotonic_increasing_or_unique(self, values):
+    def is_monotonic_increasing_and_unique(self, values):
    
         serie = pd.Series(values)
-        is_monotonic = serie.is_monotonic_increasing or serie.is_unique
+        #print(serie.is_monotonic_increasing, serie.is_unique)
+        is_monotonic = serie.is_monotonic_increasing and serie.is_unique
     
         return is_monotonic
 
@@ -277,10 +278,10 @@ class importDataWindow(QWidget):
         X2Name = self.data_table.horizontalHeaderItem(column_order[0]).text()
         X1Name = self.data_table.horizontalHeaderItem(column_order[1]).text()
 
-        if self.is_monotonic_increasing_or_unique(X2Coords):
+        if not self.is_monotonic_increasing_and_unique(X2Coords):
             QMessageBox.warning(self, "Import pointers", f"Import not possible : {X2Name} values are not monotonic or not unique")
             return
-        if self.is_monotonic_increasing_or_unique(X1Coords):
+        if not self.is_monotonic_increasing_and_unique(X1Coords):
             QMessageBox.warning(self, "Import pointers", f"Import not possible : {X1Name} values are not monotonic or not unique")
             return
 

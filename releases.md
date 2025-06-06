@@ -1,3 +1,7 @@
+ * 5.15
+   * Fix reading of multiple INTERPOLATIONs
+   * Fix test on monotonic and unique when import pointers
+   * Fix colors order (missing, duplicates) with displaySingleSerieWindow
  * 5.14
    * Fix style for buttons
    * Allow empty cells in 1st column when importing series
