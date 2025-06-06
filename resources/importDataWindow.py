@@ -279,10 +279,10 @@ class importDataWindow(QWidget):
         X1Name = self.data_table.horizontalHeaderItem(column_order[1]).text()
 
         if not self.is_monotonic_increasing_and_unique(X2Coords):
-            QMessageBox.warning(self, "Import pointers", f"Import not possible : {X2Name} values are not monotonic or not unique")
+            QMessageBox.warning(self, "Import pointers", f"Import not possible : {X2Name} values must be monotonic increasing and unique")
             return
         if not self.is_monotonic_increasing_and_unique(X1Coords):
-            QMessageBox.warning(self, "Import pointers", f"Import not possible : {X1Name} values are not monotonic or not unique")
+            QMessageBox.warning(self, "Import pointers", f"Import not possible : {X1Name} values must be monotonic increasing and unique")
             return
 
         item_Id =  generate_Id()
