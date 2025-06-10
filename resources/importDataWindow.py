@@ -79,7 +79,7 @@ class importDataWindow(QWidget):
         clipboard = QApplication.clipboard()
         text = clipboard.text()
 
-        if '\n' not in text and '\r' in text:               # Clipboard with Max produces \r instead of \t\n
+        if '\r' in text:               # Clipboard with Mac produces \r instead of \n
             text = text.replace('\r', '\n')
 
         if not text:
@@ -100,7 +100,7 @@ class importDataWindow(QWidget):
         data = []
         for n, row in enumerate(clean_rows):
             columns = row.split("\t")
-            #print('----', n, columns)
+            print('----', n, row, columns)
             values = [""] * expected_columns
             for i in range(len(columns)):
                 values[i] = columns[i] 
