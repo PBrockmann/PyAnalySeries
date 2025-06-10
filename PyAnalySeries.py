@@ -48,7 +48,7 @@ else:
     filesName = None
 
 #========================================================================================
-version = 'v5.16'
+version = 'v5.17'
 
 open_ws = {}
 open_displayWindows = {} 
@@ -496,7 +496,7 @@ def save_WorkSheet(ws_item):
                 ws.cell(row=1, column=7, value='Comment')
                 ws.cell(row=1, column=8, value='History')
 
-                for i, (index, value) in enumerate(itemDict['Serie'].items(), start=2):
+                for i, (index, value) in enumerate(itemDict['Serie'].sort_index().items(), start=2):            # force sort on index
                     ws.cell(row=i, column=1, value=index)
                     ws.cell(row=i, column=2, value=value)
                 ws.cell(row=2, column=3, value=itemDict['Type'])

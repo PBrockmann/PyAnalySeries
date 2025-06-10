@@ -1,3 +1,5 @@
+ * 5.17
+   * Force sorting on serie index when import, display data and save
  * 5.16
    * Fix \r when clipboard (copy/paste) is produced from Mac
  * 5.15

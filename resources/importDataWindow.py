@@ -255,7 +255,7 @@ class importDataWindow(QWidget):
                 'Color': generate_color(),
                 'History': 'Imported serie',
                 'Comment': '',
-                'Serie': pd.Series(values, index=index),
+                'Serie': pd.Series(values, index=index).sort_index(),           # sort_index
             }
             self.add_item_tree_widget(None, serieDict)
     

@@ -70,3 +70,6 @@ This project is distributed under the **CeCILL v2.1** license.
 
 ![ScreenShot2](misc/capture_02.png) 
 
+#### Releases
+
+See [releases.md](./releases.md) for release details.

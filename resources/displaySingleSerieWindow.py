@@ -56,6 +56,8 @@ class displaySingleSerieWindow(QWidget):
         data_table.setHorizontalHeaderLabels([self.xName, self.yName])
         duplicates = serie.index.duplicated()
         missing_values = serie.isna().to_numpy()
+        serie = serie.sort_index()
+
         for i in range(len(serie)):
             data_table.setItem(i, 0, QTableWidgetItem(str(f'{serie.index[i]:.6f}')))
             data_table.setItem(i, 1, QTableWidgetItem(str(f'{serie.values[i]:.6f}')))
@@ -211,7 +213,7 @@ class displaySingleSerieWindow(QWidget):
         ax.autoscale()
         serieDict = self.item.data(0, Qt.UserRole)
         serie = serieDict['Serie']
-        serie = serie.groupby(serie.index).mean()
+        serie = serie.groupby(serie.index).mean()           # sort on index by default
         serieColor = serieDict['Color']
         Y_axisInverted = serieDict['Y axis inverted']
 
