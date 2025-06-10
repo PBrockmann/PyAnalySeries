@@ -79,6 +79,9 @@ class importDataWindow(QWidget):
         clipboard = QApplication.clipboard()
         text = clipboard.text()
 
+        if '\n' not in text and '\r' in text:               # Clipboard with Max produces \r instead of \t\n
+            text = text.replace('\r', '\n')
+
         if not text:
             QMessageBox.warning(self, "No Data", "The clipboard is empty.")
             return
