@@ -100,7 +100,7 @@ class importDataWindow(QWidget):
         data = []
         for n, row in enumerate(clean_rows):
             columns = row.split("\t")
-            print('----', n, row, columns)
+            #print('----', n, row, columns)
             values = [""] * expected_columns
             for i in range(len(columns)):
                 values[i] = columns[i] 

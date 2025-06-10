@@ -1,3 +1,5 @@
+ * 5.16
+   * Fix \r when clipboard (copy/paste) is produced from Mac
  * 5.15
    * Fix Display Together and Display Stacked to disallow INTERPOLATION
    * Fix test on monotonic increasing and unique when import pointers
