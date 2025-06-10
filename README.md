@@ -26,9 +26,9 @@ Conception and developments : Patrick Brockmann LSCE/CEA - IPSL
 This project is distributed under the **CeCILL v2.1** license.  
 ![CeCILL License](https://img.shields.io/badge/license-CeCILL-blue)
 
-<hr style="border:2px solid gray">
-
 <img src="QRCode.png" alt="QRCode" width="200" />
+
+<hr style="border:2px solid gray">
 
 #### Installation
 
