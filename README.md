@@ -12,14 +12,7 @@ The core design follows a **"Define then Apply"** workflow for data processing o
 Documents are read and saved in an **open format** spreadsheet (xlsx) with **multiple worksheets** for organization. It is also possible to import series or pointers directly from the **clipboard**, following a simple **copy (Ctrl+C)** operation from an external spreadsheet.  
 The application leverages **robust, well-tested modules** for interpolation, notably **SciPy**, and features an **interactive interface** for defining **interpolation pointers** (formerly known as *Linage* and *Splinage*), allowing for **precise placement and manipulation**—either directly on data points or independently.  
 
-Based on:
- * numpy
- * pandas
- * matplotlib
- * scipy
- * shapely
- * openpyxl
- * PyQt
+Based on: numpy, pandas, matplotlib, scipy, shapely, openpyxl, PyQt
 
 Conception and developments : Patrick Brockmann LSCE/CEA - IPSL
 
@@ -49,7 +42,7 @@ This project is distributed under the **CeCILL v2.1** license.
  * `python PyAnalySeries.py test/ws_ex.xlsx`
  * `python PyAnalySeries.py test/MD95-2042.xlsx test/GeoB3938.xlsx`
 
-##### Icon and shortcut 
+##### Icon and shortcuts 
 
  * Icon : <img src="resources/PyAnalySeries_icon.png" alt="shortcut icon" width="80" />
  * Shortcut on Linux :
@@ -62,6 +55,9 @@ This project is distributed under the **CeCILL v2.1** license.
 	* Copy in the shell the PyAnalySeries.sh file content with correct anaconda path
 	* Save as an application in your Desktop directory
 	* Set an icon by pressing **⌘ + I** on the shorcut created and drag the `resources/PyAnalySeries_icon.icns` file on the top icon 
+
+ * Shortcut on Windows :
+	* ...
 
 <hr style="border:2px solid gray">
 
