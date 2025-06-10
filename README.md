@@ -28,6 +28,8 @@ This project is distributed under the **CeCILL v2.1** license.
 
 <hr style="border:2px solid gray">
 
+<img src="QRCode.png" alt="QRCode" width="200" />
+
 #### Installation
 
 ##### Get the application
